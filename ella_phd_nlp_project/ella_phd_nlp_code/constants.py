@@ -30,13 +30,57 @@ PROJECT_DIR = os.path.join(os.path.abspath(os.path.join(HERE, os.pardir)))
 DATA_DIR = os.path.join(PROJECT_DIR, '../data')
 TEXT_DIR = os.path.join(DATA_DIR, 'raw', 'transcripts')
 TEXT_DIR_DUMMY = os.path.join(DATA_DIR, 'raw', 'transcripts_dummy')
+DEMOGRAPHICS_DIR = os.path.join(DATA_DIR, 'raw','demographics')
 INTERIM_DIR = os.path.join(DATA_DIR, 'interim')
 PROCESSED_DIR = os.path.join(DATA_DIR, 'processed')
+
 
 ## Directory for models
 MODELS_DIR = os.path.join(PROJECT_DIR, '../models')
 MILTENBURG_MODEL_PATH = os.path.join(MODELS_DIR, 'miltenburg', 'model.perc.dutch_tagger_large.pickle')
-
+# A set of non-noun words in Dutch that should not be included in certain parts of the analyses
+NON_NOUNS = {
+    "wij",
+    "ons",
+    "onze",
+    "we",
+    "zij",
+    "ze",
+    "hun",
+    "hen",
+    "hij",
+    "hem",
+    "zijn",
+    "haar",
+    "hare",
+    "ik",
+    "mij",
+    "me",
+    "mijn",
+    "jullie",
+    "jij",
+    "u",
+    "uw",
+    "uwe",
+    "je",
+    "gij",
+    "ge",
+    "jouw",
+    "jou",
+    "dat",
+    "da",
+    "die",
+    "dit",
+    "deze",
+    "dees",
+    "het",
+    "de",
+    '"s',
+    "r",
+    "*",
+    "uh",
+    "eh",
+}
 
 ## Directories for reports
 REPORTS_DIR = os.path.join(PROJECT_DIR, '../reports')
@@ -44,11 +88,29 @@ FIGURES_DIR = os.path.join(REPORTS_DIR, 'figures')
 TABLES_DIR = os.path.join(REPORTS_DIR, 'tables')
 
 
+## Path to diagnostic labels
+LABEL_PATH = os.path.join(DEMOGRAPHICS_DIR, 'labels_meta.csv')  # todo: make labels_meta.csv file
+
+
 ## Q-file mappings
 Q_FILE_MAPPINGS = {
-    "q1_subject_wise": "",  # if looking for question 1, then looking at files with 'bio' in them etc
-    "q2_subject_wise": "day",  # important: subject = participant!!
-    "q3_subject_wise": "actua",
-    "q4_subject_wise": "object",
-    "q5_subject_wise": "picture",
+    "q1_subject_wise": "ANTAT",  # if looking for question 1, then looking at files with 'bio' in them etc
+    "q2_subject_wise": "CAT-NL",  # important: subject = participant!!
+    "q3_subject_wise": "MCA",
+    "q4_subject_wise": "narrative",
 }
+
+
+## Constants for acoustic parameters
+# Constants for acoustic parameters
+f0min = 75  # for men and women
+f0max = 500  # for men and women
+unit = "Hertz"
+# source: https://github.com/drfeinberg/PraatScripts/blob/master/Measure%20Pitch%20and%20HNR.ipynb
+period_ceiling = 1.25 / f0min  # period ceiling = 1.25 divided by pitch floor aka f0min (from PRAAT)
+# Source: https://www.fon.hum.uva.nl/praat/manual/Voice_2__Jitter.html
+silencedB = -25
+# from: https://www.researchgate.net/publication/
+# 24274554_Praat_script_to_detect_syllable_nuclei_and_measure_speech_rate_automatically
+mindip = 2
+minpause = 0.25
