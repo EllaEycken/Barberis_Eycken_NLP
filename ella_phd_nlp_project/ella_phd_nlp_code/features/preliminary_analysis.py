@@ -21,10 +21,11 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import TEXT_DIR_DUMMY # TO
 
 
 def all_paths(file_path: str):
-    """Get a list of the paths to the text/audio/audio shortened files, based on the correct directory.
+
+    """Get a list of the paths to the text/audio files, based on the correct directory.
 
     :param file_path: will now be the directory (TEXT_DIR (or AUDIO_DIR))
-    :return:a list of the paths to the files (with each path as 1 specific task part of 1 subject in the list)
+    :return:a list of the paths to the separate text/audio files (with each path as 1 specific task part of 1 subject in the list)
 
     Note: how to create all_paths: with REGULAR EXPRESSIONS:
     Alternative options
@@ -51,7 +52,8 @@ def all_paths(file_path: str):
 def read_transcripts(
     file_path: str,
 ):
-    """Get a list of the transcripts.
+    """Get a list of the transcript contents, with each element representing one transcript of one task of one subject.
+    aka following the paths in the all_paths function
 
     :param file_path: will now be the directory, NOT the join_path as you make a path during this function
     :return:a list of the transcripts (format: list(P1Q1, P1Q2, P1Q3 etc)
@@ -60,12 +62,13 @@ def read_transcripts(
     """
     transcripts_list = []
     all_paths_text = all_paths(file_path)  # each element of this list is a path to a text file
-    # (one spec interview of 1 specific subject)
+    # (one specific task of 1 specific subject)
     for i in all_paths_text:
         join_path = os.path.join(file_path, i)  # *make a path of the text_dir and each participant's specific
         f = open(join_path)  # open this text to be able to read it
         transcript = f.readlines()  # make a transcript, but will be in form of a list of a string ["text"]
         transcripts_list.append(transcript[0])
+
     return transcripts_list
 
 
@@ -105,30 +108,14 @@ def get_subject_question_names_from_files(
         # get the filename from the join path.
         # From: https://favtutor.com/blogs/get-filename-from-path-python
         splitted_file_name = file_name.split("_")
-        if splitted_file_name[0] not in ["ARCK", "MC"]:
-            subject_name = splitted_file_name[0]
-            if splitted_file_name[1] == "bio":
-                question_name = "_".join([splitted_file_name[1], splitted_file_name[2]])
-            else:
-                question_name = splitted_file_name[1]
-            list_of_subject_question_names.append([subject_name, question_name])
-        elif splitted_file_name[0] == "ARCK":
-            subject_name = "_".join([splitted_file_name[0], splitted_file_name[1], splitted_file_name[2]])
-            if splitted_file_name[3] == "bio":
-                question_name = "_".join([splitted_file_name[3], splitted_file_name[4]])
-            else:
-                question_name = splitted_file_name[3]
-            list_of_subject_question_names.append([subject_name, question_name])
-        elif splitted_file_name[0] == "MC":
-            subject_name = "_".join([splitted_file_name[0], splitted_file_name[1]])
-            if splitted_file_name[3] == "bio":
-                question_name = "_".join([splitted_file_name[2], splitted_file_name[3]])
-            else:
-                question_name = splitted_file_name[2]
-            list_of_subject_question_names.append([subject_name, question_name])
+        subject_name = splitted_file_name[0]
+        question_name = splitted_file_name[2].split(".")[0]  # without the split: would be TASK_NAME.txt; with the split: TASK_NAME
+        list_of_subject_question_names.append([subject_name, question_name])
 
     return list_of_subject_question_names
 
 
 if __name__ == "__main__":
-    get_subject_question_names_from_files(AUDIO_DIR)
+    # all_paths(TEXT_DIR_DUMMY)
+    # read_transcripts(TEXT_DIR_DUMMY)
+    get_subject_question_names_from_files(TEXT_DIR_DUMMY)

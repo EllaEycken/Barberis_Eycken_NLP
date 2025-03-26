@@ -77,7 +77,7 @@ def cleanup_txt_file(txt_path_in, processed_dir):
         processed_dir, ".".join(
             [txt_correct_name, 'txt']))
 
-    with open(txt_path_in, 'r') as infile, open(txt_path_out, 'w') as outfile:
+    with (open(txt_path_in, 'r') as infile, open(txt_path_out, 'w') as outfile):
         # 'r' = open the txt_path_in file for reading, 'w' = open the txt_path_out for writing
 
         first_line = infile.readline()
@@ -86,8 +86,8 @@ def cleanup_txt_file(txt_path_in, processed_dir):
         for line in infile:
             # Remove lines starting with 'Item', 'A:', 'Weekend', or 'Stroke'
             if line.startswith('ANTAT I') or line.startswith('MCA transcriptie') \
-                or line.startswith('Set') or line.startswith('Item') or line.startswith('A:') \
-                    or line.startswith('Weekend') or line.startswith('Stroke'):
+                or line.startswith('Set') or line.startswith('Item') or line.startswith('Oefenitem') \
+                    or line.startswith('A:') or line.startswith('Weekend') or line.startswith('Stroke'):
                 continue
 
             # Remove 'B:' from the beginning of lines, if present
