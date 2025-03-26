@@ -28,11 +28,19 @@ PROJECT_DIR = os.path.join(os.path.abspath(os.path.join(HERE, os.pardir)))
 
 ## Directories for DATA
 DATA_DIR = os.path.join(PROJECT_DIR, '../data')
-TEXT_DIR = os.path.join(DATA_DIR, 'raw', 'transcripts')
-TEXT_DIR_DUMMY = os.path.join(DATA_DIR, 'raw', 'transcripts_dummy')
-DEMOGRAPHICS_DIR = os.path.join(DATA_DIR, 'raw','demographics')
+RAW_DIR = os.path.join(DATA_DIR, 'raw')
 INTERIM_DIR = os.path.join(DATA_DIR, 'interim')
 PROCESSED_DIR = os.path.join(DATA_DIR, 'processed')
+
+DOCX_DIR = os.path.join(RAW_DIR, 'transcripts')
+DOCX_DIR_DUMMY = os.path.join(RAW_DIR, 'transcripts_dummy')
+DEMOGRAPHICS_DIR = os.path.join(RAW_DIR,'demographics')
+PRECLEANTEXT_DIR = os.path.join(INTERIM_DIR, 'transcripts_preclean')
+PRECLEANTEXT_DIR_DUMMY = os.path.join(INTERIM_DIR, 'txt_transcripts_preclean_dummy')
+TEXT_DIR = os.path.join(PROCESSED_DIR, 'txt_transcripts')
+TEXT_DIR_DUMMY = os.path.join(PROCESSED_DIR, 'txt_transcripts_dummy')
+
+
 
 
 ## Directory for models
