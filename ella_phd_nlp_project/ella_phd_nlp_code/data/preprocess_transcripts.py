@@ -65,6 +65,9 @@ def cleanup_txt_file(txt_path_in, processed_dir):
         3) Remove the 'A:' lines (= test leader)
         4) Remove the 'B:' parts in the participant lines
         5) Remove  whitespace in between paragraphs
+        6) Remove [] in [...] statements
+        7) Remove xxx
+        8) Remove dialect words, only keep normalization --> remove ( ) from normalization so that normalization is counted
     """
     # Choose the name for the cleaned text file
     txt_name_subparts = os.path.splitext(os.path.basename(txt_path_in))[0].split('_')
@@ -100,6 +103,13 @@ def cleanup_txt_file(txt_path_in, processed_dir):
             line = line.replace('ggg','')
             # Remove <spk> transcription for speaker changes from transcript line
             line = line.replace('<spk>','')
+            # Replace [] in [....] statements
+            line = line.replace('[', '')
+            line = line.replace(']', '')
+            # replace 'xxx' words
+            line = line.replace('xxx', '')
+            # replace dialectwords
+
             # Remove double spaces
             line = line.replace('  ','')
             # Remove double punctuations
@@ -108,6 +118,8 @@ def cleanup_txt_file(txt_path_in, processed_dir):
             line = line.strip()
             # Add whitespace after '.' if there isn't one
             line = re.sub(r'\.(?!\s)', '. ', line)
+
+
 
             # Write the modified line to the output file, IF the line is not empty
             if line:
