@@ -109,6 +109,7 @@ def cleanup_txt_file(txt_path_in, processed_dir):
             # Check if the line starts with 'A:'
             if line.startswith(' [A'):
                 re.sub(r'\[.*?\]', '', line)
+                # TODO: doesn't work yet
             else:
                 line = line.replace('[', '')
                 line = line.replace(']', '')
