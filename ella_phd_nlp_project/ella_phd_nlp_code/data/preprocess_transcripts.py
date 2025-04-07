@@ -69,7 +69,7 @@ def cleanup_txt_file(txt_path_in, processed_dir):
         7) Remove xxx
         8) Remove dialect words, only keep normalization --> remove ( ) from normalization so that normalization is counted
     """
-    # Choose the name for the cleaned text file
+    ## Choose the name for the cleaned text file
     txt_name_subparts = os.path.splitext(os.path.basename(txt_path_in))[0].split('_')
     # 'os.path.splitext(os.path.basename(txt_path_in))[0]' extracts the name of the txt_path (all without the .txt
     # extension)
@@ -80,11 +80,13 @@ def cleanup_txt_file(txt_path_in, processed_dir):
         processed_dir, ".".join(
             [txt_correct_name, 'txt']))
 
+
     with (open(txt_path_in, 'r') as infile, open(txt_path_out, 'w') as outfile):
         # 'r' = open the txt_path_in file for reading, 'w' = open the txt_path_out for writing
 
         first_line = infile.readline()
-        if not first_line: raise ValueError("The input file is empty")
+        if not first_line:
+            raise ValueError("The input file is empty")
 
         for line in infile:
             # Remove lines starting with 'Item', 'A:', 'Weekend', or 'Stroke'
@@ -98,18 +100,74 @@ def cleanup_txt_file(txt_path_in, processed_dir):
                 line = line[2:]  # Remove 'B:'
 
 
-            # Remove abundant text
+            ## Remove abundant text
             # Remove coughs/laughs (transcribed as 'ggg') from transcript line
             line = line.replace('ggg','')
             # Remove <spk> transcription for speaker changes from transcript line
             line = line.replace('<spk>','')
-            # Replace [] in [....] statements
-            line = line.replace('[', '')
-            line = line.replace(']', '')
+            # Replace [] in [....] statements UNLESS the [] starts with A:, then remove it completely
+            # Check if the line starts with 'A:'
+            if line.startswith(' [A'):
+                re.sub(r'\[.*?\]', '', line)
+            else:
+                line = line.replace('[', '')
+                line = line.replace(']', '')
             # replace 'xxx' words
             line = line.replace('xxx', '')
-            # replace dialectwords
 
+
+            ## Remove dialect words and replace them with their normalized versions
+            line = re.sub(r'(\w+)\*D\s*\(\s*(.*?)\s*\)', lambda m: m.group(2), line)
+            # r'(...)= regex pattern (regular expression)
+            # (\w+) captures a word (alphanumeric characters): here the dialect word that ends with *D.
+            # \*D matches the *D annotation.
+            # \(\s*(.*?)\s*\) captures the normalized word within parentheses, allowing for optional whitespace.
+            #       \(:
+            #           This matches the literal opening parenthesis (. In regex, parentheses are special characters
+            #           used for grouping, so to match an actual parenthesis,
+            #           you need to escape it with a backslash (\).
+            #       \s*:
+            #           \s matches any whitespace character (spaces, tabs, etc.).
+            #           The * quantifier means "zero or more" occurrences of the preceding element.
+            #           So, \s* matches any amount of whitespace (including none) right after the opening parenthesis.
+            #       (.*?):
+            #           The outer parentheses () create a capturing group, which allows you to extract the
+            #           part of the string that matches this pattern.
+            #           . matches any character except a newline.
+            #           *? is a lazy quantifier that matches "zero or more" of the preceding element
+            #           (in this case, any character), but it will stop matching as soon as it finds a match
+            #           for the next part of the regex (the closing parenthesis). This is why it’s "lazy";
+            #           it tries to match as little as possible.
+            #           Therefore, .*? captures everything between the parentheses,
+            #           but stops at the first closing parenthesis it encounters.
+            #       \s*:
+            #           Again, this matches any amount of whitespace (including none)
+            #           just before the closing parenthesis.
+            #       \):
+            #           This matches the literal closing parenthesis ), and like the opening parenthesis,
+            #           it is escaped to match the character literally.
+            #           the re module provides functions to work with regex. eg 'resub()' allows to replace patterns.
+            # the 'lambda m: m.group(2)' in the re.sub function replaces the entire match with the normalized word.
+            #       = lambda function in Python is a small, anonymous function defined with the lambda keyword.
+            #       It's often used for short, throwaway functions that are not intended to be reused elsewhere.
+            #       lambda function lambda m: m.group(2) takes a match object m as input and
+            #       returns the second captured group (the normalized word) from the regex match.
+            #       Regex Match Object:
+            #           When re.sub() finds a match in the target string based on the regex pattern,
+            #           it creates a match object. This object contains information about the match,
+            #           including the entire matched string and any captured groups.
+            #       Captured Groups:
+            #           The parentheses in your regex pattern define capturing groups.
+            #           For example, in the pattern (\w+)\*D\s*\(\s*(.*?)\s*\), there are two capturing groups:
+            #           Group 1: (\w+) (the dialect word)
+            #           Group 2: (.*?) (the normalized word)
+            #       Passing the Match Object:
+            #           When you use a lambda function in re.sub(), the match object is passed as an argument
+            #           to the lambda function. Inside the lambda function, you can access the captured groups
+            #           using the group() method.
+
+
+            ## Clean text formatting
             # Remove double spaces
             line = line.replace('  ','')
             # Remove double punctuations
@@ -154,15 +212,15 @@ def preprocess_IANSA_transcripts(raw_dir,interim_dir, processed_dir):
 
 
 if __name__ == "__main__":
-    # docx_path = os.path.join(DOCX_DIR_DUMMY,'sub-a070_narrative_transcriptie.docx')
-    # interim_dir = PRECLEANTEXT_DIR_DUMMY
-    # convert_docx_to_txt(docx_path, interim_dir)
-    # txt_path_in = os.path.join(INTERIM_DIR, 'sub-a070_transcriptie_narrative.txt')
-    # interim_dir = INTERIM_DIR
-    # cleanup_txt_file(txt_path_in, interim_dir)
-
-    raw_dir = DOCX_DIR_DUMMY
+    docx_path = os.path.join(DOCX_DIR_DUMMY,'sub-b007_transcriptie_MCA.docx')
     interim_dir = PRECLEANTEXT_DIR_DUMMY
+    convert_docx_to_txt(docx_path, interim_dir)
+    txt_path_in = os.path.join(interim_dir, 'sub-b007_transcriptie_MCA_preclean.txt')
     processed_dir = TEXT_DIR_DUMMY
-    preprocess_IANSA_transcripts(raw_dir, interim_dir, processed_dir)
+    cleanup_txt_file(txt_path_in, processed_dir)
+
+    # raw_dir = DOCX_DIR_DUMMY
+    # interim_dir = PRECLEANTEXT_DIR_DUMMY
+    # processed_dir = TEXT_DIR_DUMMY
+    # preprocess_IANSA_transcripts(raw_dir, interim_dir, processed_dir)
 
