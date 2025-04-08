@@ -90,9 +90,11 @@ def cleanup_txt_file(txt_path_in, processed_dir):
 
         for line in infile:
             # Remove lines starting with 'Item', 'A:', 'Weekend', or 'Stroke'
-            if line.startswith('ANTAT I') or line.startswith('MCA transcriptie') \
-                or line.startswith('Set') or line.startswith('Item') or line.startswith('Oefenitem') \
-                    or line.startswith('A:') or line.startswith('Weekend') or line.startswith('Stroke'):
+            if any(line.startswith(prefix) for prefix in ['ANTAT I', 'MCA transcriptie', 'Set', 'Item', 'Oefenitem'
+                                                          'A:', 'Weekend', 'Stroke']):
+            # if line.startswith('ANTAT I') or line.startswith('MCA transcriptie') \
+                # or line.startswith('Set') or line.startswith('Item') or line.startswith('Oefenitem') \
+                    # or line.startswith('A:') or line.startswith('Weekend') or line.startswith('Stroke'):
                 continue
 
             # Remove 'B:' from the beginning of lines, if present
@@ -105,17 +107,22 @@ def cleanup_txt_file(txt_path_in, processed_dir):
             line = line.replace('ggg','')
             # Remove <spk> transcription for speaker changes from transcript line
             line = line.replace('<spk>','')
-            # Replace [] in [....] statements UNLESS the [] starts with A:, then remove it completely
-            # Check if the line starts with 'A:'
-            if line.startswith(' [A'):
-                re.sub(r'\[.*?\]', '', line)
-                # TODO: doesn't work yet
-            else:
-                line = line.replace('[', '')
-                line = line.replace(']', '')
             # replace 'xxx' words
             line = line.replace('xxx', '')
 
+            ## Replace [] in [....] statements UNLESS the [] starts with A:, then remove it completely
+            # Check if the line starts with 'A:'
+            line_splitted = line.split('.')
+            line_splitted_fixed = list()
+            for sentence in line_splitted:
+                if sentence.startswith('[A:') or sentence.startswith(' [A:'):
+                    sentence = re.sub(r'\[.*?\]', '', sentence)
+                    # swap the [...] statement with a whitespace
+                else: # else, just remove the [ and ] but not the content (then it's the speaker's utterances)
+                    sentence = sentence.replace('[', '')
+                    sentence = sentence.replace(']', '')
+                line_splitted_fixed.append(sentence)
+            line = '. '.join(line_splitted_fixed)
 
             ## Remove dialect words and replace them with their normalized versions
             line = re.sub(r'(\w+)\*D\s*\(\s*(.*?)\s*\)', lambda m: m.group(2), line)
@@ -167,7 +174,6 @@ def cleanup_txt_file(txt_path_in, processed_dir):
             #           to the lambda function. Inside the lambda function, you can access the captured groups
             #           using the group() method.
 
-
             ## Clean text formatting
             # Remove double spaces
             line = line.replace('  ','')
@@ -177,7 +183,6 @@ def cleanup_txt_file(txt_path_in, processed_dir):
             line = line.strip()
             # Add whitespace after '.' if there isn't one
             line = re.sub(r'\.(?!\s)', '. ', line)
-
 
 
             # Write the modified line to the output file, IF the line is not empty
