@@ -103,12 +103,13 @@ def cleanup_txt_file(txt_path_in, processed_dir):
 
 
             ## Remove abundant text
+            line = line.replace('ggg', '').replace('<spk>', '').replace('xxx', '')
             # Remove coughs/laughs (transcribed as 'ggg') from transcript line
-            line = line.replace('ggg','')
+            # line = line.replace('ggg','')
             # Remove <spk> transcription for speaker changes from transcript line
-            line = line.replace('<spk>','')
+            # line = line.replace('<spk>','')
             # replace 'xxx' words
-            line = line.replace('xxx', '')
+            # line = line.replace('xxx', '')
 
             ## Replace [] in [....] statements UNLESS the [] starts with A:, then remove it completely
             # Check if the line starts with 'A:'
@@ -175,14 +176,18 @@ def cleanup_txt_file(txt_path_in, processed_dir):
             #           using the group() method.
 
             ## Clean text formatting
+            line = re.sub(r'\s+', ' ', line)  # Replace multiple spaces with a single space
+            line = line.replace('. .', '.')  # Replace double punctuation
+            line = line.strip()  # Strip leading/trailing whitespace
+            line = re.sub(r'\.(?!\s)', '. ', line)  # Add whitespace after '.' if necessary
             # Remove double spaces
-            line = line.replace('  ','')
+            # line = line.replace('  ','')
             # Remove double punctuations
-            line = line.replace('. .', '.')
+            # line = line.replace('. .', '.')
             # Strip whitespace from the line
-            line = line.strip()
+            # line = line.strip()
             # Add whitespace after '.' if there isn't one
-            line = re.sub(r'\.(?!\s)', '. ', line)
+            # line = re.sub(r'\.(?!\s)', '. ', line)
 
 
             # Write the modified line to the output file, IF the line is not empty
