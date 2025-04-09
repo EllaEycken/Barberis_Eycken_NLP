@@ -45,7 +45,8 @@ def all_paths(file_path: str):
 def read_transcripts(
     file_path: str,
 ):
-    """Get a list of the transcript contents, with each element representing one transcript of one task of one subject.
+    """
+    Get a list of the transcript contents, with each element representing one transcript of one task of one subject.
     aka following the paths in the all_paths function
 
     :param file_path: the text directory where all text files are located
@@ -93,25 +94,33 @@ def read_sounds(
 def get_subject_question_names_from_files(
     file_path: str,
 ):
-    """Get the names of the subjects and of the questions according to the order of the text or audio file names."""
+    """
+    Get the names of the subjects and of the questions according to the order of the text or audio file names.
+
+    param: file_path: the text directory where all text (or audio) files are located
+    Note: this should be the same file_path as the all_paths function
+    return: a list of the subject and of the question names, according to the order of the text or audio file names
+    """
     list_of_subject_question_names = []
     all_paths_list = all_paths(file_path)  # paths to each separate file
     for i in all_paths_list:  # i is one specific file in the all_paths_list
         join_path = os.path.join(file_path, i)  # make a path of the dir (text/audio) and each file
-        # result: C:\\Users\\Ella\\git\\masterthesisEllaLAW\\data\\raw\\transcripts\\s08_actua_BL.txt
+        # example result: C:\\Users\\Ella\\git\\masterthesisEllaLAW\\data\\raw\\transcripts\\s08_actua_BL.txt
         # note: could be 'dubbelop'
         file_name = os.path.basename(join_path)
         # get the filename from the join path.
         # From: https://favtutor.com/blogs/get-filename-from-path-python
         splitted_file_name = file_name.split("_")
         subject_name = splitted_file_name[0]
-        question_name = splitted_file_name[2].split(".")[0]  # without the split: would be TASK_NAME.txt; with the split: TASK_NAME
+        question_name = splitted_file_name[2].split(".")[0]
+        # [2] because [1] is the transcription
+        # without the split: would be TASK_NAME.txt; with the split: TASK_NAME
         list_of_subject_question_names.append([subject_name, question_name])
 
     return list_of_subject_question_names
 
 
 if __name__ == "__main__":
-    all_paths(TEXT_DIR_DUMMY)
-    read_transcripts(TEXT_DIR_DUMMY)
-    # get_subject_question_names_from_files(TEXT_DIR_DUMMY)
+    # all_paths(TEXT_DIR_DUMMY)
+    # read_transcripts(TEXT_DIR_DUMMY)
+    get_subject_question_names_from_files(TEXT_DIR_DUMMY)
