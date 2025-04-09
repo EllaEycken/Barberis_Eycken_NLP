@@ -92,9 +92,6 @@ def cleanup_txt_file(txt_path_in, processed_dir):
             # Remove lines starting with 'Item', 'A:', 'Weekend', or 'Stroke'
             if any(line.startswith(prefix) for prefix in ['ANTAT I', 'MCA transcriptie', 'Set', 'Item', 'Oefenitem'
                                                           'A:', 'Weekend', 'Stroke']):
-            # if line.startswith('ANTAT I') or line.startswith('MCA transcriptie') \
-                # or line.startswith('Set') or line.startswith('Item') or line.startswith('Oefenitem') \
-                    # or line.startswith('A:') or line.startswith('Weekend') or line.startswith('Stroke'):
                 continue
 
             # Remove 'B:' from the beginning of lines, if present
@@ -105,11 +102,8 @@ def cleanup_txt_file(txt_path_in, processed_dir):
             ## Remove abundant text
             line = line.replace('ggg', '').replace('<spk>', '').replace('xxx', '')
             # Remove coughs/laughs (transcribed as 'ggg') from transcript line
-            # line = line.replace('ggg','')
             # Remove <spk> transcription for speaker changes from transcript line
-            # line = line.replace('<spk>','')
             # replace 'xxx' words
-            # line = line.replace('xxx', '')
 
             ## Replace [] in [....] statements UNLESS the [] starts with A:, then remove it completely
             # Check if the line starts with 'A:'
@@ -180,14 +174,6 @@ def cleanup_txt_file(txt_path_in, processed_dir):
             line = line.replace('. .', '.')  # Replace double punctuation
             line = line.strip()  # Strip leading/trailing whitespace
             line = re.sub(r'\.(?!\s)', '. ', line)  # Add whitespace after '.' if necessary
-            # Remove double spaces
-            # line = line.replace('  ','')
-            # Remove double punctuations
-            # line = line.replace('. .', '.')
-            # Strip whitespace from the line
-            # line = line.strip()
-            # Add whitespace after '.' if there isn't one
-            # line = re.sub(r'\.(?!\s)', '. ', line)
 
 
             # Write the modified line to the output file, IF the line is not empty
