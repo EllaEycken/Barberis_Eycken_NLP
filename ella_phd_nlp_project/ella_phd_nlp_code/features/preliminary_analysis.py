@@ -6,7 +6,7 @@ Based on scripts from masterthesisEllaLAW
 
 # which actions are performed:
 # - get a list of the paths to all files
-# - for the text files: read the transcripts in these files; for the audio files: read the sounds in these files
+# - for the text files: read the transcripts in these files; (for the audio files: read the sounds in these files)
 # - get a list of the subject (= participant) and question names, one pair (subject, question) for each file.
 """
 
@@ -15,7 +15,7 @@ import os
 
 # import parselmouth (is for audio part)
 
-from ella_phd_nlp_project.ella_phd_nlp_code.constants import TEXT_DIR_DUMMY # TODO: change to TEXT_DIR if everything is in order!
+from ella_phd_nlp_project.ella_phd_nlp_code.constants import TEXT_DIR_DUMMY # TODO: change to TEXT_DIR if everything is ready!
 
 
 
@@ -24,27 +24,20 @@ def all_paths(file_path: str):
 
     """Get a list of the paths to the text/audio files, based on the correct directory.
 
-    :param file_path: will now be the directory (TEXT_DIR (or AUDIO_DIR))
-    :return:a list of the paths to the separate text/audio files (with each path as 1 specific task part of 1 subject in the list)
+    :param file_path: the text or audio directory (TEXT_DIR (or AUDIO_DIR))
+    :return:a list of the paths to the separate text/audio files (with each path as 1 specific task of 1 subject in the list)
 
-    Note: how to create all_paths: with REGULAR EXPRESSIONS:
-    Alternative options
-    1) with a slash: glob.glob(TEXT_DIR + r"*") (= the 'windows version')
-    with the slash: look out for anything (on level of subdirectories: all folders underneath TEXT_DIR
-    2) glob.glob(TEXT_DIR + f"{os.path.sep}s*")
-    the 's*' looks for all files starting with s (here same as everything starts with s)
-    3) glob.glob(TEXT_DIR + f"{os.path.sep}s[0-9]*")
-    [0-9] means 'any digit and doesn't matter how many digits; * means 'doesn't matter what comes after this'
-    => last one is our preferred method
+    Note: this function is based on the following data organization structure:
+        'transcripts' -> immediately all transcripts (not subdivided in subject specific folders)
 
     """
     all_paths_list = (
-            glob.glob(file_path + f"{os.path.sep}sub-a[0-9]*")  # docx from aphasia patients
+            glob.glob(file_path + f"{os.path.sep}sub-a[0-9]*")  # txt files from aphasia patients
             #  the 'sub-a*' looks for all files starting with sub-a
             #  [0-9] means 'any digit and doesn't matter how many digits;
             #  * means 'doesn't matter what comes after this'
-            + glob.glob(file_path + f"{os.path.sep}sub-b[0-9]*")  # docx from control patients (comm partner)
-            + glob.glob(file_path + f"{os.path.sep}sub-c[0-9]*")) # docx from control patients (non-related)
+            + glob.glob(file_path + f"{os.path.sep}sub-b[0-9]*")  # txt files from control patients (comm partner)
+            + glob.glob(file_path + f"{os.path.sep}sub-c[0-9]*")) # txt files from control patients (non-related)
 
     return all_paths_list
 
@@ -55,19 +48,22 @@ def read_transcripts(
     """Get a list of the transcript contents, with each element representing one transcript of one task of one subject.
     aka following the paths in the all_paths function
 
-    :param file_path: will now be the directory, NOT the join_path as you make a path during this function
-    :return:a list of the transcripts (format: list(P1Q1, P1Q2, P1Q3 etc)
-    function based on new structure: 'transcripts' -> immediately all transcripts (not subdivided in s-folders)
+    :param file_path: the text directory where all text files are located
+    :return:a list of the transcripts (format: list(sub1-Q1, sub1-Q2, sub1-Q3 etc)
+
+    Note: this function is based on the following data organization structure:
+        'transcripts' -> immediately all transcripts (not subdivided in subject specific folders)
 
     """
     transcripts_list = []
     all_paths_text = all_paths(file_path)  # each element of this list is a path to a text file
     # (one specific task of 1 specific subject)
     for i in all_paths_text:
-        join_path = os.path.join(file_path, i)  # *make a path of the text_dir and each participant's specific
+        join_path = os.path.join(file_path, i)  # make a path of the text_dir and each participant's specific txt file
         f = open(join_path)  # open this text to be able to read it
-        transcript = f.readlines()  # make a transcript, but will be in form of a list of a string ["text"]
-        transcripts_list.append(transcript[0])
+        transcript = f.readlines()  # make a transcript, but will be in form of a list* consisting of one (long) string ["text"]
+        transcripts_list.append(transcript[0])  # append the transcript string (only the content, not the one-element list* itself)
+        # to the list of transcripts
 
     return transcripts_list
 
@@ -116,6 +112,6 @@ def get_subject_question_names_from_files(
 
 
 if __name__ == "__main__":
-    # all_paths(TEXT_DIR_DUMMY)
-    # read_transcripts(TEXT_DIR_DUMMY)
-    get_subject_question_names_from_files(TEXT_DIR_DUMMY)
+    all_paths(TEXT_DIR_DUMMY)
+    read_transcripts(TEXT_DIR_DUMMY)
+    # get_subject_question_names_from_files(TEXT_DIR_DUMMY)

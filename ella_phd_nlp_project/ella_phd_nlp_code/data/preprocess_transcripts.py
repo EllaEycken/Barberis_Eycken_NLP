@@ -95,11 +95,13 @@ def cleanup_txt_file(txt_path_in, processed_dir):
 
         for line in infile:
             # Remove lines starting with 'Item', 'A:', 'Weekend', or 'Stroke'
-            if any(line.startswith(prefix) for prefix in ['ANTAT I', 'MCA transcriptie', 'Set', 'Item', 'Oefenitem'
-                                                          'A:', 'Weekend', 'Stroke']):
+            if any(line.startswith(prefix) for prefix in ['ANTAT I', 'MCA transcriptie', 'Set', 'Item', 'Oefenitem',
+                                                          'Weekend', 'Stroke']):
                 continue
 
             # Remove 'B:' from the beginning of lines, if present
+            if line.startswith('A:'):
+                continue
             if line.startswith('B:'):
                 line = line[2:]  # Remove 'B:'
 
@@ -216,15 +218,15 @@ def preprocess_IANSA_transcripts(raw_dir,interim_dir, processed_dir):
 
 
 if __name__ == "__main__":
-    # docx_path = os.path.join(DOCX_DIR_DUMMY,'sub-b007_transcriptie_ANTAT.docx')
-    # interim_dir = PRECLEANTEXT_DIR_DUMMY
-    # convert_docx_to_txt(docx_path, interim_dir)
-    # txt_path_in = os.path.join(interim_dir, 'sub-b007_transcriptie_ANTAT_preclean.txt')
-    # processed_dir = TEXT_DIR_DUMMY
-    # cleanup_txt_file(txt_path_in, processed_dir)
-
+    docx_path = os.path.join(DOCX_DIR_DUMMY,'sub-b007_transcriptie_ANTAT.docx')
+    interim_dir = PRECLEANTEXT_DIR_DUMMY
+    convert_docx_to_txt(docx_path, interim_dir)
+    txt_path_in = os.path.join(interim_dir, 'sub-b007_transcriptie_ANTAT_preclean.txt')
+    processed_dir = TEXT_DIR_DUMMY
+    cleanup_txt_file(txt_path_in, processed_dir)
+    """
     raw_dir = DOCX_DIR_DUMMY
     interim_dir = PRECLEANTEXT_DIR_DUMMY
     processed_dir = TEXT_DIR_DUMMY
     preprocess_IANSA_transcripts(raw_dir, interim_dir, processed_dir)
-
+    """
