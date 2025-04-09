@@ -126,9 +126,11 @@ def cleanup_txt_file(txt_path_in, processed_dir):
 
             ## Remove dialect words and replace them with their normalized versions
             line = re.sub(r'(\w+)\*D\s*\(\s*(.*?)\s*\)', lambda m: m.group(2), line)
+            line = re.sub(r'(\w+)\*Dw\s*\(\s*(.*?)\s*\)', lambda m: m.group(2), line)
+            line = re.sub(r'(\w+)\*Dk\s*\(\s*(.*?)\s*\)', lambda m: m.group(2), line)
             # r'(...)= regex pattern (regular expression)
             # (\w+) captures a word (alphanumeric characters): here the dialect word that ends with *D.
-            # \*D matches the *D annotation.
+            # \*D matches the *D annotation. (Dw = dialectische woorden, Dk = dialectische klanken)
             # \(\s*(.*?)\s*\) captures the normalized word within parentheses, allowing for optional whitespace.
             #       \(:
             #           This matches the literal opening parenthesis (. In regex, parentheses are special characters
