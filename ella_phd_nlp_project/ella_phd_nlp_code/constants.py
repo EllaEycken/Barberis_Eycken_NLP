@@ -112,6 +112,7 @@ Q_FILE_MAPPINGS = {
 ## Constants for linguistic parameters
 beletselteken_utf8 = 'â€¦'  # utf_8 encodering voor '...'
 accent_à_utf8 = 'Ã'  # utf_8 encodering voor à
+accent_é_utf8 = 'Ã©' #utf_8 encodering voor é
 
 ## Constants for acoustic parameters
 f0min = 75  # for men and women

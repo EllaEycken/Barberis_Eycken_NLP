@@ -85,7 +85,7 @@ def cleanup_txt_file(txt_path_in, processed_dir):
             [txt_correct_name, 'txt']))
 
 
-    with (open(txt_path_in, 'r') as infile, open(txt_path_out, 'w', encoding = 'utf-8') as outfile):
+    with (open(txt_path_in, 'r') as infile, open(txt_path_out, 'w') as outfile):
         # 'r' = open the txt_path_in file for reading, 'w' = open the txt_path_out for writing
         # Note: encoding as utf-8 is needed as Python= , encoding = 'utf-8'
 
@@ -99,12 +99,34 @@ def cleanup_txt_file(txt_path_in, processed_dir):
 
         for line in lines:
             # Remove lines starting with 'Item', 'A:', 'Weekend', or 'Stroke'
-            if any(line.startswith(prefix) for prefix in ['ANTAT I', 'MCA transcriptie', 'Set', 'Item', 'Oefenitem',
-                                                          'Weekend', 'Stroke']):
+            if line.startswith('CAT'):
                 continue
+            if line.startswith('ANTAT'):
+                continue
+            if line.startswith('MCA'):
+                continue
+            if line.startswith('Main'):  # from 'main concept analysis'
+                continue
+            if line.startswith('Set'):
+                continue
+            if line.startswith('Item'):
+                continue
+            if line.startswith('Oefenitem'):
+                continue
+            if line.startswith('Personal'): # from 'personal narrative'
+                continue
+            if line.startswith('Weekend'):
+                continue
+            if line.startswith('Stroke'):
+                continue
+            # doesn't: work: any(line.startswith(prefix) for prefix in ['ANTAT I', 'MCA transcriptie', 'Set', 'Item', 'Oefenitem',
+                                                         # 'Weekend', 'Stroke']):
+                # continue
 
             # Remove 'B:' from the beginning of lines, if present
             if line.startswith('A:'):
+                continue
+            if line.startswith(' A:'):
                 continue
             if line.startswith('B:'):
                 line = line[2:]  # Remove 'B:'
@@ -222,10 +244,11 @@ def preprocess_IANSA_transcripts(raw_dir,interim_dir, processed_dir):
 
 
 if __name__ == "__main__":
-    docx_path = os.path.join(DOCX_DIR_DUMMY,'sub-a043_CAT-NL_transcriptie.docx')
+    """
+    docx_path = os.path.join(DOCX_DIR_DUMMY,'sub-a043_transcriptie_MCA.docx')
     interim_dir = PRECLEANTEXT_DIR_DUMMY
     convert_docx_to_txt(docx_path, interim_dir)
-    txt_path_in = os.path.join(interim_dir, 'sub-a043_transcriptie_CAT-NL_preclean.txt')
+    txt_path_in = os.path.join(interim_dir, 'sub-a043_transcriptie_MCA_preclean.txt')
     processed_dir = TEXT_DIR_DUMMY
     cleanup_txt_file(txt_path_in, processed_dir)
     """
@@ -233,4 +256,4 @@ if __name__ == "__main__":
     interim_dir = PRECLEANTEXT_DIR_DUMMY
     processed_dir = TEXT_DIR_DUMMY
     preprocess_IANSA_transcripts(raw_dir, interim_dir, processed_dir)
-    """
+
