@@ -109,8 +109,11 @@ Q_FILE_MAPPINGS = {
 }
 
 
+## Constants for linguistic parameters
+beletselteken_utf8 = 'â€¦'  # utf_8 encodering voor '...'
+accent_à_utf8 = 'Ã'  # utf_8 encodering voor à
+
 ## Constants for acoustic parameters
-# Constants for acoustic parameters
 f0min = 75  # for men and women
 f0max = 500  # for men and women
 unit = "Hertz"

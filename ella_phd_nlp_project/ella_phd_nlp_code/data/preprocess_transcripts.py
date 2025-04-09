@@ -16,7 +16,7 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
 ## Create a helper function that converts word docx to a text file
 def convert_docx_to_txt(docx_path, interim_dir):
     """
-    Convert docx file to txt file
+    Helper function to convert a docx file to txt file
     :param docx_path: the word document path
     :param interim_dir: the interim directory path where the txt file must be temporarily saved
     :return: the text file in the interim directory
@@ -54,20 +54,24 @@ def convert_docx_to_txt(docx_path, interim_dir):
 
 def cleanup_txt_file(txt_path_in, processed_dir):
     """
-    Clean up text files
+    Helper function to clean up a text file
     :param txt_path_in: the text file path that must be cleaned up
     :param processed_dir: the processed directory path where the cleaned text files will be saved
     :return: returns the text file with the following changes
         1) Remove the title (first line) for
             ANTAT 1
             MCA transcriptie
-        2) Remove the 'items' lines and the 'set' lines
+        2) Remove the following lines: that start with.. 'ANTAT I', 'MCA transcriptie', 'Set', 'Item', 'Oefenitem'
+                                                          'A:', 'Weekend', 'Stroke'
         3) Remove the 'A:' lines (= test leader)
         4) Remove the 'B:' parts in the participant lines
-        5) Remove  whitespace in between paragraphs
-        6) Remove [] in [...] statements
-        7) Remove xxx
-        8) Remove dialect words, only keep normalization --> remove ( ) from normalization so that normalization is counted
+        5) Remove ggg, <spk, and xxx
+        6) Remove [] in [...] statements unless it is an [A:…] statement, then remove it completely
+        7) Remove dialect words, only keep normalization --> remove ( ) from normalization so that normalization is
+        counted
+        5) Clean text formatting: Replace multiple spaces with a single space, Replace double punctuation with single,
+         Remove  whitespace in between paragraphs, Add whitespace after '.' if necessary
+
     """
     ## Choose the name for the cleaned text file
     txt_name_subparts = os.path.splitext(os.path.basename(txt_path_in))[0].split('_')
@@ -81,8 +85,9 @@ def cleanup_txt_file(txt_path_in, processed_dir):
             [txt_correct_name, 'txt']))
 
 
-    with (open(txt_path_in, 'r') as infile, open(txt_path_out, 'w') as outfile):
+    with (open(txt_path_in, 'r') as infile, open(txt_path_out, 'w', encoding = 'utf-8') as outfile):
         # 'r' = open the txt_path_in file for reading, 'w' = open the txt_path_out for writing
+        # Note: encoding as utf-8 is needed as Python= , encoding = 'utf-8'
 
         first_line = infile.readline()
         if not first_line:
@@ -171,7 +176,7 @@ def cleanup_txt_file(txt_path_in, processed_dir):
 
             ## Clean text formatting
             line = re.sub(r'\s+', ' ', line)  # Replace multiple spaces with a single space
-            line = line.replace('. .', '.')  # Replace double punctuation
+            line = line.replace('. .', '.')  # Replace double punctuation with single
             line = line.strip()  # Strip leading/trailing whitespace
             line = re.sub(r'\.(?!\s)', '. ', line)  # Add whitespace after '.' if necessary
 
@@ -185,7 +190,7 @@ def cleanup_txt_file(txt_path_in, processed_dir):
 
 def preprocess_IANSA_transcripts(raw_dir,interim_dir, processed_dir):
     """
-    Preprocess IANSA transcripts
+    Preprocess ALL IANSA transcripts (using the helper functions convert_docx_to_txt and cleanup_txt_file)
     :param raw_dir: take the raw directory where all the raw WORD files are located
     :param interim_dir: the interim directory where all the interim PRECLEAN TEXT files will be saved
     :param processed_dir: the processed directory path where the cleaned TEXT files will be saved
@@ -209,15 +214,15 @@ def preprocess_IANSA_transcripts(raw_dir,interim_dir, processed_dir):
 
 
 if __name__ == "__main__":
-    docx_path = os.path.join(DOCX_DIR_DUMMY,'sub-b007_transcriptie_MCA.docx')
-    interim_dir = PRECLEANTEXT_DIR_DUMMY
-    convert_docx_to_txt(docx_path, interim_dir)
-    txt_path_in = os.path.join(interim_dir, 'sub-b007_transcriptie_MCA_preclean.txt')
-    processed_dir = TEXT_DIR_DUMMY
-    cleanup_txt_file(txt_path_in, processed_dir)
-
-    # raw_dir = DOCX_DIR_DUMMY
+    # docx_path = os.path.join(DOCX_DIR_DUMMY,'sub-b007_transcriptie_ANTAT.docx')
     # interim_dir = PRECLEANTEXT_DIR_DUMMY
+    # convert_docx_to_txt(docx_path, interim_dir)
+    # txt_path_in = os.path.join(interim_dir, 'sub-b007_transcriptie_ANTAT_preclean.txt')
     # processed_dir = TEXT_DIR_DUMMY
-    # preprocess_IANSA_transcripts(raw_dir, interim_dir, processed_dir)
+    # cleanup_txt_file(txt_path_in, processed_dir)
+
+    raw_dir = DOCX_DIR_DUMMY
+    interim_dir = PRECLEANTEXT_DIR_DUMMY
+    processed_dir = TEXT_DIR_DUMMY
+    preprocess_IANSA_transcripts(raw_dir, interim_dir, processed_dir)
 
