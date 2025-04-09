@@ -89,11 +89,15 @@ def cleanup_txt_file(txt_path_in, processed_dir):
         # 'r' = open the txt_path_in file for reading, 'w' = open the txt_path_out for writing
         # Note: encoding as utf-8 is needed as Python= , encoding = 'utf-8'
 
-        first_line = infile.readline()
-        if not first_line:
+        # first_line = infile.readline()
+        # if not first_line:
+        #    raise ValueError("The input file is empty")
+
+        lines = infile.readlines()
+        if not lines:
             raise ValueError("The input file is empty")
 
-        for line in infile:
+        for line in lines:
             # Remove lines starting with 'Item', 'A:', 'Weekend', or 'Stroke'
             if any(line.startswith(prefix) for prefix in ['ANTAT I', 'MCA transcriptie', 'Set', 'Item', 'Oefenitem',
                                                           'Weekend', 'Stroke']):
@@ -218,10 +222,10 @@ def preprocess_IANSA_transcripts(raw_dir,interim_dir, processed_dir):
 
 
 if __name__ == "__main__":
-    docx_path = os.path.join(DOCX_DIR_DUMMY,'sub-b007_transcriptie_ANTAT.docx')
+    docx_path = os.path.join(DOCX_DIR_DUMMY,'sub-a043_CAT-NL_transcriptie.docx')
     interim_dir = PRECLEANTEXT_DIR_DUMMY
     convert_docx_to_txt(docx_path, interim_dir)
-    txt_path_in = os.path.join(interim_dir, 'sub-b007_transcriptie_ANTAT_preclean.txt')
+    txt_path_in = os.path.join(interim_dir, 'sub-a043_transcriptie_CAT-NL_preclean.txt')
     processed_dir = TEXT_DIR_DUMMY
     cleanup_txt_file(txt_path_in, processed_dir)
     """
