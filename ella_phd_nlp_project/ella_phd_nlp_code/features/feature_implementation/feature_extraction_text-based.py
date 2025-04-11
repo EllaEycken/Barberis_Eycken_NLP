@@ -50,7 +50,7 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
     # FAMILIARITY_PATH,
     # MILTENBURG_MODEL_PATH,
     # NAME_AGREEMENT_PATH,
-    TEXT_DIR,
+    TEXT_DIR_DUMMY, # TODO: change this if all is ready!
 )
 
 # from masterthesisellalaw.data.preprocess_norms import (
@@ -65,8 +65,19 @@ from ella_phd_nlp_project.ella_phd_nlp_code.features.preliminary_analysis import
     read_transcripts,
 )
 
-epi = epitran.Epitran("nld-Latn")
+# epi = epitran.Epitran("nld-Latn")
 nlp = spacy.load("nl_core_news_lg")
+# todo: check with chatgpt how to make tagger of spacy work for dutch (not via miltenburg)
 
-tagger =
-tagger.load(MILTENBURG_MODEL_PATH)
+
+text_list = read_transcripts(TEXT_DIR_DUMMY)  # TODO: change this if all is ready!
+
+for text in text_list:
+    doc = nlp(text)
+    for token in doc:
+        tagged_text = token.tag_
+        # Tags list Spacy: https://spacy.io/models/nl --> see 'label scheme' --> tagger
+        # Glossary of Spacy tags: https://github.com/explosion/spaCy/blob/master/spacy/glossary.py
+        # https://github.com/UniversalDependencies/UD_Dutch-Alpino/blob/master/stats.xml
+        # https://github.com/rug-compling/Alpino/blob/master/AlpinoUserGuide.pdf
+
