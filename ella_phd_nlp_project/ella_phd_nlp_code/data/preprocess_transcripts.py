@@ -204,6 +204,10 @@ def cleanup_txt_file(txt_path_in, processed_dir):
             #           to the lambda function. Inside the lambda function, you can access the captured groups
             #           using the group() method.
 
+            ## Fix annotation mistakes
+            line = line.replace('oei', 'oei*p')
+            line = line.replace('fff', 'fff*a')
+
             ## Clean text formatting
             line = re.sub(r'\s+', ' ', line)  # Replace multiple spaces with a single space
             line = line.replace('. .', '.')  # Replace double punctuation with single

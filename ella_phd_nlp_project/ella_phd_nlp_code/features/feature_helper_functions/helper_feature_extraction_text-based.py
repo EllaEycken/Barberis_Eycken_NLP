@@ -41,6 +41,20 @@ text_list = read_transcripts(TEXT_DIR_DUMMY)  # TODO: change this if all is read
 class FixNlpPipeline:
     """
     Fix NLP pipeline for Dutch
+    This includes:
+    - merge s constructions: all constructions starting with 's should be merged as one token (e.g., 's avonds)
+    - fix tussentaal tags: specific tussentaal tags (gij, ge, nen) should have the correct tag (e.g., gij = VNW)
+
+
+    Note: if I want to add other changes to the pipeline:
+    Option 1) Add new language component (with different name)
+    Option 2) Append items in existing language component (eg in 'fix_tussentaal'):
+        make changes
+        THEN: reload the model to start fresh
+        nlp = spacy.load("nl_core_news_lg")  # reloads the model cleanly
+        fixer = FixNlpPipeline(nlp)
+        fixer.fix_NLP_pipeline()
+
     """
 
     def __init__(self, nlp):
@@ -48,11 +62,14 @@ class FixNlpPipeline:
         # Register and add components to the pipeline
         self.fix_nlp_pipeline()
 
-    @Language.component("merge_s_constructions")
+    @Language.component("merge_'s_constructions")
     # Why is this needed:
     # SpaCy v3+ needs pipeline components to be registered with @Language.component.
     # You then add them by string name using nlp.add_pipe("your_name").
     def merge_s_constructions(doc):
+        """
+        merge s constructions: all constructions starting with 's should be merged as one token (e.g., 's avonds)
+        """
         with doc.retokenize() as retokenizer:
             i = 0
             while i < len(doc) - 1:
@@ -60,7 +77,7 @@ class FixNlpPipeline:
                 next_token = doc[i + 1]
 
                 # Match: "'s" followed by a lowercase word (e.g. 's morgens, 's avonds)
-                if token.text == "'s" and next_token.is_lower:
+                if token.text in {"â€˜s","â€™s"} and next_token.is_lower:
                     span = doc[i:i + 2]  # Create a span of both tokens
                     attrs = {
                         "pos": "ADV",  # Universal POS tag
@@ -75,6 +92,9 @@ class FixNlpPipeline:
 
     @Language.component("fix_tussentaal")
     def fix_tussentaal_tags(doc):
+        """
+        fix tussentaal tags: specific tussentaal tags (gij, ge, nen) should have the correct tag (e.g., gij = VNW)
+        """
         for token in doc:
             if token.text.lower() in {"gij", "ge"}:  # was originally tagged as noun
                 token.tag_ = "VNW|pers"  # Custom tag
@@ -82,18 +102,32 @@ class FixNlpPipeline:
             if token.text.lower() in {"nen", "ne", "ene"}:  # was originally tagged as noun
                 token.tag_ = "LID|onbep|stan|agr"
                 token.pos_ = "DET"
+            if token.text.lower() in {"morgens", "avonds","ochtends", "middags", "eens"}:
+                token.tag_ = "BW"
+                token.pos_ = "ADV"
+            if token.text.lower() =="da":
+                token.tag_ = "VNW"
+                token.pos_ = "PRON"
+            if token.text.lower() == 'beetje':
+                token.tag_ = "BW"
+                token.pos_ = "ADV"
+            if token.text.lower() == 's':
+                token.tag_ = "LET"
+
         return doc
 
     def fix_nlp_pipeline(self):
-        # Add aforementioned methods as pipeline components
+        """
+        Add aforementioned methods as pipeline components of the Spacy NLP pipeline
+        """
         # Only add if not already in pipeline
         if "fix_tussentaal" not in self.nlp.pipe_names:
             self.nlp.add_pipe("fix_tussentaal", last=True)
-        if "merge_s_constructions" not in self.nlp.pipe_names:
-            self.nlp.add_pipe("merge_s_constructions", last=True)
+        if "merge_'s_constructions" not in self.nlp.pipe_names:
+            self.nlp.add_pipe("merge_'s_constructions", last=True)
 
 
-
+## Call NLP
 # epi = epitran.Epitran("nld-Latn")
 nlp = spacy.load("nl_core_news_lg")
 # Apply my custom fixer
@@ -116,7 +150,6 @@ class CleanTranscript(object):
 
     def clean_transcript_for_tagging(self):
         """
-
         :return: a transcript that is ready to be tagged
         """
         self_str = str(self)  # make string out of transcript
@@ -131,7 +164,13 @@ class CleanTranscript(object):
             if 'Ã' in str(token) or '©' in str(token) or 'â' in str(token) or '€' in str(token) or '¦' in str(token):  # rare characters
                 continue
             if '*s' in str(token) or '*S' in str(
-                    token):  # make sure to skip the sem paraf (it will count only the function of the normalized version)
+                    token):  # make sure to skip the semantic parafasias (it will count only the function of the normalized version)
+                continue
+            if '*F' in str(token) or '*Fs' in str(token) or '*Fa' in str(token) or '*Fo' in str(token) or '*Ft' in str(token):
+                continue  # make sure to skip the phonematic parafasias (it will count only the function of the normalized version)
+            if '*x' in str(token) or '*n' in str(token):
+                continue  # make sure to skip unintelligible words and neologisms: you cannot know their function anyways
+            if 'yyy' in str(token):
                 continue
             if '*h' in str(token):  # only keep the 'correct' word 'yyy' from the 'herneming' (xxx-yyy*h) (e.g., ge-geschoten*h)
                 match = re.match(r'(\w+)-(\w+)\*h', token.text)
