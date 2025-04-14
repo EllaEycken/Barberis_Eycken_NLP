@@ -5,6 +5,7 @@
 import statistics
 import math
 
+import re
 import epitran
 import nltk
 import pandas as pd
@@ -39,9 +40,49 @@ nlp = spacy.load("nl_core_news_lg")
 
 text_list = read_transcripts(TEXT_DIR_DUMMY)  # TODO: change this if all is ready!
 
+class CleanTranscript(object):
+    """
+    Clean_Transcript Class
+    object: a transcript
+    """
+    def __init__(self):
+        pass
+
+    def clean_transcript_for_tagging(self):
+        """
+
+        :return: a transcript that is ready to be tagged
+        """
+        self_str = str(self)  # make string out of transcript
+        doc = nlp(self_str)  # read transcript into nlp-doc
+        cleaned_tokens = []
+
+        for token in doc:
+            if token.is_punct or token.is_space:  # built-in function of token class in Spacy
+                continue
+            if '*g'in str(token) or '*p' in str(token) or '*a' in str(token):  # annotations
+                continue
+            if 'Ã' in str(token) or '©' in str(token) or 'â' in str(token) or '€' in str(token) or '¦' in str(token):  # rare characters
+                continue
+            if '*s' in str(token) or '*S' in str(
+                    token):  # make sure to skip the sem paraf (it will count only the function of the normalized version)
+                continue
+            if '*h' in str(token):  # only keep the 'correct' word 'yyy' from the 'herneming' (xxx-yyy*h) (e.g., ge-geschoten*h)
+                match = re.match(r'(\w+)-(\w+)\*h', token.text)
+                if match:
+                    cleaned_tokens. append(match.group(2))
+            else:
+                cleaned_tokens.append(str(token))  # this must be turned into a string to later be able to join all
+                # elements again
+        cleaned_text = ' '.join(cleaned_tokens)  # why join these again: the *h element is seen as a string after the
+        # manipulation. It must however be seen as a token again, and Spacy then requires to read the transcript again
+        # into an NLP-readable form (you cannot 'create spacy tokens').
+
+        return cleaned_text
 
 
-class Token_Counter(object):
+
+class TokenCounter(object):
     """
     Token_Counter Class
     object: a transcript
@@ -50,11 +91,48 @@ class Token_Counter(object):
         pass
 
     def total_number_of_tokens(self):
+        """
+
+        :return: ALL tokens, including punctuation (excluding whitespace: is the tokenizer splitter)
+
+        Notes:
+        - suffixes or prefixes are kept APART (e.g., 's avonds = 's + avonds)
+        - abbreviations are kept TOGETHER
+        """
         self_str = str(self)  # make string out of transcript
         doc = nlp(self_str)  # read transcript into nlp-doc
-        tokens = doc._.tokenize
-        total_tokens = sum(tokens)
-        return total_tokens
+        token_count = len(doc)  # (doc is immediately split into tokens, based on whitespaces)
+
+        return token_count
+
+    def total_number_of_words(self):
+        """
+
+        :return: ALL words, including non-words, phonemic language errors, repetitions, minimal responses,
+        comments and stereotypes, in accordance with ​Boxum et al. (2013)​ and ​Vandenborre et al. (2018)​.
+
+        Notes:
+        - excludes punctuation!
+        """
+        self_str = str(self)  # make string out of transcript
+
+        # Step 1: Remove any utterance inside brackets ()
+        cleaned_self_str = re.sub(r'\(.*?\)', '', self_str)
+        # why: e.g., in semantic paraphasias, now only count paraphasia and not normalized version
+
+        # step 2: Tokenize cleaned text string
+        doc = nlp(cleaned_self_str)  # read transcript into nlp-doc
+        word_count = 0
+
+        for token in doc:
+            if token.is_punct or token.is_space:  # built-in function of token class in Spacy
+                continue
+
+            word_count += 1
+
+        return word_count
+
+    # def total_number_of_word_types(self):
 
 
 
@@ -62,30 +140,50 @@ class Token_Counter(object):
 
 
 
-class POS_Tagger(object):
+class POSTagger(object):
     """
     POS_Tagger class
     object: a transcript
 
+    # Tags list Spacy: https://spacy.io/models/nl --> see 'label scheme' --> tagger
+        # Glossary of Spacy tags: https://github.com/explosion/spaCy/blob/master/spacy/glossary.py
+        # https://github.com/UniversalDependencies/UD_Dutch-Alpino/blob/master/stats.xml
+        # https://github.com/rug-compling/Alpino/blob/master/AlpinoUserGuide.pdf
 
     """
     def __init__(self):
         pass
 
-    def show_tag_types(self):  # TODO: make this!
+    # def show_tag_types(self):  # TODO: make this!
+    # LET, N,
+    # SPEC|vreemd = ja*p
+    # N |eigen|ev|basis|zijd|stan = uh*g
+    # LET = .
 
+    def fix_tags(doc):
+        for token in doc:
+            if token.text.lower() in {"gij", "ge"}:
+                token.tag_ = "VNW|pers"  # Custom tag
+                token.pos_ = "VNW"  # Custom POS (pronoun)
+            if token.text.lower() in {"nen", "ne"}:
+                token.tag_ = "LID|onbep|stan|agr"
+                token.pos_ = "LID"
+
+        return doc
 
     def tag_list(self, tag_type):
-        self_str = str(self)  # make string out of transcript
-        doc = nlp(self_str)  # read transcript into nlp-doc
+        cleaned_self = CleanTranscript.clean_transcript_for_tagging(self)  # see helper function to clean transcripts for tagging
+        cleaned_self_str = str(cleaned_self)  # make string out of transcript
+        doc = nlp(cleaned_self_str)  # read transcript into nlp-doc
         tag_list = []
 
         for token in doc:  # append all tokens with the specific tag (tag_type) to a list
-            tagged_token = token.tag_
-            if tagged_token[1] == tag_type:
-                tag_list.append(tagged_token[0])
+            tagged_token = token.tag_  # tagged_token = 'tag_type|other information on tage_type...
+            if tagged_token[0] == tag_type:
+                tag_list.append(token)
 
         return tag_list
+
 
     def tag_count(self, tag_type):
         tag_list = self.tag_list(tag_type)
@@ -93,9 +191,10 @@ class POS_Tagger(object):
 
         return tag_count
 
+
     def tag_rate(self, tag_type):
         tag_count = self.tag_count(tag_type)
-        tag_rate = tag_count / len(text_list)
+        tag_rate = tag_count / TokenCounter.total_number_of_words(self)
         return tag_rate
 
 
@@ -139,10 +238,4 @@ class POS_Tagger(object):
 
 
 for text in text_list:
-    doc = nlp(text)
-    for token in doc:
-        tagged_text = token.tag_
-        # Tags list Spacy: https://spacy.io/models/nl --> see 'label scheme' --> tagger
-        # Glossary of Spacy tags: https://github.com/explosion/spaCy/blob/master/spacy/glossary.py
-        # https://github.com/UniversalDependencies/UD_Dutch-Alpino/blob/master/stats.xml
-        # https://github.com/rug-compling/Alpino/blob/master/AlpinoUserGuide.pdf
+    POSTagger.tag_list(text,'N')
