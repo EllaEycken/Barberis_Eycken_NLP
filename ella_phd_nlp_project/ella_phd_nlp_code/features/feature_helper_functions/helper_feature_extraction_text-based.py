@@ -40,6 +40,52 @@ nlp = spacy.load("nl_core_news_lg")
 
 text_list = read_transcripts(TEXT_DIR_DUMMY)  # TODO: change this if all is ready!
 
+class FixNlpPipeline(object):
+    """
+    Fix NLP pipeline for Dutch
+    object: a transcript
+    """
+
+    def __init__(self):
+        pass
+
+    def merge_s_constructions(doc):
+        with doc.retokenize() as retokenizer:
+            i = 0
+            while i < len(doc) - 1:
+                token = doc[i]
+                next_token = doc[i + 1]
+
+                # Match: "'s" followed by a lowercase word (e.g. 's morgens, 's avonds)
+                if token.text == "'s" and next_token.is_lower:
+                    span = doc[i:i + 2]  # Create a span of both tokens
+                    attrs = {
+                        "pos": "ADV",  # Universal POS tag
+                        "tag": "BW"  # Dutch-specific tag for adverbs
+                    }
+                    retokenizer.merge(span, attrs=attrs)
+                    # After merging, the next token has become part of the current one,
+                    # so skip to the token after the merged one
+                    i += 1
+                i += 1
+        return doc
+
+    def fix_tussentaal_tags(doc):
+        for token in doc:
+            if token.text.lower() in {"gij", "ge"}:  # was originally tagged as noun
+                token.tag_ = "VNW|pers"  # Custom tag
+                token.pos_ = "VNW"  # Custom POS (pronoun)
+            if token.text.lower() in {"nen", "ne"}:  # was originally tagged as noun
+                token.tag_ = "LID|onbep|stan|agr"
+                token.pos_ = "LID"
+        return doc
+
+    def fix_NLP_pipeline(self):
+        nlp.add_pipe(FixNlpPipeline.fix_tussentaal_tags, name="fix_tussentaal", last=True)
+        nlp.add_pipe(FixNlpPipeline.merge_s_constructions, name="merge_s_constructions", last=True)
+        return
+
+
 class CleanTranscript(object):
     """
     Clean_Transcript Class
@@ -48,12 +94,14 @@ class CleanTranscript(object):
     def __init__(self):
         pass
 
+
     def clean_transcript_for_tagging(self):
         """
 
         :return: a transcript that is ready to be tagged
         """
         self_str = str(self)  # make string out of transcript
+        FixNlpPipeline.fix_NLP_pipeline(self)
         doc = nlp(self_str)  # read transcript into nlp-doc
         cleaned_tokens = []
 
@@ -100,6 +148,7 @@ class TokenCounter(object):
         - abbreviations are kept TOGETHER
         """
         self_str = str(self)  # make string out of transcript
+        FixNlpPipeline.fix_NLP_pipeline(self)
         doc = nlp(self_str)  # read transcript into nlp-doc
         token_count = len(doc)  # (doc is immediately split into tokens, based on whitespaces)
 
@@ -121,6 +170,7 @@ class TokenCounter(object):
         # why: e.g., in semantic paraphasias, now only count paraphasia and not normalized version
 
         # step 2: Tokenize cleaned text string
+        FixNlpPipeline.fix_NLP_pipeline(self)
         doc = nlp(cleaned_self_str)  # read transcript into nlp-doc
         word_count = 0
 
@@ -133,10 +183,6 @@ class TokenCounter(object):
         return word_count
 
     # def total_number_of_word_types(self):
-
-
-
-
 
 
 
@@ -160,7 +206,7 @@ class POSTagger(object):
     # N |eigen|ev|basis|zijd|stan = uh*g
     # LET = .
 
-    def fix_tags(doc):
+    def fix_tags(doc): # todo: remove this function
         for token in doc:
             if token.text.lower() in {"gij", "ge"}:
                 token.tag_ = "VNW|pers"  # Custom tag
@@ -168,12 +214,14 @@ class POSTagger(object):
             if token.text.lower() in {"nen", "ne"}:
                 token.tag_ = "LID|onbep|stan|agr"
                 token.pos_ = "LID"
+            if
 
         return doc
 
     def tag_list(self, tag_type):
         cleaned_self = CleanTranscript.clean_transcript_for_tagging(self)  # see helper function to clean transcripts for tagging
         cleaned_self_str = str(cleaned_self)  # make string out of transcript
+        FixNlpPipeline.fix_NLP_pipeline(self)
         doc = nlp(cleaned_self_str)  # read transcript into nlp-doc
         tag_list = []
 
