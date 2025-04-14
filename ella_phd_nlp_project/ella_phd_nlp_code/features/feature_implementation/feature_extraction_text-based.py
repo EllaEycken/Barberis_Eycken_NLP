@@ -67,7 +67,6 @@ from ella_phd_nlp_project.ella_phd_nlp_code.features.preliminary_analysis import
 
 # epi = epitran.Epitran("nld-Latn")
 nlp = spacy.load("nl_core_news_lg")
-# todo: check with chatgpt how to make tagger of spacy work for dutch (not via miltenburg)
 
 
 text_list = read_transcripts(TEXT_DIR_DUMMY)  # TODO: change this if all is ready!
