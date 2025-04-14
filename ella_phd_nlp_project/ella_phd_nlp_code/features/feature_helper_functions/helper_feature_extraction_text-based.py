@@ -261,16 +261,6 @@ class POSTagger(object):
     # N |eigen|ev|basis|zijd|stan = uh*g
     # LET = .
 
-    def fix_tags(doc): # todo: remove this function
-        for token in doc:
-            if token.text.lower() in {"gij", "ge"}:
-                token.tag_ = "VNW|pers"  # Custom tag
-                token.pos_ = "VNW"  # Custom POS (pronoun)
-            if token.text.lower() in {"nen", "ne"}:
-                token.tag_ = "LID|onbep|stan|agr"
-                token.pos_ = "LID"
-
-        return doc
 
     def tag_list(self, tag_type):
         cleaned_self = CleanTranscript.clean_transcript_for_tagging(self)  # see helper function to clean transcripts for tagging
