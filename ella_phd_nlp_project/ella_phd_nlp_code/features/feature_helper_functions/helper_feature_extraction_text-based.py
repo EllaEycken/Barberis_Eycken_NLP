@@ -10,6 +10,7 @@ import epitran
 import nltk
 import pandas as pd
 import spacy
+from spacy.language import Language
 
 
 from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
@@ -33,22 +34,24 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
 from ella_phd_nlp_project.ella_phd_nlp_code.features.preliminary_analysis import (
     read_transcripts,
 )
-
-# epi = epitran.Epitran("nld-Latn")
-nlp = spacy.load("nl_core_news_lg")
-
-
 text_list = read_transcripts(TEXT_DIR_DUMMY)  # TODO: change this if all is ready!
 
-class FixNlpPipeline(object):
+""" NLP HELPER CLASS """
+
+class FixNlpPipeline:
     """
     Fix NLP pipeline for Dutch
-    object: a transcript
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, nlp):
+        self.nlp = nlp
+        # Register and add components to the pipeline
+        self.fix_nlp_pipeline()
 
+    @Language.component("merge_s_constructions")
+    # Why is this needed:
+    # SpaCy v3+ needs pipeline components to be registered with @Language.component.
+    # You then add them by string name using nlp.add_pipe("your_name").
     def merge_s_constructions(doc):
         with doc.retokenize() as retokenizer:
             i = 0
@@ -70,21 +73,37 @@ class FixNlpPipeline(object):
                 i += 1
         return doc
 
+    @Language.component("fix_tussentaal")
     def fix_tussentaal_tags(doc):
         for token in doc:
             if token.text.lower() in {"gij", "ge"}:  # was originally tagged as noun
                 token.tag_ = "VNW|pers"  # Custom tag
-                token.pos_ = "VNW"  # Custom POS (pronoun)
-            if token.text.lower() in {"nen", "ne"}:  # was originally tagged as noun
+                token.pos_ = "PRON"  # Custom POS (pronoun)
+            if token.text.lower() in {"nen", "ne", "ene"}:  # was originally tagged as noun
                 token.tag_ = "LID|onbep|stan|agr"
-                token.pos_ = "LID"
+                token.pos_ = "DET"
         return doc
 
-    def fix_NLP_pipeline(self):
-        nlp.add_pipe(FixNlpPipeline.fix_tussentaal_tags, name="fix_tussentaal", last=True)
-        nlp.add_pipe(FixNlpPipeline.merge_s_constructions, name="merge_s_constructions", last=True)
-        return
+    def fix_nlp_pipeline(self):
+        # Add aforementioned methods as pipeline components
+        # Only add if not already in pipeline
+        if "fix_tussentaal" not in self.nlp.pipe_names:
+            self.nlp.add_pipe("fix_tussentaal", last=True)
+        if "merge_s_constructions" not in self.nlp.pipe_names:
+            self.nlp.add_pipe("merge_s_constructions", last=True)
 
+
+
+# epi = epitran.Epitran("nld-Latn")
+nlp = spacy.load("nl_core_news_lg")
+# Apply my custom fixer
+fixer = FixNlpPipeline(nlp)
+fixer.fix_nlp_pipeline()
+
+
+
+
+""" OTHER CLASSES"""
 
 class CleanTranscript(object):
     """
@@ -101,7 +120,6 @@ class CleanTranscript(object):
         :return: a transcript that is ready to be tagged
         """
         self_str = str(self)  # make string out of transcript
-        FixNlpPipeline.fix_NLP_pipeline(self)
         doc = nlp(self_str)  # read transcript into nlp-doc
         cleaned_tokens = []
 
@@ -148,7 +166,6 @@ class TokenCounter(object):
         - abbreviations are kept TOGETHER
         """
         self_str = str(self)  # make string out of transcript
-        FixNlpPipeline.fix_NLP_pipeline(self)
         doc = nlp(self_str)  # read transcript into nlp-doc
         token_count = len(doc)  # (doc is immediately split into tokens, based on whitespaces)
 
@@ -170,7 +187,6 @@ class TokenCounter(object):
         # why: e.g., in semantic paraphasias, now only count paraphasia and not normalized version
 
         # step 2: Tokenize cleaned text string
-        FixNlpPipeline.fix_NLP_pipeline(self)
         doc = nlp(cleaned_self_str)  # read transcript into nlp-doc
         word_count = 0
 
@@ -214,14 +230,12 @@ class POSTagger(object):
             if token.text.lower() in {"nen", "ne"}:
                 token.tag_ = "LID|onbep|stan|agr"
                 token.pos_ = "LID"
-            if
 
         return doc
 
     def tag_list(self, tag_type):
         cleaned_self = CleanTranscript.clean_transcript_for_tagging(self)  # see helper function to clean transcripts for tagging
         cleaned_self_str = str(cleaned_self)  # make string out of transcript
-        FixNlpPipeline.fix_NLP_pipeline(self)
         doc = nlp(cleaned_self_str)  # read transcript into nlp-doc
         tag_list = []
 
