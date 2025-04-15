@@ -65,8 +65,14 @@ from ella_phd_nlp_project.ella_phd_nlp_code.features.preliminary_analysis import
     read_transcripts,
 )
 
+from ella_phd_nlp_project.ella_phd_nlp_code.features.feature_helper_functions.
+
+## Call NLP
 # epi = epitran.Epitran("nld-Latn")
 nlp = spacy.load("nl_core_news_lg")
+# Apply my custom fixer
+fixer = FixNlpPipeline(nlp)
+fixer.fix_nlp_pipeline()
 
 
 text_list = read_transcripts(TEXT_DIR_DUMMY)  # TODO: change this if all is ready!

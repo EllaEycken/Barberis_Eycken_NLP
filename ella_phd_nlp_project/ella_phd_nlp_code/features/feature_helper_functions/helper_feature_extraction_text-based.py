@@ -36,7 +36,9 @@ from ella_phd_nlp_project.ella_phd_nlp_code.features.preliminary_analysis import
 )
 text_list = read_transcripts(TEXT_DIR_DUMMY)  # TODO: change this if all is ready!
 
-""" NLP HELPER CLASS """
+
+
+""" NLP PIPELINE CLASS """
 
 class FixNlpPipeline:
     """
@@ -63,12 +65,13 @@ class FixNlpPipeline:
         self.fix_nlp_pipeline()
 
     @Language.component("merge_'s_constructions")
-    # Why is this needed:
+    # Note: Why is this 'language component' needed in the code:
     # SpaCy v3+ needs pipeline components to be registered with @Language.component.
     # You then add them by string name using nlp.add_pipe("your_name").
     def merge_s_constructions(doc):
         """
         merge s constructions: all constructions starting with 's should be merged as one token (e.g., 's avonds)
+        TODO: doesn't work properly, now partly fixed in 'fix_tussentaal'
         """
         with doc.retokenize() as retokenizer:
             i = 0
@@ -137,7 +140,7 @@ fixer.fix_nlp_pipeline()
 
 
 
-""" OTHER CLASSES"""
+""" CLEAN TRANSCRIPTS FOR SPECIFIC PURPOSES CLASS"""
 
 class CleanTranscript(object):
     """
@@ -148,9 +151,61 @@ class CleanTranscript(object):
         pass
 
 
+    def clean_transcript_for_token_counting(self):
+        """
+        Clean transcript so that tokens can be counted correctly.
+
+        :return: a transcript where tokens can be counted, including non-words, phonemic language errors, repetitions,
+        minimal responses, comments and stereotypes, in accordance with Boxum et al. (2013) and Vandenborre et al. (2018).
+
+        Note:
+        - leave in transcript:
+           § *p (particles), *a (afgebroken woord), *s and *f (paraphasias), *x and *n (unintelligible words, neologisms)
+        - remove from transcript:
+           § elements within brackets (only original utterance should be counted)
+           § punctuation, *g (gevulde pauze), weird annotations/symbols
+        """
+        self_str = str(self)  # make string out of transcript
+
+        cleaned_self_str = re.sub(r'\(.*?\)', '', self_str)  # Remove any utterance inside brackets ()
+        # why: e.g., in semantic paraphasias, now only count paraphasia and not normalized version
+
+        doc = nlp(cleaned_self_str)  # read transcript into nlp-doc
+        cleaned_tokens = []
+
+        for token in doc:
+            if token.is_punct or token.is_space:  # built-in function of token class in Spacy
+                continue
+            if '*g'in str(token):  # annotation (gevulde pauze)
+                continue
+            if 'Ã' in str(token) or '©' in str(token) or 'â' in str(token) or '€' in str(token) or '¦' in str(token):  # rare characters
+                continue
+            else:
+                cleaned_tokens.append(str(token))  # this must be turned into a string to later be able to join all
+                # elements again
+        cleaned_text = ' '.join(cleaned_tokens)  # why join these again: the *h element is seen as a string after the
+        # manipulation. It must however be seen as a token again, and Spacy then requires to read the transcript again
+        # into an NLP-readable form (you cannot 'create spacy tokens').
+
+        return cleaned_text
+
+
     def clean_transcript_for_tagging(self):
         """
-        :return: a transcript that is ready to be tagged
+        Clean transcript so that tokens can be tagged correctly.
+
+        :return: a transcript where tokens can be tagged
+
+        Note:
+        - leave in transcript:
+            § elements within brackets (only normalized utterance should be tagged, original utterance cannot be tagged)
+        - remove from transcript:
+            § punctuation, *g (gevulde pauze), weird annotations/symbols
+            § *p (particles), *a (afgebroken woord), *s and *f (paraphasias), *x and *n (unintelligible words, neologisms)
+            § 'yyy' (unintelligible normalized words)
+            § Parts within 'hernemingen' that are 'untaggable': only keep the correct part of the herneming (only keep the
+             'correct' word 'yyy' from the 'herneming' (xxx-yyy*h) (e.g., ge-geschoten*h)
+
         """
         self_str = str(self)  # make string out of transcript
         doc = nlp(self_str)  # read transcript into nlp-doc
@@ -187,6 +242,8 @@ class CleanTranscript(object):
 
 
 
+""" TOKEN/WORD COUNTER CLASS """
+
 class TokenCounter(object):
     """
     Token_Counter Class
@@ -214,18 +271,15 @@ class TokenCounter(object):
         """
 
         :return: ALL words, including non-words, phonemic language errors, repetitions, minimal responses,
-        comments and stereotypes, in accordance with ​Boxum et al. (2013)​ and ​Vandenborre et al. (2018)​.
+        comments and stereotypes, in accordance with Boxum et al. (2013) and Vandenborre et al. (2018).
 
         Notes:
         - excludes punctuation!
         """
-        self_str = str(self)  # make string out of transcript
+        cleaned_self = CleanTranscript.clean_transcript_for_token_counting(
+            self)  # see helper function to clean transcripts for token counting
+        cleaned_self_str = str(cleaned_self)  # make string out of transcript
 
-        # Step 1: Remove any utterance inside brackets ()
-        cleaned_self_str = re.sub(r'\(.*?\)', '', self_str)
-        # why: e.g., in semantic paraphasias, now only count paraphasia and not normalized version
-
-        # step 2: Tokenize cleaned text string
         doc = nlp(cleaned_self_str)  # read transcript into nlp-doc
         word_count = 0
 
@@ -241,6 +295,8 @@ class TokenCounter(object):
 
 
 
+""" TAGGER CLASS """
+
 class POSTagger(object):
     """
     POS_Tagger class
@@ -255,11 +311,57 @@ class POSTagger(object):
     def __init__(self):
         pass
 
-    # def show_tag_types(self):  # TODO: make this!
-    # LET, N,
-    # SPEC|vreemd = ja*p
-    # N |eigen|ev|basis|zijd|stan = uh*g
-    # LET = .
+    def show_tag_types(self):  # TODO: make this!
+        """
+        :return: Show all main Spacy tags in a dictionary
+        Note:
+        - https://spacy.io/models/nl --> go to 'attributes' within the nl_core_news_lg model
+        - if you want extra information, use spacy.explain(...tag..)
+        """
+
+        tag_dictionary = {
+            'ADJ': 'adjectief - adjective',
+            'BW': 'bijwoord - adverb',
+            'LET': 'letter - letter + PUNCTUATION',
+            'LID': 'lidwoord - article',
+            'N': 'zelfstandig naamwoord - noun',
+            'SPEC': 'speciaal - special',
+            'SPEC|afk': 'afkorting - abbreviation',
+            'SPEC|deeleigen': '??',
+            'SPEC|enof': '??',
+            'SPEC|meta': '??',
+            'SPEC|symb': 'symbool - symbol',
+            'SPEC|vreemd': 'vreemd woord/leenwoord - foreign word + ANNOTATED words (except *h) ',
+            'TSW': '??',
+            'TW':'telwoord - cardinal/ordinal',
+            'TW|hoofd': 'hoofdtelwoord - cardinal',
+            'TW|rang' : 'rangtelwoord - ordinal',
+            'VG': 'voegwoord - conjunction',
+            'VG|neven': 'nevenschikkend voegwoord - coordinating conjunction',
+            'VG|onder': 'onderschikkend voegwoord - subordinating conjunction',
+            'VNW': 'voornaamwoord - pronoun',
+            'VNW|aanw': 'aanwijzend voornaamwoord - demonstrative pronoun (die, dat)',
+            'VNW|betr': 'betrekkelijk voornaamwoord - relative pronoun (die, dat)',
+            'VNW|bez': 'bezittelijk voornaamwoord - possessive pronoun (mijn, zijn)',
+            'VNW|excl': '??',
+            'VNW|onbep': '??',
+            'VNW|pers': 'persoonlijk voornaamwoord - personal pronoun (ik, hij)',
+            'VNW|pr': '??',
+            'VNW|recip': '?? voornaamwoord - recip pronoun',
+            'VNW|refl': 'wederkerend voornaamwoord - reflexive pronoun (zich)',
+            'VNW|vb': '??',
+            'VZ': 'voorzetsel - preposition',
+            'VZ|fin': '?? prefix?',
+            'VZ|init': '?? suffix?',
+            'VZ|versm': '??',
+            'WW': 'werkwoord - verb',
+            'WW|inf': 'werkwoord infinitief - verb infinitive',
+            'WW | od': 'werkwoord onvoltooid deelwoord - present participle',
+            'WW | pv': 'werkwoord persoonsvorm - verb conjugation',
+            'WW | vd': 'werkwoord voltooid deelwoord - past participle',
+             }
+        print(tag_dictionary)
+        return tag_dictionary
 
 
     def tag_list(self, tag_type):
