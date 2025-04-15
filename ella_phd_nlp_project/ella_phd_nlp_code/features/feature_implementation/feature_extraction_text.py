@@ -51,7 +51,7 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
     # MILTENBURG_MODEL_PATH,
     # NAME_AGREEMENT_PATH,
     TEXT_DIR_DUMMY, # TODO: change this if all is ready!
-    annot_unintelligible_word, annots_phonematic_paraphasia, annot_herneming, annots_semantic_paraphasia,
+    annot_unintelligible_word, annots_phonemic_paraphasia, annot_herneming, annots_semantic_paraphasia,
     annots_dialect, annot_neologism, annot_filled_pause, annot_grammatic_error, annot_foreign_language,
     annot_discourse_particle, annot_aborted_word_or_sound
 )
@@ -94,7 +94,7 @@ class Semantics(object):
         DEF: Substitution of content words for (un)related content words ​(Casilio et al., 2019)​,
         calculated as a proportion of the total number of words.
         self = text_directory
-        :return: proportion of semantic paraphhasias in the transcript
+        :return: proportion of semantic paraphasias in the transcript
         """
         prop_sem_pars_list = list()
         list_of_transcripts = read_transcripts(self)
@@ -119,9 +119,77 @@ class Semantics(object):
 
 
 """ PHONOLOGY """
+class Phonology(object):
+    def __init__(self):
+        pass
+
+    def phonemic_paraphasias(self):
+        """
+        Calculate the proportion of phonemic paraphasias in the transcripts in the directory (self)
+        DEF: Phoneme deletion, insertion, substitution or transposition (Casilio et al., 2019; Vermeulen et al., 1989),
+        calculated as a proportion of the total number of words.
+        self = text_directory
+        :return: proportion of phonemic paraphasias in the transcript
+        """
+        prop_phon_pars_list = list()
+        list_of_transcripts = read_transcripts(self)
+        for transcript in list_of_transcripts:
+            cleaned_transcript = CleanTranscript.clean_transcript_for_token_counting(
+                transcript)  # see helper function to clean transcripts for token counting
+            cleaned_transcript_str = str(cleaned_transcript)  # make string out of transcript
+
+            doc = nlp(cleaned_transcript_str)  # read transcript into nlp-doc
+            phon_par_list = list()
+
+            for token in doc:
+                if any(annotation in str(token) for annotation in annots_phonemic_paraphasia):
+                    # TODO: switch to more added phon paraphasias if several phon errors in one word should be counted as multiple phon paraphasias
+                   phon_par_list.append(token)
+
+            total_phon_pars = len(phon_par_list)
+            total_words = TokenCounter.total_number_of_words(transcript)
+            prop_phon_pars = float(total_phon_pars) / total_words
+            prop_phon_pars_list.append(prop_phon_pars)
+
+        return prop_phon_pars_list
+
+
+    def neologisms(self):
+        """
+        Calculate the proportion of neologisms in the transcripts in the directory (self)
+        DEF: Nonwords, i.e., word forms that are not real words (Casilio et al., 2019),
+        calculated as a proportion of the total number of words.
+        self = text_directory
+        :return: proportion of neologism in the transcript
+        """
+        prop_neologisms_list = list()
+        list_of_transcripts = read_transcripts(self)
+        for transcript in list_of_transcripts:
+            cleaned_transcript = CleanTranscript.clean_transcript_for_token_counting(
+                transcript)  # see helper function to clean transcripts for token counting
+            cleaned_transcript_str = str(cleaned_transcript)  # make string out of transcript
+
+            doc = nlp(cleaned_transcript_str)  # read transcript into nlp-doc
+            neologism_list = list()
+
+            for token in doc:
+                if annot_neologism in str(token):
+                   neologism_list.append(token)
+
+            total_neologisms = len(neologism_list)
+            total_words = TokenCounter.total_number_of_words(transcript)
+            prop_neologisms = float(total_neologisms) / total_words
+            prop_neologisms_list.append(prop_neologisms)
+
+        return prop_neologisms_list
+
 
 
 """ LEXICAL """
+class Lexical(object):
+    def __init__(self):
+        pass
+
 
 
 
@@ -136,5 +204,6 @@ class Semantics(object):
 """RUNNING THE FUNCTIONS"""
 if __name__ == "__main__":
     text_directory = TEXT_DIR_DUMMY
-    Semantics.semantic_paraphasias(text_directory)
-
+    # Semantics.semantic_paraphasias(text_directory)
+    # Phonology.phonemic_paraphasias(text_directory)
+    Phonology.neologisms(text_directory)
