@@ -269,6 +269,7 @@ class TokenCounter(object):
 
     def total_number_of_words(self):
         """
+        Calculate total number of words in the transcript.
 
         :return: ALL words, including non-words, phonemic language errors, repetitions, minimal responses,
         comments and stereotypes, in accordance with Boxum et al. (2013) and Vandenborre et al. (2018).

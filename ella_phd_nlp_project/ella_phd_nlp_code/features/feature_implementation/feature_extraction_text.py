@@ -190,6 +190,22 @@ class Lexical(object):
     def __init__(self):
         pass
 
+    def number_of_words(self):
+        """
+        Calculate the total number of words in the transcripts in the directory (self)
+        DEF: Total number of words produced, including non-words, phonemic language errors, repetitions,
+        minimal responses, comments and stereotypes, in accordance with Boxum et al. (2013) and Vandenborre et al.(2018).
+        self = text_directory
+        :return: total number of words in the transcript
+        """
+        nb_of_words_list = list()
+        list_of_transcripts = read_transcripts(self)
+        for transcript in list_of_transcripts:
+            total_nb_of_words = TokenCounter.total_number_of_words(transcript)
+            nb_of_words_list.append(total_nb_of_words)
+
+        return nb_of_words_list
+
 
 
 
@@ -206,4 +222,5 @@ if __name__ == "__main__":
     text_directory = TEXT_DIR_DUMMY
     # Semantics.semantic_paraphasias(text_directory)
     # Phonology.phonemic_paraphasias(text_directory)
-    Phonology.neologisms(text_directory)
+    # Phonology.neologisms(text_directory)
+    Lexical.number_of_words(text_directory)
