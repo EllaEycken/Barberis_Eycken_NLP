@@ -84,9 +84,9 @@ fixer.fix_nlp_pipeline()
 
 
 """ SEMANTICS """
-class Semantics(object):
-    def __init__(self):
-        pass
+class Semantics:
+    def __init__(self, text_directory):
+        self.text_dir = text_directory
 
     def semantic_paraphasias(self):
         """
@@ -94,13 +94,21 @@ class Semantics(object):
         DEF: Substitution of content words for (un)related content words ​(Casilio et al., 2019)​,
         calculated as a proportion of the total number of words.
         self = text_directory
-        :return: proportion of semantic paraphasias in the transcript
+        :return: proportion of semantic paraphasias in the transcripts
         """
         prop_sem_pars_list = list()
-        list_of_transcripts = read_transcripts(self)
+        list_of_transcripts = read_transcripts(self.text_dir)
         for transcript in list_of_transcripts:
-            cleaned_transcript = CleanTranscript.clean_transcript_for_token_counting(
-                transcript)  # see helper function to clean transcripts for token counting
+            cleaner = CleanTranscript(transcript)
+            cleaned_transcript = cleaner.clean_transcript_for_token_counting()  # see helper function to clean transcripts for token counting
+            # Note: Why CleanTranscript.clean_transcript_for_token_counting(my_text) doesn't work:
+            # clean_transcript_for_token_counting is an instance method,
+            # meaning it expects to be called on an object (an instance of the class), not the class itself.
+            # So it will throw a TypeError, because self isn't automatically passed in that case.
+            # alternative:
+            # cleaned_transcript = CleanTranscript(transcript).clean_transcript_for_token_counting()
+            # This will make sure the function (clean_transcript_for...) will be calculated on the object (class
+            # instance) 'CleanTranscript(transcript)' and not on the class CleanTranscript itself.
             cleaned_transcript_str = str(cleaned_transcript)  # make string out of transcript
 
             doc = nlp(cleaned_transcript_str)  # read transcript into nlp-doc
@@ -111,7 +119,8 @@ class Semantics(object):
                    sem_par_list.append(token)
 
             total_sem_pars = len(sem_par_list)
-            total_words = TokenCounter.total_number_of_words(transcript)
+            total_words = TokenCounter(transcript).total_number_of_words()
+            # idem as above regarding the clean_transcripts function
             prop_sem_pars = float(total_sem_pars) / total_words
             prop_sem_pars_list.append(prop_sem_pars)
 
@@ -129,7 +138,8 @@ class Phonology(object):
         DEF: Phoneme deletion, insertion, substitution or transposition (Casilio et al., 2019; Vermeulen et al., 1989),
         calculated as a proportion of the total number of words.
         self = text_directory
-        :return: proportion of phonemic paraphasias in the transcript
+
+        :return: proportion of phonemic paraphasias in the transcripts
         """
         prop_phon_pars_list = list()
         list_of_transcripts = read_transcripts(self)
@@ -160,7 +170,7 @@ class Phonology(object):
         DEF: Nonwords, i.e., word forms that are not real words (Casilio et al., 2019),
         calculated as a proportion of the total number of words.
         self = text_directory
-        :return: proportion of neologism in the transcript
+        :return: proportion of neologism in the transcripts
         """
         prop_neologisms_list = list()
         list_of_transcripts = read_transcripts(self)
@@ -230,6 +240,21 @@ class Lexical(object):
         return BI_list
 
 
+    def noun_rate(self):
+        """
+        Calculate noun rate
+        DEF: Total number of nouns divided by the total number of words.
+        :return: noun rates in the transcripts
+        """
+        noun_rate_list= list()
+        list_of_transcripts = read_transcripts(self)
+        for transcript in list_of_transcripts:
+            noun_rate = POSTagger.tag_rate(transcript, "N")  # "N" = for nouns
+            noun_rate_list.append(noun_rate)
+
+        return noun_rate_list
+
+
 
 """ GRAMMATICAL """
 
@@ -242,8 +267,11 @@ class Lexical(object):
 """RUNNING THE FUNCTIONS"""
 if __name__ == "__main__":
     text_directory = TEXT_DIR_DUMMY
-    # Semantics.semantic_paraphasias(text_directory)
+    # semantics = Semantics(text_directory)
+    # semantics.semantic_paraphasias()
+    Semantics(text_directory).semantic_paraphasias()
     # Phonology.phonemic_paraphasias(text_directory)
     # Phonology.neologisms(text_directory)
     # Lexical.number_of_words(text_directory)
-    Lexical.brunets_index(text_directory)
+    # Lexical.brunets_index(text_directory)
+    # Lexical.noun_rate(text_directory)

@@ -142,13 +142,14 @@ fixer.fix_nlp_pipeline()
 
 """ CLEAN TRANSCRIPTS FOR SPECIFIC PURPOSES CLASS"""
 
-class CleanTranscript(object):
+class CleanTranscript:
     """
-    Clean_Transcript Class
+    Clean_Transcript Class for cleaning transcripts for different NLP purposes.
     object: a transcript
     """
-    def __init__(self):
-        pass
+    def __init__(self, transcript):
+        self.transcript = transcript  # this class is namely designed to act on a transcript, so the transcript must
+        # be stored inside the class.
 
 
     def clean_transcript_for_token_counting(self):
@@ -165,12 +166,12 @@ class CleanTranscript(object):
            § elements within brackets (only original utterance should be counted)
            § punctuation, *g (gevulde pauze), weird annotations/symbols
         """
-        self_str = str(self)  # make string out of transcript
+        text = str(self.transcript)
 
-        cleaned_self_str = re.sub(r'\(.*?\)', '', self_str)  # Remove any utterance inside brackets ()
+        cleaned_text = re.sub(r'\(.*?\)', '', text)  # Remove any utterance inside brackets ()
         # why: e.g., in semantic paraphasias, now only count paraphasia and not normalized version
 
-        doc = nlp(cleaned_self_str)  # read transcript into nlp-doc
+        doc = nlp(cleaned_text)  # read transcript into nlp-doc
         cleaned_tokens = []
 
         for token in doc:
@@ -207,8 +208,8 @@ class CleanTranscript(object):
              'correct' word 'yyy' from the 'herneming' (xxx-yyy*h) (e.g., ge-geschoten*h)
 
         """
-        self_str = str(self)  # make string out of transcript
-        doc = nlp(self_str)  # read transcript into nlp-doc
+        text = str(self.transcript)
+        doc = nlp(text)  # read transcript into nlp-doc
         cleaned_tokens = []
 
         for token in doc:
@@ -244,13 +245,15 @@ class CleanTranscript(object):
 
 """ TOKEN/WORD COUNTER CLASS """
 
-class TokenCounter(object):
+class TokenCounter:
     """
     Token_Counter Class
     object: a transcript
     """
-    def __init__(self):
-        pass
+
+    def __init__(self, transcript):
+        self.transcript = transcript  # this class is namely designed to act on a transcript, so the transcript must
+        # be stored inside the class.
 
     def total_number_of_tokens(self):
         """
@@ -261,8 +264,8 @@ class TokenCounter(object):
         - suffixes or prefixes are kept APART (e.g., 's avonds = 's + avonds)
         - abbreviations are kept TOGETHER
         """
-        self_str = str(self)  # make string out of transcript
-        doc = nlp(self_str)  # read transcript into nlp-doc
+        text = str(self.transcript)
+        doc = nlp(text)  # read transcript into nlp-doc
         token_count = len(doc)  # (doc is immediately split into tokens, based on whitespaces)
 
         return token_count
@@ -277,11 +280,12 @@ class TokenCounter(object):
         Notes:
         - excludes punctuation!
         """
-        cleaned_self = CleanTranscript.clean_transcript_for_token_counting(
-            self)  # see helper function to clean transcripts for token counting
-        cleaned_self_str = str(cleaned_self)  # make string out of transcript
+        cleaner = CleanTranscript(self.transcript)  # make instance of the class for this text
+        cleaned_text = cleaner.clean_transcript_for_token_counting()  # clean the text
+        # see helper function to clean transcripts for token counting
+        cleaned_text_str = str(cleaned_text)  # make string out of transcript
 
-        doc = nlp(cleaned_self_str)  # read transcript into nlp-doc
+        doc = nlp(cleaned_text_str)  # read transcript into nlp-doc
         tokens_list = list()
 
         for token in doc:
@@ -304,11 +308,12 @@ class TokenCounter(object):
         Notes:
         - excludes punctuation!
         """
-        cleaned_self = CleanTranscript.clean_transcript_for_token_counting(
-            self)  # see helper function to clean transcripts for token counting
-        cleaned_self_str = str(cleaned_self)  # make string out of transcript
+        cleaner = CleanTranscript(self.transcript)  # make instance of the class for this text
+        cleaned_text = cleaner.clean_transcript_for_token_counting()  # clean the text
+        # see helper function to clean transcripts for token counting
+        cleaned_text_str = str(cleaned_text)  # make string out of transcript
 
-        doc = nlp(cleaned_self_str)  # read transcript into nlp-doc
+        doc = nlp(cleaned_text_str)  # read transcript into nlp-doc
         tokens_list = list()
 
         for token in doc:
@@ -338,10 +343,11 @@ class POSTagger(object):
         # https://github.com/rug-compling/Alpino/blob/master/AlpinoUserGuide.pdf
 
     """
-    def __init__(self):
-        pass
+    def __init__(self, transcript):
+        self.transcript = transcript  # this class is namely designed to act on a transcript, so the transcript must
+        # be stored inside the class.
 
-    def show_tag_types(self):  # TODO: make this!
+    def show_tag_types(self):
         """
         :return: Show all main Spacy tags in a dictionary
         Note:
@@ -395,29 +401,38 @@ class POSTagger(object):
 
 
     def tag_list(self, tag_type):
-        cleaned_self = CleanTranscript.clean_transcript_for_tagging(self)  # see helper function to clean transcripts for tagging
-        cleaned_self_str = str(cleaned_self)  # make string out of transcript
-        doc = nlp(cleaned_self_str)  # read transcript into nlp-doc
+        cleaner = CleanTranscript(self.transcript)  # make instance of the class for this text
+        cleaned_text = cleaner.clean_transcript_for_tagging()  # clean the text
+        # see helper function to clean transcripts for tagging
+        cleaned_text_str = str(cleaned_text)  # make string out of transcript
+
+        doc = nlp(cleaned_text_str)  # read transcript into nlp-doc
         tag_list = []
 
         for token in doc:  # append all tokens with the specific tag (tag_type) to a list
             tagged_token = token.tag_  # tagged_token = 'tag_type|other information on tage_type...
-            if tagged_token[0] == tag_type:
+            if tagged_token.startswith(tag_type): # note: tagged_token [0] == tag_type is too strict, only looks at
+                # first LETTER, not first item
                 tag_list.append(token)
 
         return tag_list
 
 
     def tag_count(self, tag_type):
-        tag_list = self.tag_list(tag_type)
+        tagger = POSTagger(self.transcript)  # initiate an instance of the class POStagger for this text
+        tag_list = tagger.tag_list(tag_type)  # perform the tag_list function on this instance
         tag_count = len(tag_list)
 
         return tag_count
 
 
     def tag_rate(self, tag_type):
-        tag_count = self.tag_count(tag_type)
-        tag_rate = tag_count / TokenCounter.total_number_of_words(self)
+        tagger = POSTagger(self.transcript) # initiate an instance of the class POStagger for this text
+        counter = TokenCounter(self.transcript)  # initiate an instance of the class TokenCounter for this text
+
+        tag_count = tagger.tag_count(tag_type) # perform the tag_list function on this instance
+        tag_rate = tag_count / counter.total_number_of_words()
+
         return tag_rate
 
 
@@ -461,4 +476,7 @@ class POSTagger(object):
 
 
 for text in text_list:
-    POSTagger.tag_list(text,'N')
+    tagger = POSTagger(text)
+    # tagger.tag_list('N')
+    # tagger.tag_count('N')
+    tagger.tag_rate('N')
