@@ -113,6 +113,17 @@ Q_FILE_MAPPINGS = {
 beletselteken_utf8 = 'â€¦'  # utf_8 encodering voor '...'
 accent_à_utf8 = 'Ã'  # utf_8 encodering voor à
 accent_é_utf8 = 'Ã©' #utf_8 encodering voor é
+annot_foreign_language = '*v'
+annot_neologism = '*n'
+annot_aborted_word_or_sound = '*a'
+annot_herneming = '*h'
+annot_unintelligible_word = '*x'
+annot_filled_pause = '*g'
+annots_phonematic_paraphasia = ['*F', '*f', '*Fa', '*Fo', '*Fs', '*Ft']
+annots_semantic_paraphasia = ['*S', '*s']
+annot_grammatic_error = '*gr'
+annot_discourse_particle = '*p'
+annots_dialect = ['*D', '*Dw', '*Dk']
 
 ## Constants for acoustic parameters
 f0min = 75  # for men and women
