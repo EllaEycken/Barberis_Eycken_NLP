@@ -206,6 +206,28 @@ class Lexical(object):
 
         return nb_of_words_list
 
+    def brunets_index(self):
+        """
+        Calculate Brunet's index
+        DEF: Text-length independent measure of lexical diversity. Calculated as  w^(u^−0.165)
+        where w = total number of word tokens
+        and u = total number of unique word types
+        (Parsa et al., 2021).
+        Lower values indicate richer speech (Sanborn et al., 2020).
+        :return: list of floats containing the Brunet's index
+        """
+        BI_list = []  # define a now still empty list of Brunet Indexes
+        BI_constant = float(-0.165)
+        list_of_transcripts = read_transcripts(self)
+
+        for transcript in list_of_transcripts:
+            w = TokenCounter.total_number_of_words(transcript)
+            u = TokenCounter.total_number_of_word_types(transcript)
+
+            BI = math.pow(w, math.pow(u, BI_constant)) # formula of Burnet's index (math.pow = exponentiation)
+            BI_list.append(BI)
+
+        return BI_list
 
 
 
@@ -223,4 +245,5 @@ if __name__ == "__main__":
     # Semantics.semantic_paraphasias(text_directory)
     # Phonology.phonemic_paraphasias(text_directory)
     # Phonology.neologisms(text_directory)
-    Lexical.number_of_words(text_directory)
+    # Lexical.number_of_words(text_directory)
+    Lexical.brunets_index(text_directory)

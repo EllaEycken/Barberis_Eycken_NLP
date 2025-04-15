@@ -282,17 +282,46 @@ class TokenCounter(object):
         cleaned_self_str = str(cleaned_self)  # make string out of transcript
 
         doc = nlp(cleaned_self_str)  # read transcript into nlp-doc
-        word_count = 0
+        tokens_list = list()
 
         for token in doc:
             if token.is_punct or token.is_space:  # built-in function of token class in Spacy
                 continue
+            else:
+                tokens_list.append(token)
+        nb_words = len(tokens_list)
 
-            word_count += 1
+        return nb_words
 
-        return word_count
+    def total_number_of_word_types(self):
+        """
+        Calculate total number of word types (aka unique words) in the transcript.
 
-    # def total_number_of_word_types(self):
+        :return: ALL words, including non-words, phonemic language errors, repetitions, minimal responses,
+        comments and stereotypes, in accordance with Boxum et al. (2013) and Vandenborre et al. (2018).
+        BUT excluding duplicates
+
+        Notes:
+        - excludes punctuation!
+        """
+        cleaned_self = CleanTranscript.clean_transcript_for_token_counting(
+            self)  # see helper function to clean transcripts for token counting
+        cleaned_self_str = str(cleaned_self)  # make string out of transcript
+
+        doc = nlp(cleaned_self_str)  # read transcript into nlp-doc
+        tokens_list = list()
+
+        for token in doc:
+            if token.is_punct or token.is_space:  # built-in function of token class in Spacy
+                continue
+            else:
+                tokens_list.append(str(token))  # make sure to convert the token to a string, otherwise 'set' function
+                # can't read it
+        nb_words = len(tokens_list)
+        nb_unique_words = len(set(tokens_list))  # calculate total number of types in this transcript,
+        # by allowing no duplicates: how many types per token, for all tokens
+
+        return nb_unique_words
 
 
 
