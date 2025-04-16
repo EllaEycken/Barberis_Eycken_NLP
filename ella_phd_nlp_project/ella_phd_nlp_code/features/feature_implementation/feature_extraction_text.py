@@ -310,6 +310,24 @@ def adjective_rate(
 
 
 
+def pronoun_rate(
+        file_path: str,
+):
+    """ Calculate pronoun rate
+    DEF: Total number of pronouns divided by the total number of words.
+
+    :file_path: text_directory
+    :return: pronoun rates in the transcripts
+    """
+    pronoun_rate_list = list()
+    list_of_transcripts = read_transcripts(file_path)
+
+    for transcript in list_of_transcripts:
+        pronoun_rate = POSTagger(transcript).tag_rate(tag_type = "VNW")  # "N" = for nouns
+        pronoun_rate_list.append(pronoun_rate)
+
+    return pronoun_rate_list
+
 """ GRAMMATICAL """
 
 
@@ -327,4 +345,5 @@ if __name__ == "__main__":
     # brunets_index(text_dir)
     # noun_rate(text_dir)
     # verb_rate(text_dir)
-    adjective_rate(text_dir)
+    # adjective_rate(text_dir)
+    pronoun_rate(text_dir)
