@@ -208,6 +208,9 @@ def cleanup_txt_file(txt_path_in, processed_dir):
             line = line.replace('oei', 'oei*p')
             line = line.replace('fff', 'fff*a')
 
+            ## Remove 'allee'
+            line = line.replace('allee','')
+
             ## Clean text formatting
             line = re.sub(r'\s+', ' ', line)  # Replace multiple spaces with a single space
             line = line.replace('. .', '.')  # Replace double punctuation with single

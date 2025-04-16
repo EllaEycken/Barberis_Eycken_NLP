@@ -105,7 +105,7 @@ class FixNlpPipeline:
             if token.text.lower() in {"nen", "ne", "ene"}:  # was originally tagged as noun
                 token.tag_ = "LID|onbep|stan|agr"
                 token.pos_ = "DET"
-            if token.text.lower() in {"morgens", "avonds","ochtends", "middags", "eens"}:
+            if token.text.lower() in {"morgens", "avonds","ochtends", "middags", "eens", "waarschijnlijk"}:
                 token.tag_ = "BW"
                 token.pos_ = "ADV"
             if token.text.lower() =="da":
@@ -114,7 +114,7 @@ class FixNlpPipeline:
             if token.text.lower() == 'beetje':
                 token.tag_ = "BW"
                 token.pos_ = "ADV"
-            if token.text.lower() == 's':
+            if token.text.lower() in {"s", "n"}:
                 token.tag_ = "LET"
 
         return doc
@@ -165,6 +165,7 @@ class CleanTranscript:
         - remove from transcript:
            § elements within brackets (only original utterance should be counted)
            § punctuation, *g (gevulde pauze), weird annotations/symbols
+        TODO: add function to only count repetition ONCE
         """
         text = str(self.transcript)
 
@@ -442,41 +443,8 @@ class POSTagger(object):
 
 
 
-
-"""
-- Semantics:
-    - semantic paraphasias
-- Phonology
-    - phonemic paraphasias
-    - Neologisms
-- Lexical
-    - Number of words
-    - Brunet's Index
-    - Noun Rate
-    - Verb Rate
-    - Adjective Rate
-    - Pronoun Rate
-    - Adverb Rate
-    - Determiner Rate
-    - Conjunction Rate
-    - Preposition Rate
-    - Particle Rate
-    - Content-Function Rate
-- Grammatical
-    - Mean Length of Utterance
-    - Noun-verb Rate
-    - Subordinate Clause
-    - Syntactic Deviation
-- Fluency
-    - Filled Pause
-    - False Start
-    - Word Abandoned
-    - Word Repetition"""
-
-
-
 for text in text_list:
     tagger = POSTagger(text)
-    # tagger.tag_list('N')
+    tagger.tag_list('ADJ')
     # tagger.tag_count('N')
-    tagger.tag_rate('N')
+    # tagger.tag_rate('N')
