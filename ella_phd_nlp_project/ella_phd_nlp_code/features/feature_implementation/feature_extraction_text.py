@@ -261,7 +261,33 @@ def noun_rate(
     return noun_rate_list
 
 
+def verb_rate(
+        file_path: str,
+):
+    """ Calculate verb rate
+    DEF: Total number of verbs* divided by the total number of words.
+    *main verbs (hoofdwerkwoorden)
 
+    :file_path: text_directory
+    :return: verb rates in the transcripts
+    """
+    verb_rate_list = list()
+    list_of_transcripts = read_transcripts(file_path)
+
+    for transcript in list_of_transcripts:
+        main_verb_list = list()
+        verb_list = POSTagger(transcript).tag_list(tag_type = "WW")  # "WW" = for verbs
+        for verb in verb_list:  # check for each verb whether it's a main verb (then append it to the list) or an auxilliary verb (AUX), then don't.
+            pos_verb = verb.pos_
+            if 'AUX' in str(pos_verb):
+                continue
+            else:
+                main_verb_list.append(verb)
+        main_verb_count = len(main_verb_list)
+        main_verb_rate = main_verb_count / TokenCounter(transcript).total_number_of_words()
+        verb_rate_list.append(main_verb_rate)
+
+    return verb_rate_list
 
 
 """ GRAMMATICAL """
@@ -279,4 +305,5 @@ if __name__ == "__main__":
     # neologisms(text_dir)
     # number_of_words(text_dir)
     # brunets_index(text_dir)
-    noun_rate(text_dir)
+    # noun_rate(text_dir)
+    verb_rate(text_dir)
