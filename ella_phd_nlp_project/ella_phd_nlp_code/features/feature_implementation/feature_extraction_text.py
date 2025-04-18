@@ -89,7 +89,7 @@ fixer.fix_nlp_pipeline()
 def semantic_paraphasias(
         file_path: str,
 ):
-    """ Calculate the proportion of semantic paraphasias in the transcripts in the directory (self)
+    """ Calculate the proportion of semantic paraphasias in the transcripts in the directory
     DEF: Substitution of content words for (un)related content words ​(Casilio et al., 2019)​,
     calculated as a proportion of the total number of words.
 
@@ -133,7 +133,7 @@ def semantic_paraphasias(
 def phonemic_paraphasias(
         file_path: str,
 ):
-    """Calculate the proportion of phonemic paraphasias in the transcripts in the directory (self)
+    """Calculate the proportion of phonemic paraphasias in the transcripts in the directory
     DEF: Phoneme deletion, insertion, substitution or transposition (Casilio et al., 2019; Vermeulen et al., 1989),
     calculated as a proportion of the total number of words.
 
@@ -166,7 +166,7 @@ def phonemic_paraphasias(
 def neologisms(
         file_path: str,
 ):
-    """ Calculate the proportion of neologisms in the transcripts in the directory (self)
+    """ Calculate the proportion of neologisms in the transcripts in the directory
     DEF: Nonwords, i.e., word forms that are not real words (Casilio et al., 2019),
     calculated as a proportion of the total number of words.
 
@@ -200,7 +200,7 @@ def neologisms(
 def number_of_words(
         file_path: str,
 ):
-    """ Calculate the total number of words in the transcripts in the directory (self)
+    """ Calculate the total number of words in the transcripts in the directory
     DEF: Total number of words produced, including non-words, phonemic language errors, repetitions,
     minimal responses, comments and stereotypes, in accordance with Boxum et al. (2013) and Vandenborre et al.(2018).
 
@@ -219,7 +219,7 @@ def number_of_words(
 def brunets_index(
         file_path: str,
 ):
-    """ Calculate Brunet's index
+    """ Calculate Brunet's index in the transcripts in the directory
     DEF: Text-length independent measure of lexical diversity. Calculated as  w^(u^−0.165)
     where w = total number of word tokens
     and u = total number of unique word types
@@ -246,7 +246,7 @@ def brunets_index(
 def noun_rate(
         file_path: str,
 ):
-    """ Calculate noun rate
+    """ Calculate noun rate in the transcripts in the directory
     DEF: Total number of nouns divided by the total number of words.
 
     :file_path: text_directory
@@ -264,7 +264,7 @@ def noun_rate(
 def verb_rate(
         file_path: str,
 ):
-    """ Calculate verb rate
+    """ Calculate verb rate in the transcripts in the directory
     DEF: Total number of verbs* divided by the total number of words.
     *main verbs (hoofdwerkwoorden)
 
@@ -293,7 +293,7 @@ def verb_rate(
 def adjective_rate(
         file_path: str,
 ):
-    """ Calculate adjective rate
+    """ Calculate adjective rate in the transcripts in the directory
     DEF: Total number of adjectives divided by the total number of words.
 
     :file_path: text_directory
@@ -313,7 +313,7 @@ def adjective_rate(
 def pronoun_rate(
         file_path: str,
 ):
-    """ Calculate pronoun rate
+    """ Calculate pronoun rate in the transcripts in the directory
     DEF: Total number of pronouns divided by the total number of words.
 
     :file_path: text_directory
@@ -333,7 +333,7 @@ def pronoun_rate(
 def adverb_rate(
         file_path: str,
 ):
-    """ Calculate adverb rate
+    """ Calculate adverb rate in the transcripts in the directory
     DEF: Total number of adverbs divided by the total number of words.
 
     :file_path: text_directory
@@ -353,7 +353,7 @@ def adverb_rate(
 def determiner_rate(
         file_path: str,
 ):
-    """ Calculate determiner rate
+    """ Calculate determiner rate in the transcripts in the directory
     DEF: Total number of determiners divided by the total number of words.
     DEF: determiners for Dutch includes articles (lidwoorden), numerals (telwoorden), demonstrative and possessive
     pronouns (aanwijzende en bezittelijke voornaamwoorden), and quantifiers (kwantoren).
@@ -404,7 +404,7 @@ def determiner_rate(
 def conjunction_rate(
         file_path: str,
 ):
-    """ Calculate conjunction rate
+    """ Calculate conjunction rate in the transcripts in the directory
     DEF: Total number of conjunctions divided by the total number of words.
     DEF: this includes coordinating conjunctions (nevenschikkende voegwoorden) and subordinating conjunctions
     (onderschikkende voegwoorden).
@@ -438,7 +438,7 @@ def conjunction_rate(
 def preposition_rate(
         file_path: str,
 ):
-    """ Calculate preposition rate
+    """ Calculate preposition rate in the transcripts in the directory
     DEF: Total number of prepositions divided by the total number of words.
 
     :file_path: text_directory
@@ -454,6 +454,44 @@ def preposition_rate(
 
     return preposition_rate_list
 
+
+
+def particle_rate(
+        file_path: str,
+):
+    """ Calculate the particle rate in the transcripts in the directory
+    DEF: Total number of particles* divided by the total number of words.
+    *The following tokens are seen as particles: [eigenlijk, ja, nee, toch, nou, wel, hoor, he, inderdaad, eens,
+    even, allez/allee, oei, goh, ze, se, enzo, enzovoort, zenne, enfin] + other interjections specific to the context
+    todo: is 'goeiemorgen' and 'goeiemiddag' a particle?
+
+    :file_path: text_directory
+    :return: particle rates in the transcripts
+    """
+    particle_rate_list = list()
+    list_of_transcripts = read_transcripts(file_path)
+    for transcript in list_of_transcripts:
+        cleaned_transcript = CleanTranscript(transcript).clean_transcript_for_token_counting()
+        # see helper function to clean transcripts for token counting
+        cleaned_transcript_str = str(cleaned_transcript)  # make string out of transcript
+
+        doc = nlp(cleaned_transcript_str)  # read transcript into nlp-doc
+        particle_list = list()
+
+        for token in doc:
+            if annot_discourse_particle in str(token):
+               particle_list.append(token)
+            elif token in {"eigenlijk", "ja", "nee", "toch", "nou", "wel", "hoor", "he", "inderdaad", "eens",
+                "even", "allez", "allee", "oei", "goh", "ze", "se", "enzo", "enzovoort", "zenne", "enfin"}:
+                particle_list.append(token)
+
+
+        particle_count = len(particle_list)
+        total_words = TokenCounter(transcript).total_number_of_words()
+        particle_rate = particle_count/ total_words
+        particle_rate_list.append(particle_rate)
+
+    return particle_rate_list
 
 
 
@@ -479,4 +517,5 @@ if __name__ == "__main__":
     # adverb_rate(text_dir)
     # determiner_rate(text_dir)
     # conjunction_rate(text_dir)
-    preposition_rate(text_dir)
+    # preposition_rate(text_dir)
+    particle_rate(text_dir)
