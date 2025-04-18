@@ -51,6 +51,7 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
     # MILTENBURG_MODEL_PATH,
     # NAME_AGREEMENT_PATH,
     TEXT_DIR_DUMMY, # TODO: change this if all is ready!
+    modal_lemmas,
     annot_unintelligible_word, annots_phonemic_paraphasia, annot_herneming, annots_semantic_paraphasia,
     annots_dialect, annot_neologism, annot_filled_pause, annot_grammatic_error, annot_foreign_language,
     annot_discourse_particle, annot_aborted_word_or_sound
@@ -266,7 +267,8 @@ def verb_rate(
 ):
     """ Calculate verb rate in the transcripts in the directory
     DEF: Total number of verbs* divided by the total number of words.
-    *main verbs (hoofdwerkwoorden)
+    *main verbs (hoofdwerkwoorden): excluding auxilliary and modal verbs
+    todo: if possible, append in NLP pipeline that combination of 'worden' and 'gaan' makes 'worden' an auxilliary verb
 
     :file_path: text_directory
     :return: verb rates in the transcripts
@@ -281,7 +283,9 @@ def verb_rate(
             pos_verb = verb.pos_  # verb form can be checked with the POS command (pos = universal pos tag, while tag = detailed morphological tag)
             if 'AUX' in str(pos_verb):
                 continue
-            else:  # if not AUX, it is 'VERB': then it's a main verb
+            elif verb.lemma_ in modal_lemmas and verb.pos_ in {"VERB", "AUX"}:  # modal_lemmas is from constants
+                continue
+            else:  # if not AUX, and not modal verb, it is a main 'VERB': then it's a main verb
                 main_verb_list.append(verb)
         main_verb_count = len(main_verb_list)
         main_verb_rate = main_verb_count / TokenCounter(transcript).total_number_of_words()
@@ -496,6 +500,41 @@ def particle_rate(
 
 
 """ GRAMMATICAL """
+def noun_verb_rate(
+        file_path: str,
+):
+    """ Calculate noun-verb rate in the transcripts in the directory
+    DEF: Total number of nouns divided by total number of verbs, excluding auxiliaries and modals
+
+    :file_path: text_directory
+    :return: verb rates in the transcripts
+    """
+    noun_verb_rate_list = list()
+    list_of_transcripts = read_transcripts(file_path)
+
+    for transcript in list_of_transcripts:
+        noun_list = POSTagger(transcript).tag_list(tag_type="N")  # "N" = for nouns
+        main_verb_list = list()
+        verb_list = POSTagger(transcript).tag_list(tag_type="WW")  # "WW" = for verbs
+        for verb in verb_list:  # check for each verb whether it's a main verb (then append it to the list) or an auxilliary verb (AUX), then don't.
+            pos_verb = verb.pos_  # verb form can be checked with the POS command (pos = universal pos tag, while tag = detailed morphological tag)
+            if 'AUX' in str(pos_verb):
+                continue
+            elif verb.lemma_ in modal_lemmas and verb.pos_ in {"VERB", "AUX"}:  # modal_lemmas is from constants
+                continue
+            else:  # if not AUX, and not modal verb, it is a main 'VERB': then it's a main verb
+                main_verb_list.append(verb)
+
+        noun_count = len(noun_list)
+        main_verb_count = len(main_verb_list)
+        noun_verb_rate = 0
+        if main_verb_count == 0:  # avoid dividing by 0
+            noun_verb_rate = 1
+        else:
+            noun_verb_rate = noun_count/main_verb_count
+        noun_verb_rate_list.append(noun_verb_rate)
+
+    return noun_verb_rate_list
 
 
 """ FLUENCY """
@@ -518,4 +557,5 @@ if __name__ == "__main__":
     # determiner_rate(text_dir)
     # conjunction_rate(text_dir)
     # preposition_rate(text_dir)
-    particle_rate(text_dir)
+    # particle_rate(text_dir)
+    noun_verb_rate(text_dir)

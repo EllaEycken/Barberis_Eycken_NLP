@@ -113,6 +113,7 @@ Q_FILE_MAPPINGS = {
 beletselteken_utf8 = 'â€¦'  # utf_8 encodering voor '...'
 accent_à_utf8 = 'Ã'  # utf_8 encodering voor à
 accent_é_utf8 = 'Ã©' #utf_8 encodering voor é
+modal_lemmas = {"kunnen", "moeten", "mogen", "willen", "zullen", "hoeven"}
 annot_foreign_language = '*v'
 annot_neologism = '*n'
 annot_aborted_word_or_sound = '*a'
