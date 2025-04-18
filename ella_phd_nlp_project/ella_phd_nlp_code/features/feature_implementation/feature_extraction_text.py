@@ -328,6 +328,29 @@ def pronoun_rate(
 
     return pronoun_rate_list
 
+
+
+def adverb_rate(
+        file_path: str,
+):
+    """ Calculate adverb rate
+    DEF: Total number of adverbs divided by the total number of words.
+
+    :file_path: text_directory
+    :return: adverb rates in the transcripts
+    """
+    adverb_rate_list = list()
+    list_of_transcripts = read_transcripts(file_path)
+
+    for transcript in list_of_transcripts:
+        adverb_rate = POSTagger(transcript).tag_rate(tag_type = "BW")  # "BW" = for adverbs
+        adverb_rate_list.append(adverb_rate)
+
+    return adverb_rate_list
+
+
+
+
 """ GRAMMATICAL """
 
 
@@ -346,4 +369,5 @@ if __name__ == "__main__":
     # noun_rate(text_dir)
     # verb_rate(text_dir)
     # adjective_rate(text_dir)
-    pronoun_rate(text_dir)
+    # pronoun_rate(text_dir)
+    adverb_rate(text_dir)
