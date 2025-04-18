@@ -445,6 +445,6 @@ class POSTagger(object):
 
 for text in text_list:
     tagger = POSTagger(text)
-    tagger.tag_list('BW')
+    tagger.tag_list('VZ')
     # tagger.tag_count('N')
     # tagger.tag_rate('N')

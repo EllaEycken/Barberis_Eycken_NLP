@@ -434,6 +434,29 @@ def conjunction_rate(
     return conjunction_rate_list
 
 
+
+def preposition_rate(
+        file_path: str,
+):
+    """ Calculate preposition rate
+    DEF: Total number of prepositions divided by the total number of words.
+
+    :file_path: text_directory
+    :return: preposition rates in the transcripts
+    """
+    preposition_rate_list = list()
+    list_of_transcripts = read_transcripts(file_path)
+
+    for transcript in list_of_transcripts:
+        preposition_rate = POSTagger(transcript).tag_rate(tag_type = "VZ")  # "VZ" = for prepositions (voorzetsels)
+        # Note that for universal tagging (non-Dutch specific), I could also use token.pos_ == "ADP"
+        preposition_rate_list.append(preposition_rate)
+
+    return preposition_rate_list
+
+
+
+
 """ GRAMMATICAL """
 
 
@@ -455,4 +478,5 @@ if __name__ == "__main__":
     # pronoun_rate(text_dir)
     # adverb_rate(text_dir)
     # determiner_rate(text_dir)
-    conjunction_rate(text_dir)
+    # conjunction_rate(text_dir)
+    preposition_rate(text_dir)
