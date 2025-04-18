@@ -401,7 +401,37 @@ def determiner_rate(
 
 
 
+def conjunction_rate(
+        file_path: str,
+):
+    """ Calculate conjunction rate
+    DEF: Total number of conjunctions divided by the total number of words.
+    DEF: this includes coordinating conjunctions (nevenschikkende voegwoorden) and subordinating conjunctions
+    (onderschikkende voegwoorden).
 
+    :file_path: text_directory
+    :return: conjunction rates in the transcripts
+    """
+    conjunction_rate_list = list()
+    list_of_transcripts = read_transcripts(file_path)
+
+    for transcript in list_of_transcripts:
+        cleaned_text = CleanTranscript(transcript).clean_transcript_for_tagging()  # clean the text
+        cleaned_text_str = str(cleaned_text)  # make string out of cleaned transcript
+
+        doc = nlp(cleaned_text_str)  # read transcript into nlp-doc
+        conjunctions_list = []
+
+        for token in doc:  # append all tokens with the specific tag (tag_type) to a list
+            if token.pos_ in {"CCONJ", "SCONJ"}:  # append tokens with the function of coordinating conjunctions (cconj)
+                # or subordinating conjunctions (sconj) to the list
+                conjunctions_list.append(token)
+
+        conjunction_count = len(conjunctions_list)
+        conjunction_rate = conjunction_count/TokenCounter(transcript).total_number_of_words()
+        conjunction_rate_list.append(conjunction_rate)
+
+    return conjunction_rate_list
 
 
 """ GRAMMATICAL """
@@ -424,4 +454,5 @@ if __name__ == "__main__":
     # adjective_rate(text_dir)
     # pronoun_rate(text_dir)
     # adverb_rate(text_dir)
-    determiner_rate(text_dir)
+    # determiner_rate(text_dir)
+    conjunction_rate(text_dir)
