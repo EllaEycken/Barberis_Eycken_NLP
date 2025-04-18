@@ -350,6 +350,59 @@ def adverb_rate(
 
 
 
+def determiner_rate(
+        file_path: str,
+):
+    """ Calculate determiner rate
+    DEF: Total number of determiners divided by the total number of words.
+    DEF: determiners for Dutch includes articles (lidwoorden), numerals (telwoorden), demonstrative and possessive
+    pronouns (aanwijzende en bezittelijke voornaamwoorden), and quantifiers (kwantoren).
+    Source: https://nl.wikipedia.org/wiki/Determinator_(klasse)
+    Note: here we work with POS_ (upos and xpos) as they are more specific than tag_. Moreover, for some words (pronouns)
+    the morph_function is needed to capture determiners specifically for Dutch.
+
+    :file_path: text_directory
+    :return: determiner rates in the transcripts
+    """
+    determiner_rate_list = list()
+    list_of_transcripts = read_transcripts(file_path)
+
+    for transcript in list_of_transcripts:
+        cleaned_text = CleanTranscript(transcript).clean_transcript_for_tagging()  # clean the text
+        cleaned_text_str = str(cleaned_text)  # make string out of cleaned transcript
+
+        doc = nlp(cleaned_text_str)  # read transcript into nlp-doc
+        determiner_list = []
+
+        for token in doc:  # append all tokens with the specific tag (tag_type) to a list
+            if token.pos_ == "DET":  # articles (lidwoorden), quantifiers (kwantoren)
+                # Note: 'DET' is the UPOS (universal Part of Speech), which is multilingual but
+                # doesn't grasp all determiners specifically for Dutch,
+                # namely, the UPOS tag focuses on articles (lidwoorden) en quantifiers
+                # while it doesn't tag pronouns as determiners
+                determiner_list.append(token)
+            elif token.pos_ == "PRON":  # pronouns (aanwijzende vnwen)
+                # Check morphological features for demonstrative or possessive or indicator use
+                # possessive use = possessive pronoun (bezittelijk vnw), eg 'mijn, hun'...
+                # demonstrative use = demonstrative pronoun (aanwijzend vnw), eg 'die, dat'
+                # indicator use = quantifier (kwantor), eg 'alle, elke' (wordt ook soms POS tag DET gegeven ipv pronoun)
+                if "Poss=Yes" in token.morph or "PronType=Dem" in token.morph or "PronType=Ind" in token.morph:
+                    determiner_list.append(token)
+            elif token.pos_ == "NUM":  # numerals (telwoorden)
+                # Check for cardinals or ordinals used as determiners
+                if token.dep_ == "det":
+                    determiner_list.append(token)
+
+        determiner_count = len(determiner_list)
+        determiner_rate = determiner_count/TokenCounter(transcript).total_number_of_words()
+        determiner_rate_list.append(determiner_rate)
+
+    return determiner_rate_list
+
+
+
+
+
 
 """ GRAMMATICAL """
 
@@ -370,4 +423,5 @@ if __name__ == "__main__":
     # verb_rate(text_dir)
     # adjective_rate(text_dir)
     # pronoun_rate(text_dir)
-    adverb_rate(text_dir)
+    # adverb_rate(text_dir)
+    determiner_rate(text_dir)
