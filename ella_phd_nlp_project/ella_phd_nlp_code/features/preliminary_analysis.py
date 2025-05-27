@@ -12,10 +12,10 @@ Based on scripts from masterthesisEllaLAW
 
 import glob
 import os
+import parselmouth # (is for audio part)
+import numpy as np
 
-# import parselmouth (is for audio part)
-
-from ella_phd_nlp_project.ella_phd_nlp_code.constants import TEXT_DIR_DUMMY # TODO: change to TEXT_DIR if everything is ready!
+from ella_phd_nlp_project.ella_phd_nlp_code.constants import TEXT_DIR_DUMMY, AUDIO_DIR_DUMMY # TODO: change to TEXT_DIR and AUDIO_DIR if everything is ready!
 
 
 
@@ -72,22 +72,37 @@ def read_transcripts(
 def read_sounds(
     file_path: str,
 ):
-    """Get a list of the sounds based correlating to audio-files.
+    """Get a list of the audio contents, with each element representing one sound of one task of one subject.
+    aka following the paths in the all_paths function
 
-    :param file_path: will now be the directory, NOT the join_path as you make a path during this function
-    :return:a list of sounds, with each sound correlating to an audio file
+    :param file_path: will now be the directory
+    :return:a list of sounds (format: list(sub1-Q1, sub1-Q2, sub1-Q3 etc)
     Note: these are Parselmouth sound objects
     """
     sounds_list = []
     all_paths_audio = all_paths(file_path)
+    story_list = []
     for i in all_paths_audio:
-        join_path = os.path.join(file_path, i)  # make a path of the audio_dir and each participant's folder
-        sound = parselmouth.Sound(join_path)
-        # from https://github.com/drfeinberg/PraatScripts/blob/
-        # master/Measure%20Pitch%2C%20HNR%2C%20Jitter%2C%20Shimmer%2C%20and%20Formants.ipynb
-        # = how to 'read a sound': sound = parselmouth.Sound(voiceID) # read the sound
-        # Result: something with 'Parcelmouth_file_XB003Uetc' for each file
-        sounds_list.append(sound)  # append this sound to the sounds list
+        i_splitted = i.split('_')
+        if 'story' in i_splitted :
+            story_list.append(i)
+        else:
+            join_path = os.path.join(file_path, i)  # make a path of the audio_dir and each participant's folder
+            sound = parselmouth.Sound(join_path)
+            # from https://github.com/drfeinberg/PraatScripts/blob/
+            # master/Measure%20Pitch%2C%20HNR%2C%20Jitter%2C%20Shimmer%2C%20and%20Formants.ipynb
+            # = how to 'read a sound': sound = parselmouth.Sound(voiceID) # read the sound
+            # Result: something with 'Parcelmouth_file_XB003Uetc' for each file
+            sounds_list.append(sound)  # append this sound to the sounds list
+    for item in range(0,len(story_list)-1):
+        audio_1 = story_list[item]
+        audio_2 = story_list[item+1]
+        if audio_1.split('_')[-3] == audio_2.split('_')[-3]:
+            sound_1 = parselmouth.Sound(os.path.join(file_path, story_list[item]))
+            sound_2 = parselmouth.Sound(os.path.join(file_path, story_list[item+1]))
+            combined_sound = parselmouth.Sound.concatenate([sound_1, sound_2])
+            sounds_list.append(combined_sound)
+
     return sounds_list
 
 
@@ -123,4 +138,7 @@ def get_subject_question_names_from_files(
 if __name__ == "__main__":
     # all_paths(TEXT_DIR_DUMMY)
     # read_transcripts(TEXT_DIR_DUMMY)
-    get_subject_question_names_from_files(TEXT_DIR_DUMMY)
+    # get_subject_question_names_from_files(TEXT_DIR_DUMMY)
+
+    # all_paths(AUDIO_DIR_DUMMY)
+    read_sounds(AUDIO_DIR_DUMMY)

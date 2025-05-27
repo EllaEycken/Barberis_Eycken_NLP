@@ -40,7 +40,8 @@ PRECLEANTEXT_DIR_DUMMY = os.path.join(INTERIM_DIR, 'txt_transcripts_preclean_dum
 TEXT_DIR = os.path.join(PROCESSED_DIR, 'txt_transcripts')
 TEXT_DIR_DUMMY = os.path.join(PROCESSED_DIR, 'txt_transcripts_dummy')
 
-
+AUDIO_DIR = os.path.join(RAW_DIR, 'audio')
+AUDIO_DIR_DUMMY = os.path.join(RAW_DIR, 'audio_dummy')
 
 
 ## Directory for models
