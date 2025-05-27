@@ -1,8 +1,15 @@
 """Extract linguistic features from audio-files.
 The following features are extracted:
 - Fluency
+    - Speech rate
     - Short Pause
     - Long Pause
+
+Note: Fluency measures extracted from TEXT files (see feature_extraction_text.py) include the following:
+    - Filled Pause
+    - False Start
+    - Word Abandoned
+    - Word Repetition
 
 """
 
