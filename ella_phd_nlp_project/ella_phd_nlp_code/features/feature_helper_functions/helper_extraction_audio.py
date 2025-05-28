@@ -12,13 +12,18 @@ import pandas as pd
 import spacy
 import io
 
-from ella_phd_nlp_project.ella_phd_nlp_code.constants import (  # TODO: if all is finished, switch this to AUDIO_DIR!
-    AUDIO_DIR_DUMMY,
+from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
+    AUDIO_DIR_DUMMY, # TODO: if all is finished, switch this to AUDIO_DIR!
+    f0min,
+    f0max,
     period_ceiling,
     unit,
+    minpause,
+    silencedB,
 )
 
 # TODO: add constants, other functions if necessary!
+# TODO: change minpause constant (see NLP DOCX)!!!
 
 def calculate_duration(sound: object):
     """Calculate the duration of a sound in PRAAT via Parselmouth (based on Dr Feinberg).
