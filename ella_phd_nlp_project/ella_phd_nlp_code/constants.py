@@ -46,6 +46,8 @@ DIAR_DIR = os.path.join(RAW_DIR, 'diarization')
 DIAR_DIR_DUMMY = os.path.join(RAW_DIR, 'diarization_dummy')
 CLEAN_DIAR_DIR = os.path.join(INTERIM_DIR, 'diarization_clean')
 CLEAN_DIAR_DIR_DUMMY = os.path.join(INTERIM_DIR, 'diarization_clean_dummy')
+AUDIO_PATIENT_DIR = os.path.join(PROCESSED_DIR, 'audio_patientonly')
+AUDIO_PATIENT_DIR_DUMMY = os.path.join(PROCESSED_DIR, 'audio_patientonly_dummy')
 
 
 ## Directory for models
