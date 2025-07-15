@@ -151,6 +151,8 @@ def filter_audio_file(raw_audio_path_in, diarization_dir, interim_dir, processed
         patientonly_sound = parselmouth.Sound.concatenate(extracted_segments)
         # parselmouth source code: static concatenate(sounds: List[parselmouth.Sound],
         # overlap: NonNegative[float] = 0.0)→ parselmouth.Sound
+        # TODO: smoothen this with 'call function' in PRAAT
+        # TODO: WATCH OUT: you cannot create the same file twice, should be different name
         # to smoothen the concatenation
 
         patientonly_sound.save(audio_path_out, 'WAV')
