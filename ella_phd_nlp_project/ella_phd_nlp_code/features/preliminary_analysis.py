@@ -69,6 +69,7 @@ def read_transcripts(
     return transcripts_list
 
 
+
 def read_sounds(
     file_path: str,
 ):

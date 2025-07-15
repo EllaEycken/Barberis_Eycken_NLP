@@ -42,6 +42,8 @@ TEXT_DIR_DUMMY = os.path.join(PROCESSED_DIR, 'txt_transcripts_dummy')
 
 AUDIO_DIR = os.path.join(RAW_DIR, 'audio')
 AUDIO_DIR_DUMMY = os.path.join(RAW_DIR, 'audio_dummy')
+DIAR_DIR = os.path.join(RAW_DIR, 'diarization')
+DIAR_DIR_DUMMY = os.path.join(RAW_DIR, 'diarization_dummy')
 
 
 ## Directory for models
