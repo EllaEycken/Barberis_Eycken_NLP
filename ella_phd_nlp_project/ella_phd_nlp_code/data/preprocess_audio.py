@@ -110,21 +110,24 @@ def filter_audio_file(raw_audio_path_in, diarization_dir, processed_dir, new_spk
     """
 
     ## Choose the name for the filtered audio file
-    audio_name_subparts = os.path.splitext(os.path.basename(raw_audio_path_in))[0].split('_')
+    audio_name= os.path.splitext(os.path.basename(raw_audio_path_in))[0].split('_')
     # 'os.path.splitext(os.path.basename(audio_path_in))[0]' extracts the name of the audio_path (all without the .wav
     # extension)
-    audio_correct_name = '_'.join(audio_name_subparts)
-    # make sure you only keep the 'sub-XXX' and 'NAME TASK' and join them
+    audio_new_name = str()
+    if len(audio_name) > 2:  # for those where 'story' is involved (name is then longer than 2 items: story_weekend or story_stroke
+        audio_new_name = "_".join([audio_name[0], 'patientonly', audio_name[1], audio_name[2]])
+    else:
+        audio_new_name = "_".join([audio_name[0], 'patientonly', audio_name[1]])
     audio_path_out = os.path.join(
         processed_dir, ".".join(
-            ["_".join([str(audio_correct_name), 'patientonly']),
+            [audio_new_name,
              'wav']))
 
     ## Read the original raw sound
     raw_sound = parselmouth.Sound(raw_audio_path_in)
 
     ## Read diarization info
-    original_diarization_file = ".".join([audio_correct_name,'txt'])
+    original_diarization_file = ".".join([audio_name,'txt'])
     diarization_file_path = os.path.join(diarization_dir, original_diarization_file)
     # NOT NEEDED: cleaned_diarization_file_path = cleanup_diar_txt_file(diar_txt_path_in, interim_dir)
     spk_code = give_patient_spk_code(diarization_file_path)
@@ -260,28 +263,25 @@ def preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir,
 
     ## Generate the MERGED patientonly audio files (where the story_stroke and story_weekend are merged into story)
     audio_story_list = list()
-    audio_story_stroke_list = list()
-    audio_story_weekend_list = list()
+
     for audio_patientonly_file in all_audio_patientonly_nonmerged_files_list:
         audio_name = os.path.splitext(os.path.basename(audio_patientonly_file))[0]
-        if 'story' in audio_name:
+        if 'story' in audio_name:  # do not append them to the processed dir yet, must be merged first
             audio_story_list.append(audio_name)
             continue
-        if 'story_stroke' in audio_name:
-            audio_story_stroke_list.append(audio_name)
-            continue
-        if 'story_weekend' in audio_name:
-            audio_story_weekend_list.append(audio_name)
-            continue
-        else:   # only append the file to the official
+        else:   #  append the file to the processed dir (should not be merged)
             sound = parselmouth.Sound(audio_patientonly_file)
             audio_path_out = os.path.join(
                 processed_dir, ".".join([audio_name,'wav']))
             sound.save(audio_path_out, 'WAV')
-            all_audio_patientonly_files_list.append(audio_patientonly_file)
+            all_audio_patientonly_files_list.append(audio_path_out)
 
-    for audio_story_name in audio_story_list:
+    for audio_story_name in audio_story_list:  # for all story files, merge if necessary
         audio_story_subject_number = audio_story_name.split("_")[0]
+        audio_story_name = "_".join([audio_story_subject_number, "patientonly", "narrative"])
+        audio_story_path_out = os.path.join(
+            processed_dir, ".".join([audio_story_name, 'wav']))
+
         audio_story_stroke_name = "_".join([audio_story_subject_number, "story","stroke"])
         audio_story_stroke_file_path = os.path.join(
             interim_dir, ".".join([audio_story_stroke_name, "wav"])
@@ -290,26 +290,26 @@ def preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir,
         audio_story_weekend_file_path = os.path.join(
             interim_dir, ".".join([audio_story_weekend_name, "wav"])
         )
+
         if audio_story_stroke_file_path in all_audio_patientonly_nonmerged_files_list:
             if audio_story_weekend_file_path in all_audio_patientonly_nonmerged_files_list:
-                story_sound =stroke + weekend
+                story_stroke_sound = parselmouth.Sound(audio_story_stroke_file_path)
+                story_weekend_sound = parselmouth.Sound(audio_story_weekend_file_path)
+                story_sound = parselmouth.Sound.concatenate([story_stroke_sound,story_weekend_sound],
+                                                            overlap = concatenation_overlap_time)
+                # parselmouth source code: static concatenate(sounds: List[parselmouth.Sound],
+                # overlap: NonNegative[float] = 0.0)→ parselmouth.Sound
+                # TODO: switch concatenation_overlap_time (in constants) if necessary
+                story_sound.save(audio_story_path_out, 'WAV')
+                all_audio_patientonly_files_list.append(audio_story_path_out)
+
             else:
-                story_sound = stroke
+                story_sound = parselmouth.Sound(audio_story_stroke_file_path)
+                story_sound.save(audio_story_path_out, 'WAV')
+                all_audio_patientonly_files_list.append(audio_story_path_out)
         elif audio_story_weekend_file_path in all_audio_patientonly_nonmerged_files_list:
-            story_sound = alleen weekend
-
-    for audio_story_stroke in audio_story_stroke_list:
-
-        audio_story_stroke_subject_number = audio_story_stroke.split('_')[0]
-        audio_story_stroke_path = os.path.join(interim_dir, ".".join([audio_story_stroke,'wav']))
-        sound_story_stroke = parselmouth.Sound(audio_story_stroke_path)
-        for audio_story_weekend in audio_story_weekend_list:
-            if audio_story_stroke_subject_number in audio_story_weekend:
-                audio_story_weekend_path = os.path.join(interim_dir, ".".join([audio_story_weekend, 'wav']))
-                sound_story_weekend = parselmouth.Sound(audio_story_weekend_path)
-                sound_story = parselmouth.Sound.concatenate([sound_story_stroke,sound_story_weekend],
-                                                            overlap= concatenation_overlap_time)
-
+            story_sound = parselmouth.Sound(audio_story_weekend_file_path)
+            story_sound.save(audio_story_path_out, 'WAV')
 
 
     return all_audio_patientonly_files_list
