@@ -145,3 +145,7 @@ silencedB = -25
 # 24274554_Praat_script_to_detect_syllable_nuclei_and_measure_speech_rate_automatically
 mindip = 2
 minpause = 0.25
+concatenation_overlap_time = 0.02
+# Overlap time (s) = the time by which any two adjacent sounds will come to overlap,
+        # i.e. the time during which the earlier sound fades out and the later sound fades in.
+# Source: https://www.fon.hum.uva.nl/praat/manual/Sounds__Concatenate_with_overlap___.html

@@ -10,7 +10,8 @@ import parselmouth
 import datasets  # install it first: is a package
 
 from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
-    AUDIO_DIR_DUMMY, DIAR_DIR_DUMMY, CLEAN_DIAR_DIR_DUMMY, AUDIO_PATIENT_DIR_DUMMY)  # TODO: swap for non-dummy directories once in order
+    AUDIO_DIR_DUMMY, DIAR_DIR_DUMMY, CLEAN_DIAR_DIR_DUMMY, AUDIO_PATIENT_DIR_DUMMY,
+    concatenation_overlap_time)  # TODO: swap for non-dummy directories once in order
 
 from ella_phd_nlp_project.ella_phd_nlp_code.features.preliminary_analysis import *
 from ella_phd_nlp_project.ella_phd_nlp_code.features.feature_helper_functions.helper_extraction_audio import *
@@ -112,7 +113,7 @@ def filter_audio_file(raw_audio_path_in, diarization_dir, interim_dir, processed
     # make sure you only keep the 'sub-XXX' and 'NAME TASK' and join them
     audio_path_out = os.path.join(
         processed_dir, ".".join(
-            ["_".join([str(audio_correct_name), 'patientonly']),
+            ["_".join([str(audio_correct_name), 'patientonly_3']),
              'wav']))
 
     ## Read the original raw sound
@@ -148,10 +149,11 @@ def filter_audio_file(raw_audio_path_in, diarization_dir, interim_dir, processed
 
     # Concatenate all patientonly_segments into one new sound
     if extracted_segments:
-        patientonly_sound = parselmouth.Sound.concatenate(extracted_segments)
+        # patientonly_sound = parselmouth.Sound.concatenate(extracted_segments)
+        patientonly_sound = parselmouth.Sound.concatenate(extracted_segments, overlap = concatenation_overlap_time)
         # parselmouth source code: static concatenate(sounds: List[parselmouth.Sound],
         # overlap: NonNegative[float] = 0.0)→ parselmouth.Sound
-        # TODO: smoothen this with 'call function' in PRAAT
+        # TODO: switch concatenation_overlap_time (in constants) if necessary
         # TODO: WATCH OUT: you cannot create the same file twice, should be different name
         # to smoothen the concatenation
 
@@ -164,54 +166,6 @@ def filter_audio_file(raw_audio_path_in, diarization_dir, interim_dir, processed
 
 
 
-
-
-
-
-
-
-
-
-def extract_speaker_segments(wav_path, diar_txt_path, target_speaker=0, output_path="speaker_filtered.wav"):
-    # Load the original sound
-    original_sound = parselmouth.Sound(wav_path)
-
-    # Read diarization info
-    segments = []
-    with open(diar_txt_path, 'r') as f:
-        for line in f:
-            parts = line.strip().split(',')  # Use comma delimiter
-            if len(parts) != 3:
-                continue  # Skip malformed lines
-            try:
-                start = float(parts[0])
-                end = float(parts[1])
-                speaker = int(parts[2])
-            except ValueError:
-                continue  # Skip lines with invalid data
-            if speaker == target_speaker:
-                segments.append((start, end))
-
-
-
-    # Concatenate all sample arrays along time axis
-    if extracted_samples:
-        concatenated_values = np.concatenate(extracted_samples, axis=1)  # axis=1 is time
-        new_sound = parselmouth.Sound(values=concatenated_values,
-                                      sampling_frequency=original_sound.sampling_frequency)
-        new_sound.save(output_path, 'WAV')
-        print(f"✅ Saved filtered audio to: {output_path}")
-        return output_path
-    else:
-        print("⚠️ No segments found for the target speaker.")
-        return None
-
-
-
-
-
-
-
 ## Preprocess all IANSA audio files (by filtering them)
 def preprocess_IANSA_audio(raw_dir, interim_dir, processed_dir):
     """
@@ -221,7 +175,7 @@ def preprocess_IANSA_audio(raw_dir, interim_dir, processed_dir):
     :param processed_dir: the processed directory path where the filtered audio files will be stored
     :return: the audio file in the processed directory, containing only the sounds of the speaker
     """
-
+    # TODO: deze maken, baseer op preprocess_txt EN voorzie optie als misloopt spk_code
 
 if __name__ == "__main__":
     raw_audio_path_in = os.path.join(AUDIO_DIR_DUMMY, 'sub-a043_ANTAT.wav')
