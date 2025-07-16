@@ -259,15 +259,19 @@ def preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir,
 
 
     ## Generate the MERGED patientonly audio files (where the story_stroke and story_weekend are merged into story)
+    audio_story_list = list()
     audio_story_stroke_list = list()
     audio_story_weekend_list = list()
     for audio_patientonly_file in all_audio_patientonly_nonmerged_files_list:
         audio_name = os.path.splitext(os.path.basename(audio_patientonly_file))[0]
+        if 'story' in audio_name:
+            audio_story_list.append(audio_name)
+            continue
         if 'story_stroke' in audio_name:
-            audio_story_stroke_list.append(audio_patientonly_file)
+            audio_story_stroke_list.append(audio_name)
             continue
         if 'story_weekend' in audio_name:
-            audio_story_weekend_list.append(audio_patientonly_file)
+            audio_story_weekend_list.append(audio_name)
             continue
         else:   # only append the file to the official
             sound = parselmouth.Sound(audio_patientonly_file)
@@ -276,8 +280,36 @@ def preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir,
             sound.save(audio_path_out, 'WAV')
             all_audio_patientonly_files_list.append(audio_patientonly_file)
 
+    for audio_story_name in audio_story_list:
+        audio_story_subject_number = audio_story_name.split("_")[0]
+        audio_story_stroke_name = "_".join([audio_story_subject_number, "story","stroke"])
+        audio_story_stroke_file_path = os.path.join(
+            interim_dir, ".".join([audio_story_stroke_name, "wav"])
+        )
+        audio_story_weekend_name = "_".join([audio_story_subject_number, "story","weekend"])
+        audio_story_weekend_file_path = os.path.join(
+            interim_dir, ".".join([audio_story_weekend_name, "wav"])
+        )
+        if audio_story_stroke_file_path in all_audio_patientonly_nonmerged_files_list:
+            if audio_story_weekend_file_path in all_audio_patientonly_nonmerged_files_list:
+                story_sound =stroke + weekend
+            else:
+                story_sound = stroke
+        elif audio_story_weekend_file_path in all_audio_patientonly_nonmerged_files_list:
+            story_sound = alleen weekend
+
     for audio_story_stroke in audio_story_stroke_list:
-        audio_subject_number = os.path.splitext(os.path.basename(audio_patientonly_file))[0].split('_')[0]
+
+        audio_story_stroke_subject_number = audio_story_stroke.split('_')[0]
+        audio_story_stroke_path = os.path.join(interim_dir, ".".join([audio_story_stroke,'wav']))
+        sound_story_stroke = parselmouth.Sound(audio_story_stroke_path)
+        for audio_story_weekend in audio_story_weekend_list:
+            if audio_story_stroke_subject_number in audio_story_weekend:
+                audio_story_weekend_path = os.path.join(interim_dir, ".".join([audio_story_weekend, 'wav']))
+                sound_story_weekend = parselmouth.Sound(audio_story_weekend_path)
+                sound_story = parselmouth.Sound.concatenate([sound_story_stroke,sound_story_weekend],
+                                                            overlap= concatenation_overlap_time)
+
 
 
     return all_audio_patientonly_files_list
