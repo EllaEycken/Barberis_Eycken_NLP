@@ -231,7 +231,7 @@ def preprocess_IANSA_transcripts(raw_dir,interim_dir, processed_dir):
     :param raw_dir: take the raw directory where all the raw WORD files are located
     :param interim_dir: the interim directory where all the interim PRECLEAN TEXT files will be saved
     :param processed_dir: the processed directory path where the cleaned TEXT files will be saved
-    :return: CLEANED text files in the interim directory
+    :return: a list of all the CLEANED text files in the interim directory
     """
     all_txt_files_list = list()
     all_docx_files_list = (

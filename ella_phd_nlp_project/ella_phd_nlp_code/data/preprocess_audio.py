@@ -10,13 +10,15 @@ import parselmouth
 import datasets  # install it first: is a package
 
 from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
-    AUDIO_DIR_DUMMY, DIAR_DIR_DUMMY, CLEAN_DIAR_DIR_DUMMY, AUDIO_PATIENT_DIR_DUMMY,
+    AUDIO_DIR_DUMMY, DIAR_DIR_DUMMY,  NONMERGED_AUDIO_PATIENT_DIR_DUMMY, AUDIO_PATIENT_DIR_DUMMY,
+    # CLEAN_DIAR_DIR_DUMMY,
     concatenation_overlap_time)  # TODO: swap for non-dummy directories once in order
 
 from ella_phd_nlp_project.ella_phd_nlp_code.features.preliminary_analysis import *
 from ella_phd_nlp_project.ella_phd_nlp_code.features.feature_helper_functions.helper_extraction_audio import *
 
-## Create a helper function that checks diarization_files
+## NOT USED: Create a helper function that checks diarization_files
+# IF NEEDED: add interim_folder to store cleaned diarization files
 def cleanup_diar_txt_file(diar_txt_path_in, interim_dir):
     """
     Helper function to clean up the diar txt file
@@ -58,15 +60,24 @@ def cleanup_diar_txt_file(diar_txt_path_in, interim_dir):
 
 
 ## Create a helper function that returns the binary speaker code of the patient
-def give_patient_spk_code(diar_txt_path_in_clean):
+def give_patient_spk_code(diar_txt_path_in):
     """
     Helper function to return the binary speaker code of the patient
-    :param diar_txt_path_in_clean: the CLEAN diarization.txt path (showing the indices per speaker: start, end, spk)
+    :param diar_txt_path_in: the diarization.txt path (showing the indices per speaker: start, end, spk)
     :return: the binary speaker code of the patient (0 or 1)
+
+    ASSUMPTION: assumes that the TEST ADMINISTRATOR starts speaking in the audio file. If not, then this function
+    will not work and spk_code must be inputted manually:
+    - to filter ONE audio file: add as parameters in 'filter_audio_file' function: new_spk_code (number 0 or 1 or another), overrule_spk_code = True
+    - to filter ALL audio files with some in need of manually added speaker code: add as parameter in
+    'preprocess_IANSA_audio': overrule_spk_code_list = list(tuplex, tupley), with each tuple = (audio-file name (e.g.,
+    sub-a043_ANTAT), correct speaker code)
+    Note: if diarization_files must be cleaned, then param diar_txt_path_in should be diar_txt_path_in_cleaned (as you
+    will use the cleaned diarization files)
     """
     first_line_diar_code = int()
     spk_code = int()
-    with open(diar_txt_path_in_clean, 'r') as f:
+    with open(diar_txt_path_in, 'r') as f:
         first_line = f.readline().strip()  # Read only the first line and strip whitespace
 
         # line format is: "start,end,speaker" -> we split by ','
@@ -84,25 +95,18 @@ def give_patient_spk_code(diar_txt_path_in_clean):
 
 
 
-## Helper function that makes it possible to fade in and fade out a sound so that it combines smoothly with another
-## sound if concatenated
-
-
-
-
-
 ## Filter audio file based on the diarization indices
-def filter_audio_file(raw_audio_path_in, diarization_dir, interim_dir, processed_dir, new_spk_code = 0, overrule_spk_code = False):
+def filter_audio_file(raw_audio_path_in, diarization_dir, processed_dir, new_spk_code = 0, overrule_spk_code = False):
     """
 
     :param raw_audio_path_in: the original audio (wav) file that is stored in the raw directory
     :param diarization_dir: the diarization directory path with diarization files
-    :param interim_dir: the interim directory path with cleaned diarization files
     :param processed_dir: the processed directory where the filtered audio files will be saved
     :param new_spk_code: if to overwrite spk code, this is new code
     :param overrule_spk_code: whether to overwrite spk code if it exists
     :return: a filtered audio file in the processed directory, containing only audio intervals (concatenated) attributed
     to the patient
+    (note: if diarization files must be cleaned and temporarily stored in the interim_dir, add 'interim_dir' as param here
     """
 
     ## Choose the name for the filtered audio file
@@ -113,7 +117,7 @@ def filter_audio_file(raw_audio_path_in, diarization_dir, interim_dir, processed
     # make sure you only keep the 'sub-XXX' and 'NAME TASK' and join them
     audio_path_out = os.path.join(
         processed_dir, ".".join(
-            ["_".join([str(audio_correct_name), 'patientonly_3']),
+            ["_".join([str(audio_correct_name), 'patientonly']),
              'wav']))
 
     ## Read the original raw sound
@@ -122,12 +126,13 @@ def filter_audio_file(raw_audio_path_in, diarization_dir, interim_dir, processed
     ## Read diarization info
     original_diarization_file = ".".join([audio_correct_name,'txt'])
     diarization_file_path = os.path.join(diarization_dir, original_diarization_file)
-    cleaned_diarization_file_path = cleanup_diar_txt_file(diar_txt_path_in, interim_dir)
-    spk_code = give_patient_spk_code(cleaned_diarization_file_path)
+    # NOT NEEDED: cleaned_diarization_file_path = cleanup_diar_txt_file(diar_txt_path_in, interim_dir)
+    spk_code = give_patient_spk_code(diarization_file_path)
+    # if cleaned_diar needed, then swap diarization_file_path with cleaned_diarization_file_path
     if overrule_spk_code:
         spk_code = new_spk_code
     patientonly_intervals = []
-    with open(cleaned_diarization_file_path, 'r') as f:
+    with open(diarization_file_path, 'r') as f:  # note: use cleaned_diarization_file_path if needed
         for line in f:
             parts = line.strip().split(',')  # Use comma delimiter
             if len(parts) != 3:
@@ -167,32 +172,129 @@ def filter_audio_file(raw_audio_path_in, diarization_dir, interim_dir, processed
 
 
 ## Preprocess all IANSA audio files (by filtering them)
-def preprocess_IANSA_audio(raw_dir, interim_dir, processed_dir):
+def preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir, overrule_spk_code_list = None):
     """
     Preprocessing function to filter the audio files based on the speaker diarization codes
-    :param audio_dir: the raw audio directory containing the audio (wav) files
-    :param interim_dir: the interim directory path where the (clean) diar_txt file are saved
+    :param raw_dir: the raw audio directory containing the original audio (wav) files
+    :param diarization_dir: the raw diarization directory path where the (NON-clean) diarization files are saved
+    :param interim_dir: the interim audio directory where the filtered, non-merged (for story_stroke and story_weekend)
+    audio files are stored
     :param processed_dir: the processed directory path where the filtered audio files will be stored
-    :return: the audio file in the processed directory, containing only the sounds of the speaker
+    :param overrule_spk_code_list: default None.
+    If not none, is list of TUPLES, each tuple = (audio-file NAME (e.g., sub-a043_ANTAT), correct speaker-diarization code).
+    Only to fill in if the audio file has been attributed the wrong spk-code
+    i.e., the patient has spk-code 2, or the patient began speaking in the audio file so that function give_patient_spk_code
+    is wrong (is based on assumption that patient doesn't start speaking in the file).
+
+    :return: a list of the preprocessed audio file in the processed directory, containing only the sounds of the speaker
+    Note: story_stroke and story_weekend will be MERGED into story
+    Note: if diarization files must be cleaned, add param interim_diarization_dir: the interim directory path where
+    the cleaned diarization files will be saved
     """
-    # TODO: deze maken, baseer op preprocess_txt EN voorzie optie als misloopt spk_code
+
+    ## Define the lists that have to be created
+    all_audio_patientonly_nonmerged_files_list = list()
+    all_audio_patientonly_files_list = list()
+
+    ## Get a list of all raw audio and diarization file paths
+    all_audio_files_list = (
+            glob.glob(raw_dir + f"{os.path.sep}sub-a[0-9]*")  # audio files from aphasia patients
+            #  the 'sub-a*' looks for all files starting with sub-a
+            #  [0-9] means 'any digit and doesn't matter how many digits;
+            #  * means 'doesn't matter what comes after this'
+            + glob.glob(raw_dir + f"{os.path.sep}sub-b[0-9]*")  # docx from control patients (comm partner)
+            + glob.glob(raw_dir + f"{os.path.sep}sub-c[0-9]*")  # docx from control patients (non-related)
+    )
+
+    all_diarization_files_list = (
+            glob.glob(diarization_dir + f"{os.path.sep}sub-a[0-9]*")  # audio files from aphasia patients
+            #  the 'sub-a*' looks for all files starting with sub-a
+            #  [0-9] means 'any digit and doesn't matter how many digits;
+            #  * means 'doesn't matter what comes after this'
+            + glob.glob(diarization_dir + f"{os.path.sep}sub-b[0-9]*")  # docx from control patients (comm partner)
+            + glob.glob(diarization_dir + f"{os.path.sep}sub-c[0-9]*")  # docx from control patients (non-related)
+    )
+    if len(all_audio_files_list) != len(all_diarization_files_list):
+        print("Not all audio files have a diarization file")
+
+
+    ## Create a list of audio and spk_code files when they have to overrule the give_spk_code_patient function
+    audio_file_overruling_list = list()
+    spk_code_overruling_list = list()
+    if overrule_spk_code_list:
+        for name_spk_tuple in overrule_spk_code_list:
+            audio_file_overruling = name_spk_tuple[0]
+            audio_file_overruling_list.append(audio_file_overruling)
+            spk_code_overruling = name_spk_tuple[1]
+            spk_code_overruling_list.append(spk_code_overruling)
+
+
+    ## Generate the patientonly, but non-merged audio file
+    for audio_file in all_audio_files_list:
+        audio_file_name = os.path.splitext(os.path.basename(audio_file))[0]
+        corresponding_diarization_file_path = os.path.join(
+            diarization_dir, ".".join([audio_file_name, 'txt']))
+        if corresponding_diarization_file_path not in all_diarization_files_list:
+            print(f"Not all audio files have a diarization file: {audio_file}. audio_patientonly for this file could not be generated.")
+            continue
+        else:  # if overruling applies
+            if audio_file_name in audio_file_overruling_list:
+                index_in_overruling_list = audio_file_overruling_list.index(audio_file_name)
+                audio_patientonly_file = filter_audio_file(
+                    raw_audio_path_in=audio_file,
+                    diarization_dir=diarization_dir,
+                    processed_dir=interim_dir,  # here the NONMERGED audio_patientonly files are stored
+                    new_spk_code= spk_code_overruling_list[index_in_overruling_list],
+                    overrule_spk_code=True,
+                    )
+                all_audio_patientonly_nonmerged_files_list.append(audio_patientonly_file)
+
+            else:
+                audio_patientonly_file = filter_audio_file(
+                    raw_audio_path_in = audio_file,
+                    diarization_dir = diarization_dir,
+                    processed_dir = interim_dir,  # here the NONMERGED audio_patientonly files are stored
+                    )
+                all_audio_patientonly_nonmerged_files_list.append(audio_patientonly_file)
+
+
+    ## Generate the MERGED patientonly audio files (where the story_stroke and story_weekend are merged into story)
+    audio_story_stroke_list = list()
+    audio_story_weekend_list = list()
+    for audio_patientonly_file in all_audio_patientonly_nonmerged_files_list:
+        audio_name = os.path.splitext(os.path.basename(audio_patientonly_file))[0]
+        if 'story_stroke' in audio_name:
+            audio_story_stroke_list.append(audio_patientonly_file)
+            continue
+        if 'story_weekend' in audio_name:
+            audio_story_weekend_list.append(audio_patientonly_file)
+            continue
+        else:   # only append the file to the official
+            sound = parselmouth.Sound(audio_patientonly_file)
+            audio_path_out = os.path.join(
+                processed_dir, ".".join([audio_name,'wav']))
+            sound.save(audio_path_out, 'WAV')
+            all_audio_patientonly_files_list.append(audio_patientonly_file)
+
+    for audio_story_stroke in audio_story_stroke_list:
+        audio_subject_number = os.path.splitext(os.path.basename(audio_patientonly_file))[0].split('_')[0]
+
+
+    return all_audio_patientonly_files_list
+
 
 if __name__ == "__main__":
     raw_audio_path_in = os.path.join(AUDIO_DIR_DUMMY, 'sub-a043_ANTAT.wav')
+    raw_dir = AUDIO_DIR_DUMMY
     diarization_dir = DIAR_DIR_DUMMY
+    interim_dir = NONMERGED_AUDIO_PATIENT_DIR_DUMMY
     processed_dir = AUDIO_PATIENT_DIR_DUMMY
     diar_txt_path_in = os.path.join(DIAR_DIR_DUMMY,'sub-a043_ANTAT.txt')
-    interim_dir = CLEAN_DIAR_DIR_DUMMY
-    cleanup_diar_txt_file(diar_txt_path_in, interim_dir)
-    give_patient_spk_code(diar_txt_path_in)
-    filter_audio_file(raw_audio_path_in,diarization_dir, interim_dir, processed_dir)
+    preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir, overrule_spk_code_list=None)
+    # interim_dir = CLEAN_DIAR_DIR_DUMMY
+    # cleanup_diar_txt_file(diar_txt_path_in, interim_dir)
     """
-    docx_path = os.path.join(DOCX_DIR_DUMMY,'sub-a043_transcriptie_MCA.docx')
-    interim_dir = PRECLEANTEXT_DIR_DUMMY
-    convert_docx_to_txt(docx_path, interim_dir)
-    txt_path_in = os.path.join(interim_dir, 'sub-a043_transcriptie_MCA_preclean.txt')
-    processed_dir = TEXT_DIR_DUMMY
-    cleanup_txt_file(txt_path_in, processed_dir)
+
     """
 
 
