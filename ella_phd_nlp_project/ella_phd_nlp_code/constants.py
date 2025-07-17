@@ -150,6 +150,15 @@ silencedB = -25
 # 24274554_Praat_script_to_detect_syllable_nuclei_and_measure_speech_rate_automatically
 mindip = 2
 minpause = 0.25
+minshortpause = 0.150
+# Source: Short  pauses = Number of silent regions between words that are 150-400 ms
+# (Le et al., 2018; Pakhomov et al., 2010) divided by the total number of words.
+maxshortpause = 0.400
+# Source: Short  pauses = Number of silent regions between words that are 150-400 ms
+# (Le et al., 2018; Pakhomov et al., 2010) divided by the total number of words.
+minlongpause = 0.400
+# Source: Number of silent regions between words that are > 400 ms (Le et al., 2018; Pakhomov et al., 2010)
+# divided by the total number of words.
 concatenation_overlap_time = 0.02
 # Overlap time (s) = the time by which any two adjacent sounds will come to overlap,
         # i.e. the time during which the earlier sound fades out and the later sound fades in.
