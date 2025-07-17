@@ -110,14 +110,15 @@ def filter_audio_file(raw_audio_path_in, diarization_dir, processed_dir, new_spk
     """
 
     ## Choose the name for the filtered audio file
-    audio_name= os.path.splitext(os.path.basename(raw_audio_path_in))[0].split('_')
+    audio_name= os.path.splitext(os.path.basename(raw_audio_path_in))[0]
+    audio_name_subparts = audio_name.split('_')
     # 'os.path.splitext(os.path.basename(audio_path_in))[0]' extracts the name of the audio_path (all without the .wav
     # extension)
     audio_new_name = str()
-    if len(audio_name) > 2:  # for those where 'story' is involved (name is then longer than 2 items: story_weekend or story_stroke
-        audio_new_name = "_".join([audio_name[0], 'patientonly', audio_name[1], audio_name[2]])
+    if len(audio_name_subparts) > 2:  # for those where 'story' is involved (name is then longer than 2 items: story_weekend or story_stroke
+        audio_new_name = "_".join([audio_name_subparts[0], 'patientonly', audio_name_subparts[1], audio_name_subparts[2]])
     else:
-        audio_new_name = "_".join([audio_name[0], 'patientonly', audio_name[1]])
+        audio_new_name = "_".join([audio_name_subparts[0], 'patientonly', audio_name_subparts[1]])
     audio_path_out = os.path.join(
         processed_dir, ".".join(
             [audio_new_name,
@@ -240,8 +241,8 @@ def preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir,
         if corresponding_diarization_file_path not in all_diarization_files_list:
             print(f"Not all audio files have a diarization file: {audio_file}. audio_patientonly for this file could not be generated.")
             continue
-        else:  # if overruling applies
-            if audio_file_name in audio_file_overruling_list:
+        else:
+            if audio_file_name in audio_file_overruling_list: # if overruling applies
                 index_in_overruling_list = audio_file_overruling_list.index(audio_file_name)
                 audio_patientonly_file = filter_audio_file(
                     raw_audio_path_in=audio_file,
@@ -262,13 +263,20 @@ def preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir,
 
 
     ## Generate the MERGED patientonly audio files (where the story_stroke and story_weekend are merged into story)
-    audio_story_list = list()
+    sub_story_list = list()
 
+    # Append the non-story files to the final list of patientonly_audio files in the processed_dir
     for audio_patientonly_file in all_audio_patientonly_nonmerged_files_list:
         audio_name = os.path.splitext(os.path.basename(audio_patientonly_file))[0]
+
         if 'story' in audio_name:  # do not append them to the processed dir yet, must be merged first
-            audio_story_list.append(audio_name)
-            continue
+            audio_name_subject_number = audio_name.split("_")[0]
+            if audio_name_subject_number in sub_story_list: # only append the audio_names (subject_story) ONCE to the story_list,
+                # so that merged stroke _ weekend story only happens ONCE
+                continue
+            else:
+                sub_story_list.append(audio_name_subject_number)
+
         else:   #  append the file to the processed dir (should not be merged)
             sound = parselmouth.Sound(audio_patientonly_file)
             audio_path_out = os.path.join(
@@ -276,21 +284,23 @@ def preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir,
             sound.save(audio_path_out, 'WAV')
             all_audio_patientonly_files_list.append(audio_path_out)
 
-    for audio_story_name in audio_story_list:  # for all story files, merge if necessary
-        audio_story_subject_number = audio_story_name.split("_")[0]
-        audio_story_name = "_".join([audio_story_subject_number, "patientonly", "narrative"])
+    # For the story-files, merge the 'stroke' and 'weekend' subparts if possible before appending them to the list
+    for sub in sub_story_list:
+        # define and check file paths and names
+        audio_story_name = "_".join([sub, "patientonly", "narrative"])
         audio_story_path_out = os.path.join(
             processed_dir, ".".join([audio_story_name, 'wav']))
 
-        audio_story_stroke_name = "_".join([audio_story_subject_number, "story","stroke"])
+        audio_story_stroke_name = "_".join([sub,"patientonly", "story","stroke"])
         audio_story_stroke_file_path = os.path.join(
             interim_dir, ".".join([audio_story_stroke_name, "wav"])
         )
-        audio_story_weekend_name = "_".join([audio_story_subject_number, "story","weekend"])
+        audio_story_weekend_name = "_".join([sub,"patientonly", "story","weekend"])
         audio_story_weekend_file_path = os.path.join(
             interim_dir, ".".join([audio_story_weekend_name, "wav"])
         )
-
+        # if the stroke story is in the interim dir, then merge it with the weekend story if the latter exists,
+        # otherwise set the stroke story as the only story
         if audio_story_stroke_file_path in all_audio_patientonly_nonmerged_files_list:
             if audio_story_weekend_file_path in all_audio_patientonly_nonmerged_files_list:
                 story_stroke_sound = parselmouth.Sound(audio_story_stroke_file_path)
@@ -307,21 +317,33 @@ def preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir,
                 story_sound = parselmouth.Sound(audio_story_stroke_file_path)
                 story_sound.save(audio_story_path_out, 'WAV')
                 all_audio_patientonly_files_list.append(audio_story_path_out)
+        # if the weekend story exists (and thus not the stroke story), set this one as the only story for that subject
         elif audio_story_weekend_file_path in all_audio_patientonly_nonmerged_files_list:
             story_sound = parselmouth.Sound(audio_story_weekend_file_path)
             story_sound.save(audio_story_path_out, 'WAV')
 
+     # Now perform a double check whether all story-files have been merged (then called 'narrative')
+    for audio_file in all_audio_patientonly_files_list:  # sanity check
+        if 'story' in audio_file:  # now there shouldn't be any story file left, only 'narratives'
+            print(
+                f"Some story files haven't been merged yet: {audio_file}. "
+                f"Audio_patientonly 'story' for this file has been generated but has not yet been merged with 'story_weekend' "
+                f"nor has been checked whether this file is the only 'story' part for this subject (i.e., we don't know"
+                f"whether story_weekend exists for this subject.")
+            continue
 
     return all_audio_patientonly_files_list
 
 
 if __name__ == "__main__":
-    raw_audio_path_in = os.path.join(AUDIO_DIR_DUMMY, 'sub-a043_ANTAT.wav')
+    raw_audio_path_in = os.path.join(AUDIO_DIR_DUMMY, 'sub-a043_story_stroke.wav')
     raw_dir = AUDIO_DIR_DUMMY
     diarization_dir = DIAR_DIR_DUMMY
     interim_dir = NONMERGED_AUDIO_PATIENT_DIR_DUMMY
     processed_dir = AUDIO_PATIENT_DIR_DUMMY
     diar_txt_path_in = os.path.join(DIAR_DIR_DUMMY,'sub-a043_ANTAT.txt')
+
+    # filter_audio_file(raw_audio_path_in, diarization_dir, processed_dir)
     preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir, overrule_spk_code_list=None)
     # interim_dir = CLEAN_DIAR_DIR_DUMMY
     # cleanup_diar_txt_file(diar_txt_path_in, interim_dir)
