@@ -46,11 +46,14 @@ DIAR_DIR = os.path.join(RAW_DIR, 'diarization')
 DIAR_DIR_DUMMY = os.path.join(RAW_DIR, 'diarization_dummy')
 NONMERGED_AUDIO_PATIENT_DIR = os.path.join(INTERIM_DIR, 'audio_patientonly_nonmerged')
 NONMERGED_AUDIO_PATIENT_DIR_DUMMY = os.path.join(INTERIM_DIR, 'audio_patientonly_nonmerged_dummy')
+NONMERGED_AUDIO_PATIENTU_DIR = os.path.join(INTERIM_DIR, 'audio_patientonlyU_nonmerged')
+NONMERGED_AUDIO_PATIENTU_DIR_DUMMY = os.path.join(INTERIM_DIR, 'audio_patientonlyU_nonmerged_dummy')
 # CLEAN_DIAR_DIR = os.path.join(INTERIM_DIR, 'diarization_clean')
 # CLEAN_DIAR_DIR_DUMMY = os.path.join(INTERIM_DIR, 'diarization_clean_dummy')
 AUDIO_PATIENT_DIR = os.path.join(PROCESSED_DIR, 'audio_patientonly')
 AUDIO_PATIENT_DIR_DUMMY = os.path.join(PROCESSED_DIR, 'audio_patientonly_dummy')
-
+AUDIO_PATIENTU_DIR = os.path.join(PROCESSED_DIR, 'audio_patientonlyU')
+AUDIO_PATIENTU_DIR_DUMMY = os.path.join(PROCESSED_DIR, 'audio_patientonlyU_dummy')
 
 ## Directory for models
 MODELS_DIR = os.path.join(PROJECT_DIR, '../models')

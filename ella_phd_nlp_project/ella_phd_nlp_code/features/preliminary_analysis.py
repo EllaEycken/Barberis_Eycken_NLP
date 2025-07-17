@@ -15,7 +15,8 @@ import os
 import parselmouth # (is for audio part)
 import numpy as np
 
-from ella_phd_nlp_project.ella_phd_nlp_code.constants import TEXT_DIR_DUMMY, AUDIO_DIR_DUMMY # TODO: change to TEXT_DIR and AUDIO_DIR if everything is ready!
+from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
+    TEXT_DIR_DUMMY, AUDIO_PATIENTU_DIR_DUMMY) # TODO: change to TEXT_DIR and AUDIO_DIR if everything is ready!
 
 
 
@@ -73,12 +74,42 @@ def read_transcripts(
 def read_sounds(
     file_path: str,
 ):
-    """Get a list of the audio contents, with each element representing one sound of one task of one subject.
-    aka following the paths in the all_paths function
+    """Get a list of the sounds correlating to audio-files, with each element representing one sound of one task of one subject.
 
-    :param file_path: will now be the directory
+    :param file_path: the directory where all the audio_patientonly files are located (so those that already underwent
+    diarization and concatenation of only the speech of the patient)
+    :return:a list of sounds, with each sound correlating to an audio file
+    Note: these are Parselmouth sound objects
+
+    Note: this function inputs 1 narrative task (= a merge of the two story tasks: stroke + weekend), so do not input story_stroke
+    and story_weekend separately
+    """
+    sounds_list = []
+    all_paths_audio = all_paths(file_path)
+    for i in all_paths_audio:
+        join_path = os.path.join(file_path, i)  # make a path of the audio_dir and each participant's folder
+        sound = parselmouth.Sound(join_path)
+        # from https://github.com/drfeinberg/PraatScripts/blob/
+        # master/Measure%20Pitch%2C%20HNR%2C%20Jitter%2C%20Shimmer%2C%20and%20Formants.ipynb
+        # = how to 'read a sound': sound = parselmouth.Sound(voiceID) # read the sound
+        # Result: something with 'Parcelmouth_file_XB003Uetc' for each file
+        sounds_list.append(sound)  # append this sound to the sounds list
+
+    return sounds_list
+
+
+
+def read_sounds_story(
+    file_path: str,
+):
+    """Get a list of the audio contents, with each element representing one sound of one task of one subject.
+
+    :param file_path: will  be the directory
     :return:a list of sounds (format: list(sub1-Q1, sub1-Q2, sub1-Q3 etc)
     Note: these are Parselmouth sound objects
+
+    Note: this function inputs 2 story tasks (stroke, weekend) and concatenates their content. So not applicable if the
+    story_stroke and story_weekend have already been merged beforehand.
     """
     sounds_list = []
     all_paths_audio = all_paths(file_path)
@@ -141,5 +172,5 @@ if __name__ == "__main__":
     # read_transcripts(TEXT_DIR_DUMMY)
     # get_subject_question_names_from_files(TEXT_DIR_DUMMY)
 
-    # all_paths(AUDIO_DIR_DUMMY)
-    read_sounds(AUDIO_DIR_DUMMY)
+    # all_paths(AUDIO_PATIENTU_DIR_DUMMY)
+    read_sounds(AUDIO_PATIENTU_DIR_DUMMY)

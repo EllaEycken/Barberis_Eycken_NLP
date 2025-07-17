@@ -12,6 +12,7 @@ import datasets  # install it first: is a package
 
 from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
     AUDIO_DIR_DUMMY, DIAR_DIR_DUMMY,  NONMERGED_AUDIO_PATIENT_DIR_DUMMY, AUDIO_PATIENT_DIR_DUMMY,
+    NONMERGED_AUDIO_PATIENTU_DIR_DUMMY, AUDIO_PATIENTU_DIR_DUMMY,
     # CLEAN_DIAR_DIR_DUMMY,
     concatenation_overlap_time)  # TODO: swap for non-dummy directories once in order
 
@@ -365,7 +366,7 @@ def preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim
         else:
             if audio_file_name in audio_file_overruling_list: # if overruling applies
                 index_in_overruling_list = audio_file_overruling_list.index(audio_file_name)
-                audio_patientonly_file = filter_audio_file(
+                audio_patientonly_file = filter_audio_file_uninterruptedmerged(
                     raw_audio_path_in=audio_file,
                     diarization_dir=diarization_dir,
                     processed_dir=interim_dir,  # here the NONMERGED audio_patientonly files are stored
@@ -375,7 +376,7 @@ def preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim
                 all_audio_patientonly_nonmerged_files_list.append(audio_patientonly_file)
 
             else:
-                audio_patientonly_file = filter_audio_file(
+                audio_patientonly_file = filter_audio_file_uninterruptedmerged(
                     raw_audio_path_in = audio_file,
                     diarization_dir = diarization_dir,
                     processed_dir = interim_dir,  # here the NONMERGED audio_patientonly files are stored
@@ -622,13 +623,15 @@ if __name__ == "__main__":
     raw_dir = AUDIO_DIR_DUMMY
     diarization_dir = DIAR_DIR_DUMMY
     interim_dir = NONMERGED_AUDIO_PATIENT_DIR_DUMMY
+    interim_dir_uninterrupted = NONMERGED_AUDIO_PATIENTU_DIR_DUMMY
     processed_dir = AUDIO_PATIENT_DIR_DUMMY
+    processed_dir_uninterrupted = AUDIO_PATIENTU_DIR_DUMMY
     diar_txt_path_in = os.path.join(DIAR_DIR_DUMMY,'sub-a043_ANTAT.txt')
 
-    filter_audio_file_uninterruptedmerged(raw_audio_path_in, diarization_dir, processed_dir)
+    filter_audio_file_uninterruptedmerged(raw_audio_path_in, diarization_dir, processed_dir_uninterrupted)
     # filter_audio_file(raw_audio_path_in, diarization_dir, processed_dir)
 
-    preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir, processed_dir, overrule_spk_code_list=None)
+    preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir_uninterrupted, processed_dir_uninterrupted, overrule_spk_code_list=None)
     # preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir, overrule_spk_code_list=None)
     # interim_dir = CLEAN_DIAR_DIR_DUMMY
     # cleanup_diar_txt_file(diar_txt_path_in, interim_dir)
