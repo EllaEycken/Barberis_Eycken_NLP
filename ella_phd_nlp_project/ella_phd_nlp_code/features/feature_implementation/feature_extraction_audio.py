@@ -28,21 +28,14 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import (  # TODO: if all i
     period_ceiling,
     unit,
 )
-from masterthesisellalaw.features.helper_functions.helper_functions_praat import (
+from ella_phd_nlp_project.ella_phd_nlp_code.features.feature_helper_functions.helper_extraction_audio import (
     calculate_duration,
-    calculate_durationsOfPeriodsLists,
-    calculate_meanIntensity,
-    calculate_syllNucleiFeinberg,
-    create_new_sound_only_sounding,
-    create_pitchObject,
-    create_pointProcessObject,
     create_textGridDataframe,
     create_textGridSilencesObject,
-    create_textGridVuvNoSilencesObject,
-    extract_partsOfSound,
 )
 from ella_phd_nlp_project.ella_phd_nlp_code.features.preliminary_analysis import (
     read_sounds,
+    read_transcripts,
 )
 
 """ FLUENCY """

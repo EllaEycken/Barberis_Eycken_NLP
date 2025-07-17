@@ -13,7 +13,7 @@ import spacy
 import io
 
 from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
-    AUDIO_DIR_DUMMY, # TODO: if all is finished, switch this to AUDIO_DIR!
+    AUDIO_PATIENT_DIR_DUMMY, # TODO: if all is finished, switch this to AUDIO_PATIENT_DIR!
     f0min,
     f0max,
     period_ceiling,
