@@ -697,7 +697,7 @@ def word_repetition(
         cleaned_transcript_str = str(cleaned_transcript)  # make string out of transcript
 
         doc = nlp(cleaned_transcript_str)  # read transcript into nlp-doc
-        abandoned_words_list = list()
+        word_repetition_list = list()
 
         for token in doc:
             if annot_aborted_word_or_sound in str(token):

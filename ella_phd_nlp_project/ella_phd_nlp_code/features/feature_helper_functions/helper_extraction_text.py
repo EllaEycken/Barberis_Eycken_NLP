@@ -151,6 +151,60 @@ class CleanTranscript:
         self.transcript = transcript  # this class is namely designed to act on a transcript, so the transcript must
         # be stored inside the class.
 
+    def clean_transcript_for_token_counting_rep(self):
+        """
+        Clean transcript so that tokens can be counted correctly.
+
+        :return: a transcript where tokens can be counted, including non-words, phonemic language errors, repetitions,
+        minimal responses, comments and stereotypes, in accordance with Boxum et al. (2013) and Vandenborre et al. (2018).
+
+        Note:
+        - leave in transcript:
+           § *p (particles), *a (afgebroken woord), *s and *f (paraphasias), *x and *n (unintelligible words, neologisms)
+        - remove from transcript:
+           § elements within brackets (only original utterance should be counted)
+           § punctuation, *g (gevulde pauze), weird annotations/symbols
+       - change in transcript:
+           § repetitions: make sure that a repetition is only counted ONCE. This implies that a repetition is
+           defined as 'a word/utterance that has been repeated AT LEAST ONCE'.
+           When a word is repeated consecutively multiple times, it will only be counted once. Thus, only one 're-occurrence'
+           of that word will be kept in the transcript, all extra (consecutive) re-occurrences are removed.
+           The resulting transcript should thus contain repetitions as 1 extra occurrence of the target word, and not
+           more than that.
+        """
+        text = str(self.transcript)
+
+        cleaned_text = re.sub(r'\(.*?\)', '', text)  # Remove any utterance inside brackets ()
+        # why: e.g., in semantic paraphasias, now only count paraphasia and not normalized version
+
+        doc = nlp(cleaned_text)  # read transcript into nlp-doc
+        cleaned_tokens = []
+
+        for token in doc:
+            if token.is_punct or token.is_space:  # built-in function of token class in Spacy
+                continue
+            if '*g'in str(token):  # annotation (gevulde pauze)
+                continue
+            if 'Ã' in str(token) or '©' in str(token) or 'â' in str(token) or '€' in str(token) or '¦' in str(token):  # rare characters
+                continue
+            else:
+                cleaned_tokens.append(str(token))  # this must be turned into a string to later be able to join all
+                # elements again
+
+        total_amount_of_cleaned_tokens = len(cleaned_tokens)
+        for i in range(total_amount_of_cleaned_tokens-1):
+            j = i
+            cleaned_tokens[j] = cleaned_tokens[j].lower()
+            if cleaned_tokens[j] == cleaned_tokens[j+1]:
+
+
+
+        cleaned_text = ' '.join(cleaned_tokens)  # why join these again: the *h element is seen as a string after the
+        # manipulation. It must however be seen as a token again, and Spacy then requires to read the transcript again
+        # into an NLP-readable form (you cannot 'create spacy tokens').
+
+        return cleaned_text
+
 
     def clean_transcript_for_token_counting(self):
         """
