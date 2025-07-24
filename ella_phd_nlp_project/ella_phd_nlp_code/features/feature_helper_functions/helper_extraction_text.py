@@ -151,7 +151,7 @@ class CleanTranscript:
         self.transcript = transcript  # this class is namely designed to act on a transcript, so the transcript must
         # be stored inside the class.
 
-    def clean_transcript_for_token_counting_rep(self):
+    def clean_transcript_for_token_counting(self):
         """
         Clean transcript so that tokens can be counted correctly.
 
@@ -195,11 +195,13 @@ class CleanTranscript:
 
         # Change repetitions: Remove extra consecutive repetitions, keep max 2
         limited_repetitions_cleaned_tokens = []
+        repeated_tokens = []  # just a list to see the repetitions when debugging
         prev_token = None
         repeat_count = 0
 
         for token in cleaned_tokens:
             if token == prev_token:
+                repeated_tokens.append(token)
                 repeat_count += 1
                 if repeat_count < 2:  # Only allow up to 1 repetition (i.e., total of 2 occurrences)
                     limited_repetitions_cleaned_tokens.append(token)
@@ -217,45 +219,6 @@ class CleanTranscript:
         return cleaned_text
 
 
-    def clean_transcript_for_token_counting(self):
-        """
-        Clean transcript so that tokens can be counted correctly.
-
-        :return: a transcript where tokens can be counted, including non-words, phonemic language errors, repetitions,
-        minimal responses, comments and stereotypes, in accordance with Boxum et al. (2013) and Vandenborre et al. (2018).
-
-        Note:
-        - leave in transcript:
-           § *p (particles), *a (afgebroken woord), *s and *f (paraphasias), *x and *n (unintelligible words, neologisms)
-        - remove from transcript:
-           § elements within brackets (only original utterance should be counted)
-           § punctuation, *g (gevulde pauze), weird annotations/symbols
-        TODO: add function to only count repetition ONCE
-        """
-        text = str(self.transcript)
-
-        cleaned_text = re.sub(r'\(.*?\)', '', text)  # Remove any utterance inside brackets ()
-        # why: e.g., in semantic paraphasias, now only count paraphasia and not normalized version
-
-        doc = nlp(cleaned_text)  # read transcript into nlp-doc
-        cleaned_tokens = []
-
-        for token in doc:
-            if token.is_punct or token.is_space:  # built-in function of token class in Spacy
-                continue
-            if '*g'in str(token):  # annotation (gevulde pauze)
-                continue
-            if 'Ã' in str(token) or '©' in str(token) or 'â' in str(token) or '€' in str(token) or '¦' in str(token):  # rare characters
-                continue
-            else:
-                cleaned_tokens.append(str(token))  # this must be turned into a string to later be able to join all
-                # elements again
-        cleaned_text = ' '.join(cleaned_tokens)  # why join these again: the *h element is seen as a string after the
-        # manipulation. It must however be seen as a token again, and Spacy then requires to read the transcript again
-        # into an NLP-readable form (you cannot 'create spacy tokens').
-
-        return cleaned_text
-
 
     def clean_transcript_for_tagging(self):
         """
@@ -272,7 +235,13 @@ class CleanTranscript:
             § 'yyy' (unintelligible normalized words)
             § Parts within 'hernemingen' that are 'untaggable': only keep the correct part of the herneming (only keep the
              'correct' word 'yyy' from the 'herneming' (xxx-yyy*h) (e.g., ge-geschoten*h)
-
+        - change in transcript:
+            § repetitions: make sure that a repetition is only counted ONCE. This implies that a repetition is
+            defined as 'a word/utterance that has been repeated AT LEAST ONCE'.
+            When a word is repeated consecutively multiple times, it will only be counted once. Thus, only one 're-occurrence'
+            of that word will be kept in the transcript, all extra (consecutive) re-occurrences are removed.
+            The resulting transcript should thus contain repetitions as 1 extra occurrence of the target word, and not
+            more than that.
         """
         text = str(self.transcript)
         doc = nlp(text)  # read transcript into nlp-doc
@@ -301,7 +270,26 @@ class CleanTranscript:
             else:
                 cleaned_tokens.append(str(token))  # this must be turned into a string to later be able to join all
                 # elements again
-        cleaned_text = ' '.join(cleaned_tokens)  # why join these again: the *h element is seen as a string after the
+
+        # Change repetitions: Remove extra consecutive repetitions, keep max 2
+        limited_repetitions_cleaned_tokens = []
+        repeated_tokens = []  # just a list to see the repetitions when debugging
+        prev_token = None
+        repeat_count = 0
+
+        for token in cleaned_tokens:
+            if token == prev_token:
+                repeated_tokens.append(token)
+                repeat_count += 1
+                if repeat_count < 2:  # Only allow up to 1 repetition (i.e., total of 2 occurrences)
+                    limited_repetitions_cleaned_tokens.append(token)
+            else:
+                repeat_count = 0
+                limited_repetitions_cleaned_tokens.append(token)
+                prev_token = token
+
+        cleaned_text = ' '.join(limited_repetitions_cleaned_tokens)
+        # why join these again: the *h element is seen as a string after the
         # manipulation. It must however be seen as a token again, and Spacy then requires to read the transcript again
         # into an NLP-readable form (you cannot 'create spacy tokens').
 
@@ -504,12 +492,9 @@ class POSTagger(object):
 
 
 
-
-
-
-
 for text in text_list:
-    tagger = POSTagger(text)
-    tagger.tag_list('VZ')
+    # tagger = POSTagger(text)
+    # tagger.tag_list('VZ')
     # tagger.tag_count('N')
     # tagger.tag_rate('N')
+    CleanTranscript(text).clean_transcript_for_token_counting()
