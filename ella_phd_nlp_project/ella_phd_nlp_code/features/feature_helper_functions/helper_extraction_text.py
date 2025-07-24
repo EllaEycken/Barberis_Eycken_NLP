@@ -165,7 +165,8 @@ class CleanTranscript:
            § elements within brackets (only original utterance should be counted)
            § punctuation, *g (gevulde pauze), weird annotations/symbols
        - change in transcript:
-           § repetitions: make sure that a repetition is only counted ONCE. This implies that a repetition is
+           § repetitions: consecutive repetitions of a word are reduced to a maximum of two occurrences.
+           Aka make sure that a repetition is only counted ONCE. This implies that a repetition is
            defined as 'a word/utterance that has been repeated AT LEAST ONCE'.
            When a word is repeated consecutively multiple times, it will only be counted once. Thus, only one 're-occurrence'
            of that word will be kept in the transcript, all extra (consecutive) re-occurrences are removed.

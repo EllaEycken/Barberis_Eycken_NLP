@@ -679,6 +679,9 @@ def word_repetition(
     """ Calculate the proportion of word repetitions in the transcripts in the directory
     DEF: Repetition of a previously used word, calculated as a proportion of the total number of words.
 
+    Note: in the helper.py, the cleanup_transcript functions handle repetitions in that way that consecutive repetitions
+    of a word are reduced to a maximum of two occurrences. As such, repetitions are not 'overcounted'.
+
     :file_path: text_directory
     :return: proportion of word repetitions in the transcripts
     """
@@ -698,19 +701,29 @@ def word_repetition(
 
         doc = nlp(cleaned_transcript_str)  # read transcript into nlp-doc
         word_repetition_list = list()
+        prev_token = None
+        repeat_count = 0
 
         for token in doc:
-            if annot_aborted_word_or_sound in str(token):
-                abandoned_words_list.append(token)
-            # note: idem note as in filled_pauses() function
+            if token == prev_token:
+                repeat_count += 1
+                if repeat_count < 2:
+                    # Only allow up to 1 repetition (i.e., total of 2 occurrences) to be included in the
+                    # word_repetition_list. Normally this is already handled in the helper cleanup file (namely
+                    # to only allow for max 2 occurrences (1 target word + 1 repetition) of a word to be counted as
+                    # a repetition), but this serves as an extra check.
+                    word_repetition_list.append(token)
+            else:
+                repeat_count = 0
+                prev_token = token
 
-        total_abandoned_words = len(abandoned_words_list)
+        total_word_repetitions = len(word_repetition_list)
         total_words = TokenCounter(transcript).total_number_of_words()
         # idem as above regarding the clean_transcripts function
-        prop_word_abandoned = float(total_abandoned_words) / total_words
-        prop_word_abandoned_list.append(prop_word_abandoned)
+        prop_word_repetitions = float(total_word_repetitions) / total_words
+        prop_word_repetitions_list.append(prop_word_repetitions)
 
-    return prop_word_abandoned_list
+    return prop_word_repetitions_list
 
 
 
@@ -734,3 +747,4 @@ if __name__ == "__main__":
     # filled_pauses(text_dir)
     # false_starts(text_dir)
     # word_abandoned(text_dir)
+    word_repetition(text_dir)
