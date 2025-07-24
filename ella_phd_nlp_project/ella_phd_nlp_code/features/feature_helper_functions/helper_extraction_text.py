@@ -180,6 +180,7 @@ class CleanTranscript:
         doc = nlp(cleaned_text)  # read transcript into nlp-doc
         cleaned_tokens = []
 
+        # Clean transcript
         for token in doc:
             if token.is_punct or token.is_space:  # built-in function of token class in Spacy
                 continue
@@ -191,15 +192,25 @@ class CleanTranscript:
                 cleaned_tokens.append(str(token))  # this must be turned into a string to later be able to join all
                 # elements again
 
-        total_amount_of_cleaned_tokens = len(cleaned_tokens)
-        for i in range(total_amount_of_cleaned_tokens-1):
-            j = i
-            cleaned_tokens[j] = cleaned_tokens[j].lower()
-            if cleaned_tokens[j] == cleaned_tokens[j+1]:
+
+        # Change repetitions: Remove extra consecutive repetitions, keep max 2
+        limited_repetitions_cleaned_tokens = []
+        prev_token = None
+        repeat_count = 0
+
+        for token in cleaned_tokens:
+            if token == prev_token:
+                repeat_count += 1
+                if repeat_count < 2:  # Only allow up to 1 repetition (i.e., total of 2 occurrences)
+                    limited_repetitions_cleaned_tokens.append(token)
+            else:
+                repeat_count = 0
+                limited_repetitions_cleaned_tokens.append(token)
+                prev_token = token
 
 
-
-        cleaned_text = ' '.join(cleaned_tokens)  # why join these again: the *h element is seen as a string after the
+        cleaned_text = ' '.join(limited_repetitions_cleaned_tokens)
+        # why join these again: the *h element is seen as a string after the
         # manipulation. It must however be seen as a token again, and Spacy then requires to read the transcript again
         # into an NLP-readable form (you cannot 'create spacy tokens').
 
