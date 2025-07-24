@@ -126,12 +126,12 @@ beletselteken_utf8 = 'â€¦'  # utf_8 encodering voor '...'
 accent_à_utf8 = 'Ã'  # utf_8 encodering voor à
 accent_é_utf8 = 'Ã©' #utf_8 encodering voor é
 modal_lemmas = {"kunnen", "moeten", "mogen", "willen", "zullen", "hoeven"}
-annot_foreign_language = '*v'
+annot_foreign_language = '*v'  # v = vreemde taal (Dutch)
 annot_neologism = '*n'
 annot_aborted_word_or_sound = '*a'
-annot_herneming = '*h'
+annot_false_start = '*h'  # h = herneming (Dutch)
 annot_unintelligible_word = '*x'
-annot_filled_pause = '*g'
+annot_filled_pause = '*g' # g = gevulde pauze (Dutch)
 annots_phonemic_paraphasia = ['*F', '*f', '*Fa', '*Fo', '*Fs', '*Ft']
 annots_semantic_paraphasia = ['*S', '*s']
 annot_grammatic_error = '*gr'

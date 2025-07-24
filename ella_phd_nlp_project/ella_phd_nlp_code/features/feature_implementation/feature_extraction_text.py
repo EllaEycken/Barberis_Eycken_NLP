@@ -52,7 +52,7 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
     # NAME_AGREEMENT_PATH,
     TEXT_DIR_DUMMY, # TODO: change this if all is ready!
     modal_lemmas,
-    annot_unintelligible_word, annots_phonemic_paraphasia, annot_herneming, annots_semantic_paraphasia,
+    annot_unintelligible_word, annots_phonemic_paraphasia, annot_false_start, annots_semantic_paraphasia,
     annots_dialect, annot_neologism, annot_filled_pause, annot_grammatic_error, annot_foreign_language,
     annot_discourse_particle, annot_aborted_word_or_sound
 )
@@ -538,7 +538,179 @@ def noun_verb_rate(
 
 
 """ FLUENCY """
+def filled_pauses(
+        file_path: str,
+):
+    """ Calculate the proportion of filled pauses in the transcripts in the directory
+    DEF: Filler words (e.g., ‘uh’) calculated as a proportion of the total number of words.
 
+    :file_path: text_directory
+    :return: proportion of filled pauses in the transcripts
+    """
+    prop_filled_pauses_list = list()
+    list_of_transcripts = read_transcripts(file_path)
+    for transcript in list_of_transcripts:
+        cleaned_transcript = CleanTranscript(transcript).clean_transcript_for_token_counting()
+        # see helper function to clean transcripts for token counting
+        # Note: Why CleanTranscript.clean_transcript_for_token_counting(my_text) doesn't work:
+        # clean_transcript_for_token_counting is an instance method,
+        # meaning it expects to be called on an object (an instance of the class), not the class itself.
+        # So it will throw a TypeError, because self isn't automatically passed in that case.
+        # cleaned_transcript = CleanTranscript(transcript).clean_transcript_for_token_counting()
+        # This will make sure the function (clean_transcript_for...) will be calculated on the object (class
+        # instance) 'CleanTranscript(transcript)' and not on the class CleanTranscript itself.
+        cleaned_transcript_str = str(cleaned_transcript)  # make string out of transcript
+
+        doc = nlp(cleaned_transcript_str)  # read transcript into nlp-doc
+        filled_pauses_list = list()
+
+        for token in doc:
+            if annot_filled_pause in str(token):
+                filled_pauses_list.append(token)
+            # note: don't use 'if any(annotation in str(token) for annotation in annot_filled_pause):..." because
+            # there is only one element in annot_filled_pause, so if you apply the 'any()' function, it will split
+            # that one annotation (here '*g') into its components (here '*' and 'g') and look for occurrences of those
+            # components in each token.
+            # As a result, it will list all tokens with * and all tokens containing the letter 'g' in the filled_pauses_list,
+            # overestimating the real amount.
+
+        total_filled_pauses = len(filled_pauses_list)
+        total_words = TokenCounter(transcript).total_number_of_words()
+        # idem as above regarding the clean_transcripts function
+        prop_filled_pauses = float(total_filled_pauses) / total_words
+        prop_filled_pauses_list.append(prop_filled_pauses)
+
+    return prop_filled_pauses_list
+
+
+
+def false_starts(
+        file_path: str,
+):
+    """ Calculate the proportion of false starts in the transcripts in the directory
+    DEF: A word is temporarily interrupted, but the target word is eventually produced (e.g., ca-camera).
+    Calculated as a proportion of the total number of words.
+
+    :file_path: text_directory
+    :return: proportion of false starts in the transcripts
+    """
+    prop_false_starts_list = list()
+    list_of_transcripts = read_transcripts(file_path)
+    for transcript in list_of_transcripts:
+        cleaned_transcript = CleanTranscript(transcript).clean_transcript_for_token_counting()
+        # see helper function to clean transcripts for token counting
+        # Note: Why CleanTranscript.clean_transcript_for_token_counting(my_text) doesn't work:
+        # clean_transcript_for_token_counting is an instance method,
+        # meaning it expects to be called on an object (an instance of the class), not the class itself.
+        # So it will throw a TypeError, because self isn't automatically passed in that case.
+        # cleaned_transcript = CleanTranscript(transcript).clean_transcript_for_token_counting()
+        # This will make sure the function (clean_transcript_for...) will be calculated on the object (class
+        # instance) 'CleanTranscript(transcript)' and not on the class CleanTranscript itself.
+        cleaned_transcript_str = str(cleaned_transcript)  # make string out of transcript
+
+        doc = nlp(cleaned_transcript_str)  # read transcript into nlp-doc
+        false_starts_list = list()
+
+        for token in doc:
+            if annot_false_start in str(token):
+                false_starts_list.append(token)
+            # note: don't use 'if any(annotation in str(token) for annotation in annot_false_start):..." because
+            # there is only one element in annot_false_start, so if you apply the 'any()' function, it will split
+            # that one annotation (here '*h') into its components (here '*' and 'h') and look for occurrences of those
+            # components in each token.
+            # As a result, it will list all tokens with * and all tokens containing the letter 'g' in the false_starts_list,
+            # overestimating the real amount.
+
+        total_false_starts = len(false_starts_list)
+        total_words = TokenCounter(transcript).total_number_of_words()
+        # idem as above regarding the clean_transcripts function
+        prop_false_starts = float(total_false_starts) / total_words
+        prop_false_starts_list.append(prop_false_starts)
+
+    return prop_false_starts_list
+
+
+
+def word_abandoned(
+        file_path: str,
+):
+    """ Calculate the proportion of abandoned words in the transcripts in the directory
+    DEF: Words are abandoned after one or two phonemes; the target word is not produced.
+    Calculated as a proportion of the total number of words.
+
+    :file_path: text_directory
+    :return: proportion of abandoned words in the transcripts
+    """
+    prop_word_abandoned_list = list()
+    list_of_transcripts = read_transcripts(file_path)
+    for transcript in list_of_transcripts:
+        cleaned_transcript = CleanTranscript(transcript).clean_transcript_for_token_counting()
+        # see helper function to clean transcripts for token counting
+        # Note: Why CleanTranscript.clean_transcript_for_token_counting(my_text) doesn't work:
+        # clean_transcript_for_token_counting is an instance method,
+        # meaning it expects to be called on an object (an instance of the class), not the class itself.
+        # So it will throw a TypeError, because self isn't automatically passed in that case.
+        # cleaned_transcript = CleanTranscript(transcript).clean_transcript_for_token_counting()
+        # This will make sure the function (clean_transcript_for...) will be calculated on the object (class
+        # instance) 'CleanTranscript(transcript)' and not on the class CleanTranscript itself.
+        cleaned_transcript_str = str(cleaned_transcript)  # make string out of transcript
+
+        doc = nlp(cleaned_transcript_str)  # read transcript into nlp-doc
+        abandoned_words_list = list()
+
+        for token in doc:
+            if annot_aborted_word_or_sound in str(token):
+                abandoned_words_list.append(token)
+            # note: idem note as in filled_pauses() function
+
+        total_abandoned_words = len(abandoned_words_list)
+        total_words = TokenCounter(transcript).total_number_of_words()
+        # idem as above regarding the clean_transcripts function
+        prop_word_abandoned = float(total_abandoned_words) / total_words
+        prop_word_abandoned_list.append(prop_word_abandoned)
+
+    return prop_word_abandoned_list
+
+
+
+def word_repetition(
+        file_path: str,
+):
+    """ Calculate the proportion of word repetitions in the transcripts in the directory
+    DEF: Repetition of a previously used word, calculated as a proportion of the total number of words.
+
+    :file_path: text_directory
+    :return: proportion of word repetitions in the transcripts
+    """
+    prop_word_repetitions_list = list()
+    list_of_transcripts = read_transcripts(file_path)
+    for transcript in list_of_transcripts:
+        cleaned_transcript = CleanTranscript(transcript).clean_transcript_for_token_counting()
+        # see helper function to clean transcripts for token counting
+        # Note: Why CleanTranscript.clean_transcript_for_token_counting(my_text) doesn't work:
+        # clean_transcript_for_token_counting is an instance method,
+        # meaning it expects to be called on an object (an instance of the class), not the class itself.
+        # So it will throw a TypeError, because self isn't automatically passed in that case.
+        # cleaned_transcript = CleanTranscript(transcript).clean_transcript_for_token_counting()
+        # This will make sure the function (clean_transcript_for...) will be calculated on the object (class
+        # instance) 'CleanTranscript(transcript)' and not on the class CleanTranscript itself.
+        cleaned_transcript_str = str(cleaned_transcript)  # make string out of transcript
+
+        doc = nlp(cleaned_transcript_str)  # read transcript into nlp-doc
+        abandoned_words_list = list()
+
+        for token in doc:
+            if annot_aborted_word_or_sound in str(token):
+                abandoned_words_list.append(token)
+            # note: idem note as in filled_pauses() function
+
+        total_abandoned_words = len(abandoned_words_list)
+        total_words = TokenCounter(transcript).total_number_of_words()
+        # idem as above regarding the clean_transcripts function
+        prop_word_abandoned = float(total_abandoned_words) / total_words
+        prop_word_abandoned_list.append(prop_word_abandoned)
+
+    return prop_word_abandoned_list
 
 
 
@@ -558,4 +730,7 @@ if __name__ == "__main__":
     # conjunction_rate(text_dir)
     # preposition_rate(text_dir)
     # particle_rate(text_dir)
-    noun_verb_rate(text_dir)
+    # noun_verb_rate(text_dir)
+    # filled_pauses(text_dir)
+    # false_starts(text_dir)
+    # word_abandoned(text_dir)
