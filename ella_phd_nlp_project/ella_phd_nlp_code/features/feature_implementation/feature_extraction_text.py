@@ -681,6 +681,8 @@ def word_repetition(
 
     Note: in the helper.py, the cleanup_transcript functions handle repetitions in that way that consecutive repetitions
     of a word are reduced to a maximum of two occurrences. As such, repetitions are not 'overcounted'.
+    Thus, a repetition is seen as 'the observation that a target word has been repeated at least 1 time'. And it is
+    this observation alone that is counted, not the amount of repetitions itself.
 
     :file_path: text_directory
     :return: proportion of word repetitions in the transcripts
@@ -701,21 +703,11 @@ def word_repetition(
 
         doc = nlp(cleaned_transcript_str)  # read transcript into nlp-doc
         word_repetition_list = list()
-        prev_token = None
-        repeat_count = 0
 
         for token in doc:
-            if token == prev_token:
-                repeat_count += 1
-                if repeat_count < 2:
-                    # Only allow up to 1 repetition (i.e., total of 2 occurrences) to be included in the
-                    # word_repetition_list. Normally this is already handled in the helper cleanup file (namely
-                    # to only allow for max 2 occurrences (1 target word + 1 repetition) of a word to be counted as
-                    # a repetition), but this serves as an extra check.
-                    word_repetition_list.append(token)
-            else:
-                repeat_count = 0
-                prev_token = token
+            if annot_repetition in str(token):
+                word_repetition_list.append(token)
+            # note: idem note as in filled_pauses() function
 
         total_word_repetitions = len(word_repetition_list)
         total_words = TokenCounter(transcript).total_number_of_words()
