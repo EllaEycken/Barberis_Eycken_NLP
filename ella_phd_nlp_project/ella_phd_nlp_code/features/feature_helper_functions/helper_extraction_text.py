@@ -378,6 +378,10 @@ class TokenCounter:
         for token in doc:
             if token.is_punct or token.is_space:  # built-in function of token class in Spacy
                 continue
+            if annot_repetition in str(token):  # make sure the repetition is not counted as a unique item because it
+                # has been annotated with a '*r' and thus would 'seem' different from the original target word while
+                # it is in fact not different.
+                continue
             else:
                 tokens_list.append(str(token))  # make sure to convert the token to a string, otherwise 'set' function
                 # can't read it
