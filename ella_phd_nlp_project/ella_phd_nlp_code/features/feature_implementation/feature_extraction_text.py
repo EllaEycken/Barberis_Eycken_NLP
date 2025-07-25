@@ -52,6 +52,8 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
     # NAME_AGREEMENT_PATH,
     TEXT_DIR_DUMMY, # TODO: change this if all is ready!
     modal_lemmas,
+    articles_dutch,
+    particles_dutch,
     annot_unintelligible_word, annots_phonemic_paraphasia, annot_false_start, annots_semantic_paraphasia,
     annots_dialect, annot_neologism, annot_filled_pause, annot_grammatic_error, annot_foreign_language,
     annot_discourse_particle, annot_aborted_word_or_sound
@@ -485,8 +487,7 @@ def particle_rate(
         for token in doc:
             if annot_discourse_particle in str(token):
                particle_list.append(token)
-            elif token in {"eigenlijk", "ja", "nee", "toch", "nou", "wel", "hoor", "he", "inderdaad", "eens",
-                "even", "allez", "allee", "oei", "goh", "ze", "se", "enzo", "enzovoort", "zenne", "enfin"}:
+            elif token in particles_dutch:
                 particle_list.append(token)
 
 
@@ -499,6 +500,107 @@ def particle_rate(
 
 
 
+def content_function_ratio(
+        file_path: str,
+):
+    """ Calculate content-function ratio in the transcripts in the directory
+    DEF: the total number of content words (that express semantic content) divided by total number of function words
+    (that express grammatical relationships rather than semantic content).
+    - content words include: nouns, lexical verbs (= non-auxiliary), adjectives, adverbs
+    - function words include: articles, pronouns, adpositions, conjunctions (coordinating and subordinating),
+    auxiliary verbs, particles.
+    Source: https://en.wikipedia.org/wiki/Content_word and https://en.wikipedia.org/wiki/Function_word
+    IMPLICATION: Measure of lexical proportion (Gordon, 2020).
+    - High content-function ratio is characteristic of agrammatic speech (Gordon, 2006; Saffran et al., 1989)
+    - Low content-function word ratio is characteristic of empty speech (Gordon, 2006)(Edwards, 2005).
+
+    :file_path: text_directory
+    :return: content-function rates in the transcripts
+
+    todo: in Wikipedia, function words also include interjections, expletives and pro-sentences. But seems bit odd. I left them out for now.
+    todo: is 'goeiemorgen' and 'goeiemiddag' a particle?
+    """
+    content_function_ratio_list = list()
+    list_of_transcripts = read_transcripts(file_path)
+
+    for transcript in list_of_transcripts:
+
+        ## Set empty lists
+        content_words_list = list()
+        noun_list = list()
+        lexical_verb_list = list()
+        adjective_list = list()
+        adverb_list = list()
+
+        function_words_list = list()
+        article_list = list()
+        pronoun_list = list()
+        preposition_list = list()
+        conjunction_list = list()
+        auxiliary_verb_list = list()
+        particle_list = list()
+        # interjection_list = list()  # note: token.pos_ == 'INTJ'
+        # expletive_list = list()
+        # pro_sentence_list = list()
+
+
+        ##  Make lists of the content and function words based on POS tagging
+        noun_list = POSTagger(transcript).tag_list(tag_type="N")  # "N" = for nouns
+        adjective_list = POSTagger(transcript).tag_list(tag_type = "ADJ")  # "ADJ" = for adjectives
+        adverb_list = POSTagger(transcript).tag_list(tag_type="BW")  # "BW" = for adverbs
+        preposition_list = POSTagger(transcript).tag_list(tag_type="VZ")  # "VZ" = for prepositions (voorzetsels)
+        pronoun_list = POSTagger(transcript).tag_list(tag_type="VNW")  # "N" = for nouns
+        lexical_verb_list = list()
+        auxiliary_verb_list = list()
+        verb_list = POSTagger(transcript).tag_list(tag_type="WW")  # "WW" = for verbs
+        for verb in verb_list:  # check for each verb whether it's a main verb (then append it to the main verb list) or
+            # an auxiliary verb (AUX), then append it to the auxiliary verb list
+            pos_verb = verb.pos_  # verb form can be checked with the POS command (pos = universal pos tag, while tag = detailed morphological tag)
+            if 'AUX' in str(pos_verb):
+                auxiliary_verb_list.append(verb)
+            elif verb.lemma_ in modal_lemmas and verb.pos_ in {"VERB", "AUX"}:
+                # sometimes the verb is not recognized as an auxiliary verb while it is, then look at the lemma
+                # note: modal_lemmas is from constants
+                auxiliary_verb_list.append(verb)
+            else:  # if not AUX, and not modal verb, it is a main 'VERB': then it's a main verb
+                lexical_verb_list.append(verb)
+
+
+        ##  Make lists of the content and function words based on in text- or other annotations
+        cleaned_transcript = CleanTranscript(transcript).clean_transcript_for_token_counting()
+        # see helper function to clean transcripts for token counting
+        cleaned_transcript_str = str(cleaned_transcript)  # make string out of transcript
+
+        doc = nlp(cleaned_transcript_str)  # read transcript into nlp-doc
+
+        for token in doc:
+            if annot_discourse_particle in str(token):
+                particle_list.append(token)
+            elif str(token) in particles_dutch:
+                particle_list.append(token)
+            elif token.pos_ in {"CCONJ", "SCONJ"}:  # append tokens with the function of coordinating conjunctions (cconj)
+                        # or subordinating conjunctions (sconj) to the list
+                conjunction_list.append(token)
+            elif str(token) in articles_dutch:
+                article_list.append(token)
+
+        content_words_list = noun_list + lexical_verb_list + adjective_list + adverb_list
+        function_words_list = article_list + pronoun_list + preposition_list + conjunction_list + auxiliary_verb_list + particle_list
+
+        content_word_count = len(content_words_list)
+        function_word_count = len(function_words_list)
+        if function_word_count == 0:  # avoid dividing by 0
+            content_function_ratio = 1
+        else:
+            content_function_ratio = content_word_count / function_word_count
+
+        content_function_ratio_list.append(content_function_ratio)
+
+
+    return content_function_ratio_list
+
+
+
 """ GRAMMATICAL """
 def noun_verb_rate(
         file_path: str,
@@ -507,7 +609,7 @@ def noun_verb_rate(
     DEF: Total number of nouns divided by total number of verbs, excluding auxiliaries and modals
 
     :file_path: text_directory
-    :return: verb rates in the transcripts
+    :return: noun-verb rates in the transcripts
     """
     noun_verb_rate_list = list()
     list_of_transcripts = read_transcripts(file_path)
@@ -520,7 +622,9 @@ def noun_verb_rate(
             pos_verb = verb.pos_  # verb form can be checked with the POS command (pos = universal pos tag, while tag = detailed morphological tag)
             if 'AUX' in str(pos_verb):
                 continue
-            elif verb.lemma_ in modal_lemmas and verb.pos_ in {"VERB", "AUX"}:  # modal_lemmas is from constants
+            elif verb.lemma_ in modal_lemmas and verb.pos_ in {"VERB", "AUX"}:
+                # sometimes the verb is not recognized as an auxiliary verb while it is, then look at the lemma
+                # note: modal_lemmas is from constants
                 continue
             else:  # if not AUX, and not modal verb, it is a main 'VERB': then it's a main verb
                 main_verb_list.append(verb)
@@ -735,8 +839,9 @@ if __name__ == "__main__":
     # conjunction_rate(text_dir)
     # preposition_rate(text_dir)
     # particle_rate(text_dir)
-    # noun_verb_rate(text_dir)
+    noun_verb_rate(text_dir)
     # filled_pauses(text_dir)
     # false_starts(text_dir)
     # word_abandoned(text_dir)
-    word_repetition(text_dir)
+    # word_repetition(text_dir)
+    # content_function_ratio(text_dir)

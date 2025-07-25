@@ -238,15 +238,8 @@ class CleanTranscript:
             § 'yyy' (unintelligible normalized words)
             § Parts within 'hernemingen' that are 'untaggable': only keep the correct part of the herneming (only keep the
              'correct' word 'yyy' from the 'herneming' (xxx-yyy*h) (e.g., ge-geschoten*h)
-        - change in transcript:
-           § repetitions: consecutive repetitions of a word are reduced to a maximum of two occurrences, with the second
-           occurrence annotated as '*r'.
-           Aka make sure that a repetition is only counted ONCE. This implies that a repetition is
-           defined as 'a word/utterance that has been repeated AT LEAST ONCE'.
-           When a word is repeated consecutively multiple times, it will only be counted once. Thus, only one 're-occurrence'
-           of that word will be kept in the transcript, all extra (consecutive) re-occurrences are removed.
-           The resulting transcript should thus contain repetitions as 1 extra occurrence of the target word, and not
-           more than that.
+             § Repetitions: only allow the first occurrence of the target word, otherwise risk that repetition is taken
+             into account when tagging (the *r is often misclassified)
         """
         text = str(self.transcript)
         doc = nlp(text)  # read transcript into nlp-doc
@@ -277,7 +270,7 @@ class CleanTranscript:
                 # elements again
 
         # Change repetitions: Remove extra consecutive repetitions, keep max 2
-        limited_repetitions_cleaned_tokens = []
+        no_repetitions_cleaned_tokens = []
         repeated_tokens = []  # just a list to see the repetitions when debugging
         prev_token = None
         repeat_count = 0
@@ -286,14 +279,12 @@ class CleanTranscript:
             if token == prev_token:
                 repeated_tokens.append(token)
                 repeat_count += 1
-                if repeat_count < 2:  # Only allow up to 1 repetition (i.e., total of 2 occurrences) and give it an annotation
-                    limited_repetitions_cleaned_tokens.append(''.join([str(token), annot_repetition]))
             else:
                 repeat_count = 0
-                limited_repetitions_cleaned_tokens.append(token)
+                no_repetitions_cleaned_tokens.append(token)  # allow only the first occurrence of the target word, no repetitions
                 prev_token = token
 
-        cleaned_text = ' '.join(limited_repetitions_cleaned_tokens)
+        cleaned_text = ' '.join(no_repetitions_cleaned_tokens)
         # why join these again: the *h element is seen as a string after the
         # manipulation. It must however be seen as a token again, and Spacy then requires to read the transcript again
         # into an NLP-readable form (you cannot 'create spacy tokens').

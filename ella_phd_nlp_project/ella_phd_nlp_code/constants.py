@@ -125,7 +125,12 @@ Q_FILE_MAPPINGS = {
 beletselteken_utf8 = 'â€¦'  # utf_8 encodering voor '...'
 accent_à_utf8 = 'Ã'  # utf_8 encodering voor à
 accent_é_utf8 = 'Ã©' #utf_8 encodering voor é
+
 modal_lemmas = {"kunnen", "moeten", "mogen", "willen", "zullen", "hoeven"}
+particles_dutch = {"eigenlijk", "ja", "nee", "toch", "nou", "wel", "hoor", "he", "inderdaad", "eens",
+                "even", "allez", "allee", "oei", "goh", "ze", "se", "enzo", "enzovoort", "zenne", "enfin"}
+articles_dutch = {"de", "het", "een", "ne", "nen"}  # note: "ne" and "nen" are tussentaal
+
 annot_foreign_language = '*v'  # v = vreemde taal (Dutch)
 annot_neologism = '*n'
 annot_aborted_word_or_sound = '*a'
