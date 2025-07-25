@@ -137,6 +137,7 @@ annots_semantic_paraphasia = ['*S', '*s']
 annot_grammatic_error = '*gr'
 annot_discourse_particle = '*p'
 annots_dialect = ['*D', '*Dw', '*Dk']
+annot_repetition = '*r'  # note: this annotation is ADDED in the function 'clean transcripts'
 
 ## Constants for acoustic parameters
 f0min = 75  # for men and women

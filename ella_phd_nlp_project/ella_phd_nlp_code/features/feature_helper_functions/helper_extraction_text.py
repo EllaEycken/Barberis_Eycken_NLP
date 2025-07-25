@@ -21,6 +21,7 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
     # FAMILIARITY_PATH,
     # NAME_AGREEMENT_PATH,
     TEXT_DIR_DUMMY, # TODO: change this if all is ready!
+    annot_repetition,
 )
 
 # from masterthesisellalaw.data.preprocess_norms import (
@@ -165,7 +166,8 @@ class CleanTranscript:
            § elements within brackets (only original utterance should be counted)
            § punctuation, *g (gevulde pauze), weird annotations/symbols
        - change in transcript:
-           § repetitions: consecutive repetitions of a word are reduced to a maximum of two occurrences.
+           § repetitions: consecutive repetitions of a word are reduced to a maximum of two occurrences, with the second
+           occurrence annotated as '*r'.
            Aka make sure that a repetition is only counted ONCE. This implies that a repetition is
            defined as 'a word/utterance that has been repeated AT LEAST ONCE'.
            When a word is repeated consecutively multiple times, it will only be counted once. Thus, only one 're-occurrence'
@@ -204,8 +206,8 @@ class CleanTranscript:
             if token == prev_token:
                 repeated_tokens.append(token)
                 repeat_count += 1
-                if repeat_count < 2:  # Only allow up to 1 repetition (i.e., total of 2 occurrences)
-                    limited_repetitions_cleaned_tokens.append(token)
+                if repeat_count < 2:  # Only allow up to 1 repetition (i.e., total of 2 occurrences) and give it an annotation
+                    limited_repetitions_cleaned_tokens.append(''.join([str(token),annot_repetition]))
             else:
                 repeat_count = 0
                 limited_repetitions_cleaned_tokens.append(token)
@@ -237,12 +239,14 @@ class CleanTranscript:
             § Parts within 'hernemingen' that are 'untaggable': only keep the correct part of the herneming (only keep the
              'correct' word 'yyy' from the 'herneming' (xxx-yyy*h) (e.g., ge-geschoten*h)
         - change in transcript:
-            § repetitions: make sure that a repetition is only counted ONCE. This implies that a repetition is
-            defined as 'a word/utterance that has been repeated AT LEAST ONCE'.
-            When a word is repeated consecutively multiple times, it will only be counted once. Thus, only one 're-occurrence'
-            of that word will be kept in the transcript, all extra (consecutive) re-occurrences are removed.
-            The resulting transcript should thus contain repetitions as 1 extra occurrence of the target word, and not
-            more than that.
+           § repetitions: consecutive repetitions of a word are reduced to a maximum of two occurrences, with the second
+           occurrence annotated as '*r'.
+           Aka make sure that a repetition is only counted ONCE. This implies that a repetition is
+           defined as 'a word/utterance that has been repeated AT LEAST ONCE'.
+           When a word is repeated consecutively multiple times, it will only be counted once. Thus, only one 're-occurrence'
+           of that word will be kept in the transcript, all extra (consecutive) re-occurrences are removed.
+           The resulting transcript should thus contain repetitions as 1 extra occurrence of the target word, and not
+           more than that.
         """
         text = str(self.transcript)
         doc = nlp(text)  # read transcript into nlp-doc
@@ -259,7 +263,7 @@ class CleanTranscript:
                     token):  # make sure to skip the semantic parafasias (it will count only the function of the normalized version)
                 continue
             if '*F' in str(token) or '*Fs' in str(token) or '*Fa' in str(token) or '*Fo' in str(token) or '*Ft' in str(token):
-                continue  # make sure to skip the phonematic parafasias (it will count only the function of the normalized version)
+                continue  # make sure to skip the phonematic paraphasias (it will count only the function of the normalized version)
             if '*x' in str(token) or '*n' in str(token):
                 continue  # make sure to skip unintelligible words and neologisms: you cannot know their function anyways
             if 'yyy' in str(token):
@@ -282,8 +286,8 @@ class CleanTranscript:
             if token == prev_token:
                 repeated_tokens.append(token)
                 repeat_count += 1
-                if repeat_count < 2:  # Only allow up to 1 repetition (i.e., total of 2 occurrences)
-                    limited_repetitions_cleaned_tokens.append(token)
+                if repeat_count < 2:  # Only allow up to 1 repetition (i.e., total of 2 occurrences) and give it an annotation
+                    limited_repetitions_cleaned_tokens.append(''.join([str(token), annot_repetition]))
             else:
                 repeat_count = 0
                 limited_repetitions_cleaned_tokens.append(token)
