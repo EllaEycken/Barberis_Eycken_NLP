@@ -577,50 +577,56 @@ class Utterance(object):
         utterances = []
         current = []
 
-        # Extract embedded utterances
-
+        # CRIT 4: Embedded utterances: Interjected comments within a sentence are extracted as separate utterances.
         processed = extract_embedded_utterances(text)
 
         for chunk in processed:
             doc_chunk = nlp(chunk)
-            for sent in doc_chunk.sents:
-                tokens = list(sent)
+            for sent in doc_chunk.sents:  # built-in function of Spacy to parse text in sentences
+                tokens = list(sent)  # turn one sentence into list of tokens
                 current = []
-                for token in tokens:
+
+                for token in tokens:  # go over each token in the sentence
+
+                    # CRIT 1: “And”: New utterance unless it’s part of an enumeration or combined action.
                     # Handle "and"
                     if token.text.lower() == 'and':
-                        if not is_enumeration(token):
-                            if current:
+                        if not is_enumeration(token):  # if that 'and' is not part of an enumeration
+                            if current: # AND if current is not empty,
+                                # then the current line should be added as a separate utterance
+                                # (as this 'and' initiates
+                                # a new separate utterance (which will be the next 'current')
                                 utterances.append(' '.join([t.text for t in current]))
-                                current = []
-                            continue
-                    # Handle other conjunctions
-                    elif token.pos_ == 'CCONJ' and token.text.lower() != 'and':
-                        if not is_functional_conjunction(token):
-                            if current:
-                                utterances.append(' '.join([t.text for t in current]))
-                                current = []
-                            continue
-                    current.append(token)
+                                current = []  # reset current again so that it is empty
+                            continue    # if current was empty, then do nothing yet (nl the token 'and' initiates a new sentence
+                                        # and will be later appended to current so that current can be built again)
 
-                    # If sentence ends
+                    # CRIT 2: Other conjunctions: Only separate utterances if used disfluently or non-functionally.
+                    elif token.pos_ == 'CCONJ' and token.text.lower() != 'and':
+                        if not is_functional_conjunction(token):  # if the conjunction is not functional
+                            if current:  # AND if current is not empty
+                                # then the current line should be added as a separate utterance
+                                # (as this 'non-functional conjunction' initiates
+                                # a new separate utterance (which will be the next 'current')
+                                utterances.append(' '.join([t.text for t in current]))
+                                current = []
+                            continue
+                    current.append(token)  # the token will be added to the current utterance
+
+                    # EXTRA: If sentence ends, the last utterance should be added to the list of utterances
                     if token.is_sent_end:
                         if current:
                             utterances.append(' '.join([t.text for t in current]))
                             current = []
-                if current:
+
+                if current:  # if the current sentence did not have an ending token, it should still be counted
+                    # as a utterance and thus appended to the list of utterances
                     utterances.append(' '.join([t.text for t in current]))
                     current = []
 
-        return [utt.strip() for utt in utterances if utt.strip()]
+        return [utt.strip() for utt in utterances if utt.strip()]  # if the utterance is not empty, return a list of utterances
 
-    # --- MLU Calculation ---
-    def mean_length_of_utterance(text):
-        utterances = split_into_custom_utterances(text)
-        if not utterances:
-            return 0.0
-        lengths = [len(nlp(utt)) for utt in utterances]
-        return sum(lengths) / len(lengths)
+
 
     # --- Test Example ---
     text = (

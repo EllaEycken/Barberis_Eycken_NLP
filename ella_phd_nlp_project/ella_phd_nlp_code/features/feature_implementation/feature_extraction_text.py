@@ -641,7 +641,14 @@ def noun_verb_rate(
     return noun_verb_rate_list
 
 
+def mean_length_utterance(
 
+):
+    utterances = Utterance(transcript).split_into_custom_utterances(text)
+    if not utterances:
+        return 0.0
+    lengths = [len(nlp(utt)) for utt in utterances]
+    return sum(lengths) / len(lengths)
 
 """ FLUENCY """
 def filled_pauses(
