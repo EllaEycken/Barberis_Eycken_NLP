@@ -162,9 +162,10 @@ class CleanTranscript:
         Note:
         - leave in transcript:
            § *p (particles), *a (afgebroken woord), *s and *f (paraphasias), *x and *n (unintelligible words, neologisms)
+           § punctuation and spaces: needed for MLU and sentence analysis
         - remove from transcript:
            § elements within brackets (only original utterance should be counted)
-           § punctuation, *g (gevulde pauze), weird annotations/symbols
+           § *g (gevulde pauze), weird annotations/symbols
        - change in transcript:
            § repetitions: consecutive repetitions of a word are reduced to a maximum of two occurrences, with the second
            occurrence annotated as '*r'.
@@ -185,8 +186,8 @@ class CleanTranscript:
 
         # Clean transcript
         for token in doc:
-            if token.is_punct or token.is_space:  # built-in function of token class in Spacy
-                continue
+            # if token.is_punct or token.is_space:  # built-in function of token class in Spacy
+                # continue
             if '*g'in str(token):  # annotation (gevulde pauze)
                 continue
             if 'Ã' in str(token) or '©' in str(token) or 'â' in str(token) or '€' in str(token) or '¦' in str(token):  # rare characters
@@ -329,6 +330,7 @@ class TokenCounter:
 
         Notes:
         - excludes punctuation!
+        TODO: count particles? here yes, volgens Spontaal niet!
         """
         cleaner = CleanTranscript(self.transcript)  # make instance of the class for this text
         cleaned_text = cleaner.clean_transcript_for_token_counting()  # clean the text
@@ -489,6 +491,180 @@ class POSTagger(object):
 
         return tag_rate
 
+
+""" UTTERANCE CLASS """
+""" helper functions for utterance class """
+
+
+def is_enumeration(token
+):
+    """Check if 'and' is used in an enumeration or list."""
+
+    if token.dep_ == 'cc' and token.text.lower() == 'and':
+        conj = [t for t in token.head.conjuncts if t != token.head]
+        if token.head.pos_ in {'NOUN', 'ADJ'} and conj:
+            return True
+        if token.head.pos_ == 'VERB':
+            return False
+    return False
+
+def is_functional_conjunction(token):
+    """Check if conjunction is functional (i.e., not a discourse marker)."""
+    if token.dep_ == 'cc':
+        return True
+    if token.pos_ == 'CCONJ' and token.head.pos_ == 'VERB':
+        return True
+    return False
+
+
+def extract_embedded_utterances(text):
+    """Detects embedded discourse expressions like 'I don't know', 'you know'.
+    For Dutch: "je weet wel|ge weet wel|snap je|snapt ge|ik bedoel"
+    """
+    pattern = r'(,?\s*(je weet wel|ge weet wel|snap je|snapt ge|ik bedoel)[,\.]?\s*)'
+    # builds a regex pattern to match common interjected phrases
+    splits = re.split(pattern, text)
+    # splits the text wherever this pattern occurs, preserving the interjection as a separate element.
+    utterances = []
+
+    buffer = ""
+    for seg in splits:
+        if seg.strip().lower() in {"je weet wel", "ge weet wel", "snap je", "snapt ge", "ik bedoel"}:
+            if buffer.strip():  # returns true if buffer isn't empty
+                # Only add the buffer as an utterance if it's not empty after trimming
+                utterances.append(buffer.strip())  # flush the pre-interjection part
+                buffer = ""  # reset the buffer
+            utterances.append(seg.strip()) # add interjection itself
+        else:
+            buffer += seg
+    if buffer.strip():
+        utterances.append(buffer.strip()) # flush remaining text
+    return utterances
+
+
+class Utterance(object):
+    """
+    Utterance class
+    object: a transcript
+
+    Split transcripts into utterances complying with linguistic criteria
+    1) “And”: New utterance unless it’s part of an enumeration or combined action.
+    2) Conjunctions: Only separate utterances if used disfluently or non-functionally.
+    ( 3) Direct speech: All direct speech after a colon (e.g., He said: "I don’t know.") is treated as a distinct unit.
+    Each sentence within the direct quote counts as a separate utterance.)
+    4) Embedded utterances: Interjected comments within a sentence are extracted as separate utterances
+    (e.g., parentheticals, commas with discourse phrases like "I don't know", etc.).
+
+    """
+    def __init__(self, transcript):
+        self.transcript = transcript
+        # this class is namely designed to act on a transcript, so the transcript must
+        # be stored inside the class.
+
+    def is_enumeration(self, token):
+        """Check if 'and' is used in an enumeration or list."""
+        if token.dep_ == 'cc' and token.text.lower() == 'and':
+            conj = [t for t in token.head.conjuncts if t != token.head]
+            if token.head.pos_ in {'NOUN', 'ADJ'} and conj:
+                return True
+            if token.head.pos_ == 'VERB':
+                return False
+        return False
+
+    # --- Main Utterance Splitter ---
+    def split_into_custom_utterances(self):
+        doc = nlp(self.transcript)
+        utterances = []
+        current = []
+
+        # Extract embedded utterances
+
+        processed = extract_embedded_utterances(text)
+
+        for chunk in processed:
+            doc_chunk = nlp(chunk)
+            for sent in doc_chunk.sents:
+                tokens = list(sent)
+                current = []
+                for token in tokens:
+                    # Handle "and"
+                    if token.text.lower() == 'and':
+                        if not is_enumeration(token):
+                            if current:
+                                utterances.append(' '.join([t.text for t in current]))
+                                current = []
+                            continue
+                    # Handle other conjunctions
+                    elif token.pos_ == 'CCONJ' and token.text.lower() != 'and':
+                        if not is_functional_conjunction(token):
+                            if current:
+                                utterances.append(' '.join([t.text for t in current]))
+                                current = []
+                            continue
+                    current.append(token)
+
+                    # If sentence ends
+                    if token.is_sent_end:
+                        if current:
+                            utterances.append(' '.join([t.text for t in current]))
+                            current = []
+                if current:
+                    utterances.append(' '.join([t.text for t in current]))
+                    current = []
+
+        return [utt.strip() for utt in utterances if utt.strip()]
+
+    # --- MLU Calculation ---
+    def mean_length_of_utterance(text):
+        utterances = split_into_custom_utterances(text)
+        if not utterances:
+            return 0.0
+        lengths = [len(nlp(utt)) for utt in utterances]
+        return sum(lengths) / len(lengths)
+
+    # --- Test Example ---
+    text = (
+        "The man said: I don't know. I think he's leaving. "
+        "Suddenly, I don't know when exactly, I saw the horse. "
+        "He takes the shoes and the socks and a sweater to wear. "
+        "But I was tired. And then he left."
+    )
+
+    utterances = split_into_custom_utterances(text)
+    mlu = mean_length_of_utterance(text)
+
+    print("Utterances:")
+    for i, utt in enumerate(utterances, 1):
+        print(f"{i}. {utt}")
+    print(f"\nMean Length of Utterance: {mlu:.2f}")
+
+    def total_number_of_words(self):
+        """
+        Calculate total number of words in the transcript.
+
+        :return: ALL words, including non-words, phonemic language errors, repetitions, minimal responses,
+        comments and stereotypes, in accordance with Boxum et al. (2013) and Vandenborre et al. (2018).
+
+        Notes:
+        - excludes punctuation!
+        TODO: count particles? here yes, volgens Spontaal niet!
+        """
+        cleaner = CleanTranscript(self.transcript)  # make instance of the class for this text
+        cleaned_text = cleaner.clean_transcript_for_token_counting()  # clean the text
+        # see helper function to clean transcripts for token counting
+        cleaned_text_str = str(cleaned_text)  # make string out of transcript
+
+        doc = nlp(cleaned_text_str)  # read transcript into nlp-doc
+        tokens_list = list()
+
+        for token in doc:
+            if token.is_punct or token.is_space:  # built-in function of token class in Spacy
+                continue
+            else:
+                tokens_list.append(token)
+        nb_words = len(tokens_list)
+
+        return nb_words
 
 
 

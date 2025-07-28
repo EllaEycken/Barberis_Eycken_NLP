@@ -641,6 +641,8 @@ def noun_verb_rate(
     return noun_verb_rate_list
 
 
+
+
 """ FLUENCY """
 def filled_pauses(
         file_path: str,
