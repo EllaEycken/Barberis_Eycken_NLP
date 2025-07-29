@@ -9,6 +9,7 @@ import re
 import epitran
 import nltk
 import pandas as pd
+import string
 import spacy
 from spacy.language import Language
 
@@ -186,8 +187,8 @@ class CleanTranscript:
 
         # Clean transcript
         for token in doc:
-            # if token.is_punct or token.is_space:  # built-in function of token class in Spacy
-                # continue
+            if token.is_space:  # built-in function of token class in Spacy (keep punctuation in it to allow for MLU calc)
+                continue
             if '*g'in str(token):  # annotation (gevulde pauze)
                 continue
             if 'Ã' in str(token) or '©' in str(token) or 'â' in str(token) or '€' in str(token) or '¦' in str(token):  # rare characters
@@ -622,8 +623,18 @@ class Utterance(object):
                     utterances.append(' '.join([t.text for t in current]))
                     current = []
 
-        [utt.strip() for utt in utterances if utt.strip()]  # if the utterance is not empty, return a list of utterances
-        return utterances
+        # Remove the end '.' if necessary
+        # why needed: if utterance length is counted, then '.' is counted as a word (we don't want that)
+        cleaned_utterances = []
+        for utt in utterances:
+            text = utt.strip()
+            while text and text[-1] in ".!?…":
+                text = text[:-1].rstrip()
+            if text:
+                cleaned_utterances.append(text)
+
+        # [utt.strip() for utt in utterances if utt.strip()]
+        return cleaned_utterances
 
 
 

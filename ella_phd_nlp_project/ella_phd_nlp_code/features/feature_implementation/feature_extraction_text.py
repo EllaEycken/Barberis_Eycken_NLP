@@ -644,11 +644,40 @@ def noun_verb_rate(
 def mean_length_utterance(
         file_path: str,
 ):
-    utterances = Utterance(transcript).split_into_custom_utterances(text)
-    if not utterances:
-        return 0.0
-    lengths = [len(nlp(utt)) for utt in utterances]
-    return sum(lengths) / len(lengths)
+    """ Calculate the MLU (mean length of utterance) in the transcripts in the directory
+    DEF: Average number of words per utterance, based on the guidelines provided by (Boxum et al., 2013).
+    Utterances are split using the helper function Utterance(transcript).split_into_custom_utterances():
+    Split transcripts into utterances complying with linguistic criteria
+        1) “And”: New utterance unless it’s part of an enumeration or combined action.
+        2) Conjunctions: Only separate utterances if used disfluently or non-functionally.
+        ( 3) Direct speech: All direct speech after a colon (e.g., He said: "I don’t know.") is treated as a distinct unit.
+        Each sentence within the direct quote counts as a separate utterance.)
+        4) Embedded utterances: Interjected comments within a sentence are extracted as separate utterances
+        (e.g., parentheticals, commas with discourse phrases like "I don't know", etc.).
+
+    :file_path: text_directory
+    :return: MLU in the transcripts
+    """
+    mlu_list = list()
+    list_of_transcripts = read_transcripts(file_path)
+
+    for transcript in list_of_transcripts:
+        utterances = Utterance(transcript).split_into_custom_utterances()
+        list_of_utterance_lengths = []
+        if not utterances:
+            return 0.0
+        for utt in utterances:
+            len_utterance = len(nlp(utt))
+            list_of_utterance_lengths.append(len_utterance)
+
+        sum_of_utterance_lengths = sum(list_of_utterance_lengths)
+        amount_of_utterances = len(list_of_utterance_lengths)
+        mlu = sum_of_utterance_lengths/amount_of_utterances
+
+        mlu_list.append(mlu)
+
+    return mlu_list
+
 
 """ FLUENCY """
 def filled_pauses(
@@ -848,9 +877,10 @@ if __name__ == "__main__":
     # conjunction_rate(text_dir)
     # preposition_rate(text_dir)
     # particle_rate(text_dir)
-    noun_verb_rate(text_dir)
+    # noun_verb_rate(text_dir)
     # filled_pauses(text_dir)
     # false_starts(text_dir)
     # word_abandoned(text_dir)
     # word_repetition(text_dir)
     # content_function_ratio(text_dir)
+    mean_length_utterance(text_dir)
