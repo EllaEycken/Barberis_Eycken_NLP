@@ -642,7 +642,7 @@ def noun_verb_rate(
 
 
 def mean_length_utterance(
-
+        file_path: str,
 ):
     utterances = Utterance(transcript).split_into_custom_utterances(text)
     if not utterances:

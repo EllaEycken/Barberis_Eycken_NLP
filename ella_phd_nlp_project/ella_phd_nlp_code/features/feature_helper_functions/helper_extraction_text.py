@@ -494,8 +494,6 @@ class POSTagger(object):
 
 """ UTTERANCE CLASS """
 """ helper functions for utterance class """
-
-
 def is_enumeration(token
 ):
     """Check if 'and' is used in an enumeration or list."""
@@ -520,6 +518,9 @@ def is_functional_conjunction(token):
 def extract_embedded_utterances(text):
     """Detects embedded discourse expressions like 'I don't know', 'you know'.
     For Dutch: "je weet wel|ge weet wel|snap je|snapt ge|ik bedoel"
+
+    Return: List of utterances in the transcript, with embedded utterances 'disembedded' (e.g., instead of A-B1-A-B2, it
+    gives A-B)
     """
     pattern = r'(,?\s*(je weet wel|ge weet wel|snap je|snapt ge|ik bedoel)[,\.]?\s*)'
     # builds a regex pattern to match common interjected phrases
@@ -542,6 +543,7 @@ def extract_embedded_utterances(text):
     return utterances
 
 
+""" Utterance class itself """
 class Utterance(object):
     """
     Utterance class
@@ -561,24 +563,20 @@ class Utterance(object):
         # this class is namely designed to act on a transcript, so the transcript must
         # be stored inside the class.
 
-    def is_enumeration(self, token):
-        """Check if 'and' is used in an enumeration or list."""
-        if token.dep_ == 'cc' and token.text.lower() == 'and':
-            conj = [t for t in token.head.conjuncts if t != token.head]
-            if token.head.pos_ in {'NOUN', 'ADJ'} and conj:
-                return True
-            if token.head.pos_ == 'VERB':
-                return False
-        return False
 
     # --- Main Utterance Splitter ---
     def split_into_custom_utterances(self):
-        doc = nlp(self.transcript)
+        cleaned_transcript = CleanTranscript(self.transcript).clean_transcript_for_token_counting()
+        # see helper function to clean transcripts for token counting
+        cleaned_transcript_str = str(cleaned_transcript)  # make string out of transcript
+
         utterances = []
         current = []
 
         # CRIT 4: Embedded utterances: Interjected comments within a sentence are extracted as separate utterances.
-        processed = extract_embedded_utterances(text)
+        processed = extract_embedded_utterances(cleaned_transcript_str)
+        # returns chunks of text 'utterance.utterance.utterance' and embedded text 'je weet wel'.
+        # e.g., ['utterance.utterance.utterance.','je weet wel.', 'utterance']
 
         for chunk in processed:
             doc_chunk = nlp(chunk)
@@ -590,7 +588,7 @@ class Utterance(object):
 
                     # CRIT 1: “And”: New utterance unless it’s part of an enumeration or combined action.
                     # Handle "and"
-                    if token.text.lower() == 'and':
+                    if token.text.lower() == 'en':
                         if not is_enumeration(token):  # if that 'and' is not part of an enumeration
                             if current: # AND if current is not empty,
                                 # then the current line should be added as a separate utterance
@@ -602,7 +600,7 @@ class Utterance(object):
                                         # and will be later appended to current so that current can be built again)
 
                     # CRIT 2: Other conjunctions: Only separate utterances if used disfluently or non-functionally.
-                    elif token.pos_ == 'CCONJ' and token.text.lower() != 'and':
+                    elif token.pos_ == 'CCONJ' and token.text.lower() != 'en':
                         if not is_functional_conjunction(token):  # if the conjunction is not functional
                             if current:  # AND if current is not empty
                                 # then the current line should be added as a separate utterance
@@ -624,25 +622,10 @@ class Utterance(object):
                     utterances.append(' '.join([t.text for t in current]))
                     current = []
 
-        return [utt.strip() for utt in utterances if utt.strip()]  # if the utterance is not empty, return a list of utterances
+        [utt.strip() for utt in utterances if utt.strip()]  # if the utterance is not empty, return a list of utterances
+        return utterances
 
 
-
-    # --- Test Example ---
-    text = (
-        "The man said: I don't know. I think he's leaving. "
-        "Suddenly, I don't know when exactly, I saw the horse. "
-        "He takes the shoes and the socks and a sweater to wear. "
-        "But I was tired. And then he left."
-    )
-
-    utterances = split_into_custom_utterances(text)
-    mlu = mean_length_of_utterance(text)
-
-    print("Utterances:")
-    for i, utt in enumerate(utterances, 1):
-        print(f"{i}. {utt}")
-    print(f"\nMean Length of Utterance: {mlu:.2f}")
 
     def total_number_of_words(self):
         """
@@ -679,4 +662,5 @@ for text in text_list:
     # tagger.tag_list('VZ')
     # tagger.tag_count('N')
     # tagger.tag_rate('N')
-    CleanTranscript(text).clean_transcript_for_token_counting()
+    # CleanTranscript(text).clean_transcript_for_token_counting()
+    Utterance(text).split_into_custom_utterances()
