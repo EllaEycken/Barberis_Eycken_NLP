@@ -56,7 +56,7 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
     particles_dutch,
     annot_unintelligible_word, annots_phonemic_paraphasia, annot_false_start, annots_semantic_paraphasia,
     annots_dialect, annot_neologism, annot_filled_pause, annot_grammatic_error, annot_foreign_language,
-    annot_discourse_particle, annot_aborted_word_or_sound
+    annot_discourse_particle, annot_aborted_word_or_sound, subordinate_dependencies
 )
 
 # from masterthesisellalaw.data.preprocess_norms import (
@@ -679,6 +679,43 @@ def mean_length_utterance(
     return mlu_list
 
 
+def subordinate_clauses(
+        file_path: str,
+):
+    """ Calculate the proportion of subordinate clauses in the transcripts in the directory
+    DEF: Clause that forms part of and is dependent on a main clause, often introduced by a conjunction.
+    Calculated as a proportion of the total number of utterances.
+    Definition of a subordinate clause was based on:
+    In syntax, a subordinate clause is a dependent clause that cannot stand alone. It usually starts with:
+        - Subordinating conjunctions: because, although, since, if, when, unless, while, etc.
+        - Relative pronouns: who, which, that
+        - Wh- words: what, how, why, where
+
+    :file_path: text_directory
+    :return: proportion of subordinate clauses in the transcripts
+    """
+    prop_subordinate_clauses_list = list()
+
+    list_of_transcripts = read_transcripts(file_path)
+    for transcript in list_of_transcripts:
+        list_of_utterances = Utterance(transcript).split_into_custom_utterances()
+        list_of_subordinate_clauses = list()
+
+        for utt in list_of_utterances:
+            utt_doc = nlp(utt)
+            for token in utt_doc:
+                if token.dep_ in subordinate_dependencies:
+                    list_of_subordinate_clauses.append(utt)
+
+        total_subordinate_clauses = len(list_of_subordinate_clauses)
+        total_utterances = len(list_of_utterances)
+        prop_subordinate_clauses = total_subordinate_clauses/total_utterances
+        prop_subordinate_clauses_list.append(prop_subordinate_clauses)
+
+    return prop_subordinate_clauses_list
+
+
+
 """ FLUENCY """
 def filled_pauses(
         file_path: str,
@@ -883,4 +920,5 @@ if __name__ == "__main__":
     # word_abandoned(text_dir)
     # word_repetition(text_dir)
     # content_function_ratio(text_dir)
-    mean_length_utterance(text_dir)
+    # mean_length_utterance(text_dir)
+    subordinate_clauses(text_dir)

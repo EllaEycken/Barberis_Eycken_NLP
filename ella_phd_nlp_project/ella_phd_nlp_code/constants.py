@@ -131,6 +131,13 @@ particles_dutch = {"eigenlijk", "ja", "nee", "toch", "nou", "wel", "hoor", "he",
                 "even", "allez", "allee", "oei", "goh", "ze", "se", "enzo", "enzovoort", "zenne", "enfin"}
 articles_dutch = {"de", "het", "een", "ne", "nen"}  # note: "ne" and "nen" are tussentaal
 
+subordinate_dependencies = {"advcl", "ccomp", "xcomp", "relcl", "acl"}  # define clause types that represent subordination
+# advcl (adverbial clause modifier)
+# ccomp (clausal complement)
+# xcomp (open clausal complement)
+# relcl (relative clause modifier)
+# acl (clausal modifier of noun)
+
 annot_foreign_language = '*v'  # v = vreemde taal (Dutch)
 annot_neologism = '*n'
 annot_aborted_word_or_sound = '*a'

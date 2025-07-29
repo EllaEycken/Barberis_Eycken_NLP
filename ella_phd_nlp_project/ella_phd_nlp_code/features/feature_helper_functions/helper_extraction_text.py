@@ -567,6 +567,11 @@ class Utterance(object):
 
     # --- Main Utterance Splitter ---
     def split_into_custom_utterances(self):
+        """
+        Split a transcript in its utterances (without end punctuation)
+
+        :return: list of utterances in the transcript
+        """
         cleaned_transcript = CleanTranscript(self.transcript).clean_transcript_for_token_counting()
         # see helper function to clean transcripts for token counting
         cleaned_transcript_str = str(cleaned_transcript)  # make string out of transcript
@@ -636,35 +641,16 @@ class Utterance(object):
         # [utt.strip() for utt in utterances if utt.strip()]
         return cleaned_utterances
 
-
-
-    def total_number_of_words(self):
+    def total_utterances(self):
         """
-        Calculate total number of words in the transcript.
-
-        :return: ALL words, including non-words, phonemic language errors, repetitions, minimal responses,
-        comments and stereotypes, in accordance with Boxum et al. (2013) and Vandenborre et al. (2018).
-
-        Notes:
-        - excludes punctuation!
-        TODO: count particles? here yes, volgens Spontaal niet!
+        Count the total amount of utterances in the transcript.
+        :return: total amount of utterances in the transcript
         """
-        cleaner = CleanTranscript(self.transcript)  # make instance of the class for this text
-        cleaned_text = cleaner.clean_transcript_for_token_counting()  # clean the text
-        # see helper function to clean transcripts for token counting
-        cleaned_text_str = str(cleaned_text)  # make string out of transcript
+        list_of_utterances = Utterance(self.transcript).split_into_custom_utterances()
+        total_utterances = len(list_of_utterances)
 
-        doc = nlp(cleaned_text_str)  # read transcript into nlp-doc
-        tokens_list = list()
+        return total_utterances
 
-        for token in doc:
-            if token.is_punct or token.is_space:  # built-in function of token class in Spacy
-                continue
-            else:
-                tokens_list.append(token)
-        nb_words = len(tokens_list)
-
-        return nb_words
 
 
 
