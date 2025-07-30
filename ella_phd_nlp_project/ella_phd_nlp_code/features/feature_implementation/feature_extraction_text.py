@@ -22,7 +22,7 @@ The following features are extracted:
     - Mean Length of Utterance
     - Noun-verb Rate
     - Subordinate Clause
-    - Syntactic Deviation
+    - (Syntactic Deviation)
 - Fluency
     - Filled Pause
     - False Start

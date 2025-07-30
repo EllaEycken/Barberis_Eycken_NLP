@@ -1,7 +1,8 @@
 """Extract linguistic features from audio-files.
 The following features are extracted:
 - Fluency
-    - Speech rate
+    - Speech rate words
+    - Speech rate syllables
     - Short Pause
     - Long Pause
 
@@ -48,7 +49,7 @@ from ella_phd_nlp_project.ella_phd_nlp_code.features.feature_helper_functions.he
 
 
 """ FLUENCY """
-def calculate_speech_rate_words(
+def speech_rate_words(
     audio_dir: str,
     transcript_dir: str,
 ):
@@ -106,7 +107,7 @@ def calculate_speech_rate_words(
 
 
 
-def calculate_speech_rate_syllables(
+def speech_rate_syllables(
   audio_dir: str,
 ):
     """Calculate the speech Rate (syll/min) using PRAAT via Parselmouth (based on Dr Feinberg).
@@ -146,7 +147,7 @@ def calculate_speech_rate_syllables(
     return speechRateMin_list
 
 
-def calculate_SilentPauseProportion(
+def silent_pauses(
     audio_dir: str,
     transcript_dir: str,
     short_or_long: str,
@@ -239,7 +240,7 @@ def calculate_SilentPauseProportion(
     return propSilentPauses_list
 
 
-
+# NOT USED
 def calculate_SilentPausesRate(
     audio_dir: str,
 ):
@@ -293,7 +294,7 @@ if __name__ == "__main__":
     audio_dir = AUDIO_PATIENTU_DIR_DUMMY
     transcript_dir = TEXT_DIR_DUMMY
 
-    # calculate_speech_rate_words(audio_dir, transcript_dir)
-    # calculate_speech_rate_syllables(audio_dir)
-    # calculate_SilentPauseProportion(audio_dir, transcript_dir, 'short')
-    calculate_SilentPauseProportion(audio_dir, transcript_dir, 'long')
+    # speech_rate_words(audio_dir, transcript_dir)
+    # speech_rate_syllables(audio_dir)
+    # silent_pauses(audio_dir, transcript_dir, 'short')
+    silent_pauses(audio_dir, transcript_dir, 'long')
