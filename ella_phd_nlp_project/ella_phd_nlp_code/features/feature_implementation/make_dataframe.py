@@ -10,10 +10,13 @@ import os
 import epitran
 import pandas as pd
 import spacy
+# Note: don't forget to install openpyxl package (pip install openpyxl in your anaconda prompt)
+
 
 from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
     AUDIO_PATIENTU_DIR, AUDIO_PATIENTU_DIR_DUMMY,
     TEXT_DIR, TEXT_DIR_DUMMY,
+    TABLES_DIR
 )
 
 from ella_phd_nlp_project.ella_phd_nlp_code.features.feature_implementation.feature_extraction_text import *
@@ -84,26 +87,29 @@ def normalize_results_z(input_list: list):
 def build_df_subject_task_features(
     text_dir: str,
     audio_dir: str,
+    tables_dir: str,
+    excel_name = str("df_subject_task_features.xlsx"),
 ) -> pd.DataFrame:
     """Build a dataframe with all subject-task-pairs and features.
+    - rows: subject-task pairs
+    - columns: features
 
     :param text_dir: path to the (processed) text directory (already in function)
-    :type audio_dir: path to the (processed) audio directory
-    :return: a dataframe covering ALL features (as z-values), with subjects-tasks pairs as rows,
-    features as columns
-    :rtype: pd.DataFrame
+    :param audio_dir: path to the (processed) audio directory
+    :param tables_dir: path to the tables directory
+    :param excel_name: defaults to df_subject_task_features.xlsx
+    :return: a Pandas dataframe covering ALL features (as z-values), with subjects-tasks pairs as rows,
+    features as columns and an Excel file saved in the tables directory
     """
     # ---- STEP 1: initialize lists of data ----
     data = {
-        """ ROWS """
         "subject_id": [name[0] for name in get_subject_question_names_from_files(text_dir)],
         # use list comprehension ([...]) and take the first part of the 'subject and question name'
         # aka take the 'subject name'
-        "question_id": [name[1] for name in get_subject_question_names_from_files(text_dir)],
+        "task_id": [name[1] for name in get_subject_question_names_from_files(text_dir)],
         # use list comprehension ([...]) and take the second part of the 'subject and question name'
         # aka take the 'question name'
 
-        """ COLUMNS"""
         "SEM_Semantic Paraphasias": normalize_results_z(semantic_paraphasias(text_dir)),
 
         "PHON_Phonemic Paraphasias": normalize_results_z(phonemic_paraphasias(text_dir)),
@@ -127,14 +133,15 @@ def build_df_subject_task_features(
         "GRAM_Subordinate Clauses": normalize_results_z(subordinate_clauses(text_dir)),
         # "GRAM_Syntactic Deviation": normalize_results_Z(calculate_propof2CharLength(file_path)),
 
-        "FLU_Filled Pause_T": normalize_results_z(filled_pauses(text_dir)),
-        "FLU_False Start_T": normalize_results_z(false_starts(text_dir)),
-        "FLU_Word Abandoned_T": normalize_results_z(word_abandoned(text_dir)),
-        "FLU_Word Repetition_T": normalize_results_z(word_repetition(text_dir)),
-        "FLU_Speech Rate Words_AT": normalize_results_z(speech_rate_words(audio_dir, text_dir)),
-        "FLU_Speech Rate Syllables_A": normalize_results_z(speech_rate_syllables(audio_dir)),
-        "FLU_Short Pauses_AT": normalize_results_z(silent_pauses(audio_dir, text_dir, 'short')),
-        "FLU_Long Pauses_AT": normalize_results_z(silent_pauses(audio_dir, text_dir, 'long')),
+
+        # "FLU_Filled Pause_T": normalize_results_z(filled_pauses(text_dir)),
+        # "FLU_False Start_T": normalize_results_z(false_starts(text_dir)),
+        # "FLU_Word Abandoned_T": normalize_results_z(word_abandoned(text_dir)),
+        # "FLU_Word Repetition_T": normalize_results_z(word_repetition(text_dir)),
+        # "FLU_Speech Rate Words_AT": normalize_results_z(speech_rate_words(audio_dir, text_dir)),
+        # "FLU_Speech Rate Syllables_A": normalize_results_z(speech_rate_syllables(audio_dir)),
+        # "FLU_Short Pauses_AT": normalize_results_z(silent_pauses(audio_dir, text_dir, 'short')),
+        # "FLU_Long Pauses_AT": normalize_results_z(silent_pauses(audio_dir, text_dir, 'long')),
 
     }
 
@@ -147,11 +154,61 @@ def build_df_subject_task_features(
     )
 
     # ---- STEP 3: save Dataframe as excel in interim data directory
-    file_name = os.path.join(INTERIM_DIR, "df_nltk_lexicon.xlsx")
-    df_lexical.to_excel(file_name, index=False)
+    file_name = os.path.join(TABLES_DIR, excel_name)
+    df_features.to_excel(file_name, index=False)
     # https://www.geeksforgeeks.org/exporting-a-pandas-dataframe-to-an-excel-file/
 
-    return df_lexical
+    return df_features
+
+
+
+def build_df_subject_features_per_task(
+    text_dir: str,
+    audio_dir: str,
+    tables_dir: str,
+    excel_name_df_subject_task_features = str("df_subject_task_features.xlsx"),
+    excel_name = str("df_subject_features_per_task.xlsx")
+):
+    """
+    Generate a dataframe with all subjects and features, per task
+    - sheets: per task, one separate sheet
+    - rows: subjects
+    - columns: features
+
+    :param text_dir: the (processed) text directory
+    :param audio_dir: the (processed) audio directory
+    :param tables_dir: the tables directory
+    :param excel_name: defaults to df_subject_features_per_task.xlsx
+    :return: a dictionary containing key-value pairs,
+     - with key = task_name
+     - with value = a Pandas dataframe of that task covering ALL features (as z-values), with subjects as rows,
+        features as columns
+    and an Excel file saved in the tables directory
+    """
+    df = pd.read_excel(os.path.join(tables_dir, excel_name_df_subject_task_features))
+    # df= build_df_subject_task_features(text_dir, audio_dir, tables_dir))
+
+    # Get the different tasks
+    task_names = df['task_id'].unique()
+
+    # Create a dictionary to hold each task-specific DataFrame
+    task_dfs = {}
+
+    for task_name in task_names:
+        # Filter for this task
+        df_task = df[df['task_id'] == task_name].copy()
+        # Drop 'task' column
+        df_task = df_task.drop(columns=['task_id'])
+        # Store with task name as key
+        task_dfs[task_name] = df_task
+
+    # Write to Excel with multiple sheets
+    file_name = os.path.join(TABLES_DIR, excel_name)
+    with pd.ExcelWriter(file_name) as writer:
+        for task_name, task_df in task_dfs.items():
+            task_df.to_excel(writer, sheet_name=str(task_name), index=False)
+
+    return task_dfs
 
 
 def build_extra_df_for_character_counts(
@@ -192,4 +249,10 @@ def build_extra_df_for_character_counts(
 
 
 if __name__ == "__main__":
-    build_extra_df_for_character_counts(TEXT_DIR)
+    text_dir = TEXT_DIR_DUMMY
+    audio_dir = AUDIO_PATIENTU_DIR_DUMMY
+    tables_dir = TABLES_DIR
+
+    build_df_subject_task_features(text_dir, audio_dir, tables_dir)
+    # build_df_subject_features_per_task(text_dir, audio_dir, tables_dir)
+    # build_extra_df_for_character_counts(TEXT_DIR)
