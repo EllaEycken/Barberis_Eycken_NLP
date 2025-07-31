@@ -70,7 +70,8 @@ def cleanup_txt_file(txt_path_in, processed_dir):
         6) Remove [] in [...] statements unless it is an [A:…] statement, then remove it completely
         7) Remove dialect words, only keep normalization --> remove ( ) from normalization so that normalization is
         counted
-        5) Clean text formatting: Replace multiple spaces with a single space, Replace double punctuation with single,
+        8) Remove direct speech annotations: :"..."
+        9) Clean text formatting: Replace multiple spaces with a single space, Replace double punctuation with single,
          Remove  whitespace in between paragraphs, Add whitespace after '.' if necessary
 
     """
@@ -86,9 +87,12 @@ def cleanup_txt_file(txt_path_in, processed_dir):
             [txt_correct_name, 'txt']))
 
 
-    with (open(txt_path_in, 'r') as infile, open(txt_path_out, 'w') as outfile):
+    with (
+        open(txt_path_in, 'r', encoding = "utf-8") as infile,
+        open(txt_path_out, 'w') as outfile
+    ):
         # 'r' = open the txt_path_in file for reading, 'w' = open the txt_path_out for writing
-        # Note: encoding as utf-8 is needed as Python= , encoding = 'utf-8'
+        # Note: encoding as utf-8 is needed as Python should be able to read different characters , encoding = 'utf-8'
 
         # first_line = infile.readline()
         # if not first_line:
@@ -134,9 +138,12 @@ def cleanup_txt_file(txt_path_in, processed_dir):
 
 
             ## Remove abundant text
-            line = line.replace('ggg', '').replace('<spk>', '').replace('xxx', '')
+            line = line.replace('ggg', '').replace('<spk>', '').replace('xxx', ''
+                                                                        ).replace(':"',''
+                                                                                  ).replace('"','')
             # Remove coughs/laughs (transcribed as 'ggg') from transcript line
             # Remove <spk> transcription for speaker changes from transcript line
+            # Remove direct speech annotations (:"")
             # replace 'xxx' words
 
             ## Replace [] in [....] statements UNLESS the [] starts with A:, then remove it completely
