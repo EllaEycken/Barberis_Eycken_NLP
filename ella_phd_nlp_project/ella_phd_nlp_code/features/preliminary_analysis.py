@@ -2,7 +2,7 @@
 Based on scripts from masterthesisEllaLAW
 
 # - on the text files
-# - on the audio files --> # TODO: not necessary yet? (for NLP project)
+# - on the audio files
 
 # which actions are performed:
 # - get a list of the paths to all files
@@ -16,7 +16,8 @@ import parselmouth # (is for audio part)
 import numpy as np
 
 from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
-    TEXT_DIR_DUMMY, AUDIO_PATIENTU_DIR_DUMMY) # TODO: change to TEXT_DIR and AUDIO_DIR if everything is ready!
+    TEXT_DIR, AUDIO_PATIENTU_DIR)
+    # TEXT_DIR_DUMMY, AUDIO_PATIENTU_DIR_DUMMY)
 
 
 
@@ -172,5 +173,5 @@ if __name__ == "__main__":
     # read_transcripts(TEXT_DIR_DUMMY)
     # get_subject_question_names_from_files(TEXT_DIR_DUMMY)
 
-    # all_paths(AUDIO_PATIENTU_DIR_DUMMY)
-    read_sounds(AUDIO_PATIENTU_DIR_DUMMY)
+    # all_paths(AUDIO_PATIENTU_DIR)
+    read_sounds(AUDIO_PATIENTU_DIR)
