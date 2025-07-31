@@ -13,7 +13,8 @@ import spacy
 import io
 
 from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
-    AUDIO_PATIENT_DIR_DUMMY, # TODO: if all is finished, switch this to AUDIO_PATIENT_DIR!
+    AUDIO_PATIENTU_DIR,
+    # AUDIO_PATIENTU_DIR_DUMMY,
     f0min,
     f0max,
     period_ceiling,
@@ -25,8 +26,6 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
 
 from ella_phd_nlp_project.ella_phd_nlp_code.features.preliminary_analysis import read_sounds
 
-# TODO: add constants, other functions if necessary!
-# TODO: change minpause constant (see NLP DOCX)!!!
 
 
 def calculate_duration(sound: object):

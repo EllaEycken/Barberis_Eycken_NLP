@@ -15,28 +15,16 @@ from spacy.language import Language
 
 
 from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
-    # AoA_PATH,
-    # CONCRETENESS_PATH,
-    # FREQUENCY_PATH,
-    # DUTCH_ALPHABET,
-    # FAMILIARITY_PATH,
-    # NAME_AGREEMENT_PATH,
-    TEXT_DIR_DUMMY, # TODO: change this if all is ready!
+    TEXT_DIR,
+    # TEXT_DIR_DUMMY,
     annot_repetition,
 )
 
-# from masterthesisellalaw.data.preprocess_norms import (
-    # read_Norms_AoA,
-    # read_Norms_concreteness,
-    # read_Norms_familiarity,
-    # read_Norms_frequency,
-    # read_Norms_nameAgreement,
-# )
 
 from ella_phd_nlp_project.ella_phd_nlp_code.features.preliminary_analysis import (
     read_transcripts,
 )
-text_list = read_transcripts(TEXT_DIR_DUMMY)  # TODO: change this if all is ready!
+text_list = read_transcripts(TEXT_DIR)
 
 
 
