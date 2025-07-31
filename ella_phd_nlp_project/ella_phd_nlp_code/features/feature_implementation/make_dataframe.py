@@ -222,5 +222,5 @@ if __name__ == "__main__":
     audio_dir = AUDIO_PATIENTU_DIR
     tables_dir = TABLES_DIR
 
-    # build_df_subject_task_features(text_dir, audio_dir, tables_dir)
+    build_df_subject_task_features(text_dir, audio_dir, tables_dir)
     build_df_subject_features_per_task(text_dir, audio_dir, tables_dir)
