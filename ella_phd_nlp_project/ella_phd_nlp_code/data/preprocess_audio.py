@@ -11,9 +11,11 @@ import parselmouth
 import datasets  # install it first: is a package
 
 from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
-    AUDIO_DIR_DUMMY, DIAR_DIR_DUMMY,  NONMERGED_AUDIO_PATIENT_DIR_DUMMY, AUDIO_PATIENT_DIR_DUMMY,
-    NONMERGED_AUDIO_PATIENTU_DIR_DUMMY, AUDIO_PATIENTU_DIR_DUMMY,
+    # AUDIO_DIR_DUMMY, DIAR_DIR_DUMMY,  NONMERGED_AUDIO_PATIENT_DIR_DUMMY, AUDIO_PATIENT_DIR_DUMMY,
+    # NONMERGED_AUDIO_PATIENTU_DIR_DUMMY, AUDIO_PATIENTU_DIR_DUMMY,
     # CLEAN_DIAR_DIR_DUMMY,
+    AUDIO_DIR, DIAR_DIR,
+    NONMERGED_AUDIO_PATIENTU_DIR, AUDIO_PATIENTU_DIR,
     concatenation_overlap_time)  # TODO: swap for non-dummy directories once in order
 
 from ella_phd_nlp_project.ella_phd_nlp_code.features.preliminary_analysis import *
@@ -619,22 +621,21 @@ def preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir,
 
 
 if __name__ == "__main__":
-    raw_audio_path_in = os.path.join(AUDIO_DIR_DUMMY, 'sub-a043_story_stroke.wav')
-    raw_dir = AUDIO_DIR_DUMMY
-    diarization_dir = DIAR_DIR_DUMMY
-    interim_dir = NONMERGED_AUDIO_PATIENT_DIR_DUMMY
-    interim_dir_uninterrupted = NONMERGED_AUDIO_PATIENTU_DIR_DUMMY
-    processed_dir = AUDIO_PATIENT_DIR_DUMMY
-    processed_dir_uninterrupted = AUDIO_PATIENTU_DIR_DUMMY
-    diar_txt_path_in = os.path.join(DIAR_DIR_DUMMY,'sub-a043_ANTAT.txt')
+    # raw_audio_path_in = os.path.join(AUDIO_DIR, 'sub-a043_story_stroke.wav')
+    raw_dir = AUDIO_DIR
+    diarization_dir = DIAR_DIR
+    interim_dir= NONMERGED_AUDIO_PATIENTU_DIR
+    processed_dir = AUDIO_PATIENTU_DIR
+    # diar_txt_path_in = os.path.join(DIAR_DIR,'sub-a043_ANTAT.txt')
 
-    filter_audio_file_uninterruptedmerged(raw_audio_path_in, diarization_dir, processed_dir_uninterrupted)
+    # filter_audio_file_uninterruptedmerged(raw_audio_path_in, diarization_dir, processed_dir)
     # filter_audio_file(raw_audio_path_in, diarization_dir, processed_dir)
-
-    preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir_uninterrupted, processed_dir_uninterrupted, overrule_spk_code_list=None)
-    # preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir, overrule_spk_code_list=None)
     # interim_dir = CLEAN_DIAR_DIR_DUMMY
     # cleanup_diar_txt_file(diar_txt_path_in, interim_dir)
+
+    preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir, processed_dir, overrule_spk_code_list=None)
+    # preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir, overrule_spk_code_list=None)
+
     """
 
     """
