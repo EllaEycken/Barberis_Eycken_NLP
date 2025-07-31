@@ -10,7 +10,8 @@ from typing import List
 import datasets  # install it first: is a package
 
 from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
-    DOCX_DIR_DUMMY, PRECLEANTEXT_DIR_DUMMY, TEXT_DIR_DUMMY)  # TODO: swap for non-dummy directories once in order
+    DOCX_DIR, PRECLEANTEXT_DIR, TEXT_DIR)
+    # DOCX_DIR_DUMMY, PRECLEANTEXT_DIR_DUMMY, TEXT_DIR_DUMMY,
 
 
 ## Create a helper function that converts word docx to a text file
@@ -259,8 +260,8 @@ if __name__ == "__main__":
     processed_dir = TEXT_DIR_DUMMY
     cleanup_txt_file(txt_path_in, processed_dir)
     """
-    raw_dir = DOCX_DIR_DUMMY
-    interim_dir = PRECLEANTEXT_DIR_DUMMY
-    processed_dir = TEXT_DIR_DUMMY
+    raw_dir = DOCX_DIR
+    interim_dir = PRECLEANTEXT_DIR
+    processed_dir = TEXT_DIR
     preprocess_IANSA_transcripts(raw_dir, interim_dir, processed_dir)
 

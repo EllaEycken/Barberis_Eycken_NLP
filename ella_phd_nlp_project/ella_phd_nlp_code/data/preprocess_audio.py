@@ -16,7 +16,7 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
     # CLEAN_DIAR_DIR_DUMMY,
     AUDIO_DIR, DIAR_DIR,
     NONMERGED_AUDIO_PATIENTU_DIR, AUDIO_PATIENTU_DIR,
-    concatenation_overlap_time)  # TODO: swap for non-dummy directories once in order
+    concatenation_overlap_time)
 
 from ella_phd_nlp_project.ella_phd_nlp_code.features.preliminary_analysis import *
 from ella_phd_nlp_project.ella_phd_nlp_code.features.feature_helper_functions.helper_extraction_audio import *
