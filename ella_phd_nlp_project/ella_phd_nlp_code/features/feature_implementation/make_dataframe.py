@@ -211,48 +211,11 @@ def build_df_subject_features_per_task(
     return task_dfs
 
 
-def build_extra_df_for_character_counts(
-    file_path: str,
-) -> pd.DataFrame:
-    """Generate a dataframe with only the character counts in the same style as the other function.
-
-    :param file_path: text directory (already in function)
-    :type file_path: str
-    :return: a dataframe covering character counts, with participants-questions as rows,
-    features as columns
-    """
-    # ---- STEP 1: initialize data of lists ----
-    data_lexical = {
-        "subject_id": [name[0] for name in get_subject_question_names_from_files(file_path)],
-        # use list comprehension ([...]) and take the first part of the 'subject and question name'
-        # aka take the 'subject name'
-        "question_id": [name[1] for name in get_subject_question_names_from_files(file_path)],
-        # use list comprehension ([...]) and take the second part of the 'subject and question name'
-        # aka take the 'question name'
-        "character_count": calculate_character_count(file_path),
-    }
-
-    # ---- STEP 2: Create Dataframe ----
-    df_lexical = pd.DataFrame(data_lexical)
-    # https://stackoverflow.com/questions/18837262/convert-python-dict-into-a-dataframe
-    pd.set_option("display.max.columns", None)
-    df_lexical.style.background_gradient().set_caption("Table of Language-Lexical Features").apply(
-        color_if_even, subset=["subject_id"]
-    )
-
-    # ---- STEP 3: save Dataframe as excel in interim data directory
-    file_name = os.path.join(INTERIM_DIR, "df_nltk_character.xlsx")
-    df_lexical.to_excel(file_name, index=False)
-    # https://www.geeksforgeeks.org/exporting-a-pandas-dataframe-to-an-excel-file/
-
-    return df_lexical
-
 
 if __name__ == "__main__":
     text_dir = TEXT_DIR_DUMMY
     audio_dir = AUDIO_PATIENTU_DIR_DUMMY
     tables_dir = TABLES_DIR
 
-    build_df_subject_task_features(text_dir, audio_dir, tables_dir)
-    # build_df_subject_features_per_task(text_dir, audio_dir, tables_dir)
-    # build_extra_df_for_character_counts(TEXT_DIR)
+    # build_df_subject_task_features(text_dir, audio_dir, tables_dir)
+    build_df_subject_features_per_task(text_dir, audio_dir, tables_dir)
