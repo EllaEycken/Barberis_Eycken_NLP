@@ -24,9 +24,11 @@ import nltk
 import pandas as pd
 import spacy
 
-from ella_phd_nlp_project.ella_phd_nlp_code.constants import (  # TODO: if all is finished, switch this to AUDIO_PATIENT_DIR and TEXT_DIR!
-    AUDIO_PATIENTU_DIR_DUMMY,
-    TEXT_DIR_DUMMY,
+from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
+    AUDIO_PATIENTU_DIR,
+    TEXT_DIR,
+    # AUDIO_PATIENTU_DIR_DUMMY,
+    # TEXT_DIR_DUMMY,
     period_ceiling,
     unit,
     minpause,
@@ -291,8 +293,8 @@ def calculate_SilentPausesRate(
 
 """RUNNING THE FUNCTIONS"""
 if __name__ == "__main__":
-    audio_dir = AUDIO_PATIENTU_DIR_DUMMY
-    transcript_dir = TEXT_DIR_DUMMY
+    audio_dir = AUDIO_PATIENTU_DIR
+    transcript_dir = TEXT_DIR
 
     # speech_rate_words(audio_dir, transcript_dir)
     # speech_rate_syllables(audio_dir)

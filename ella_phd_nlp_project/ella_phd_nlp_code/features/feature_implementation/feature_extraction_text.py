@@ -43,14 +43,8 @@ import spacy
 
 
 from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
-    # AoA_PATH,
-    # CONCRETENESS_PATH,
-    # FREQUENCY_PATH,
-    # DUTCH_ALPHABET,
-    # FAMILIARITY_PATH,
-    # MILTENBURG_MODEL_PATH,
-    # NAME_AGREEMENT_PATH,
-    TEXT_DIR_DUMMY, # TODO: change this if all is ready!
+    TEXT_DIR,
+    # TEXT_DIR_DUMMY,
     modal_lemmas,
     articles_dutch,
     particles_dutch,
@@ -59,14 +53,6 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
     annot_discourse_particle, annot_aborted_word_or_sound, subordinate_dependencies
 )
 
-# from masterthesisellalaw.data.preprocess_norms import (
-    # read_Norms_AoA,
-    # read_Norms_concreteness,
-    # read_Norms_familiarity,
-    # read_Norms_frequency,
-    # read_Norms_nameAgreement,
-# )
-
 from ella_phd_nlp_project.ella_phd_nlp_code.features.preliminary_analysis import (
     read_transcripts,
 )
@@ -74,7 +60,7 @@ from ella_phd_nlp_project.ella_phd_nlp_code.features.preliminary_analysis import
 from ella_phd_nlp_project.ella_phd_nlp_code.features.feature_helper_functions.helper_extraction_text import *
 
 
-text_list = read_transcripts(TEXT_DIR_DUMMY)  # TODO: change this if all is ready!
+text_list = read_transcripts(TEXT_DIR)
 
 
 """ SET UP NLP"""
@@ -900,7 +886,7 @@ def word_repetition(
 
 """RUNNING THE FUNCTIONS"""
 if __name__ == "__main__":
-    text_dir = TEXT_DIR_DUMMY
+    text_dir = TEXT_DIR
     # semantic_paraphasias(text_dir)
     # neologisms(text_dir)
     # number_of_words(text_dir)
