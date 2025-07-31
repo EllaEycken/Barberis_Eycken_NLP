@@ -1,7 +1,12 @@
 """Make a dataframe to list all extracted features for the participants and the tasks.
 
-The dataframes will have the following structure:
+The first dataframe will have the following structure:
 - rows = subjects-tasks of the study
+- columns = extracted features
+
+The second dataframe will have the following structure:
+- sheet: task
+- rows = subjects of the study
 - columns = extracted features
 """
 
@@ -14,8 +19,8 @@ import spacy
 
 
 from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
-    AUDIO_PATIENTU_DIR, AUDIO_PATIENTU_DIR_DUMMY,
-    TEXT_DIR, TEXT_DIR_DUMMY,
+    AUDIO_PATIENTU_DIR, # AUDIO_PATIENTU_DIR_DUMMY,
+    TEXT_DIR, # TEXT_DIR_DUMMY,
     TABLES_DIR
 )
 
@@ -213,8 +218,8 @@ def build_df_subject_features_per_task(
 
 
 if __name__ == "__main__":
-    text_dir = TEXT_DIR_DUMMY
-    audio_dir = AUDIO_PATIENTU_DIR_DUMMY
+    text_dir = TEXT_DIR
+    audio_dir = AUDIO_PATIENTU_DIR
     tables_dir = TABLES_DIR
 
     # build_df_subject_task_features(text_dir, audio_dir, tables_dir)
