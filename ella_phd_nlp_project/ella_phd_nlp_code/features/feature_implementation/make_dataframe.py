@@ -140,14 +140,14 @@ def build_df_subject_task_features(
         # "GRAM_Syntactic Deviation": normalize_results_Z(calculate_propof2CharLength(file_path)),
 
 
-        # "FLU_Filled Pause_T": normalize_results_z(filled_pauses(text_dir)),
-        # "FLU_False Start_T": normalize_results_z(false_starts(text_dir)),
-        # "FLU_Word Abandoned_T": normalize_results_z(word_abandoned(text_dir)),
-        # "FLU_Word Repetition_T": normalize_results_z(word_repetition(text_dir)),
-        # "FLU_Speech Rate Words_AT": normalize_results_z(speech_rate_words(audio_dir, text_dir)),
-        # "FLU_Speech Rate Syllables_A": normalize_results_z(speech_rate_syllables(audio_dir)),
-        # "FLU_Short Pauses_AT": normalize_results_z(silent_pauses(audio_dir, text_dir, 'short')),
-        # "FLU_Long Pauses_AT": normalize_results_z(silent_pauses(audio_dir, text_dir, 'long')),
+        "FLU_Filled Pause_T": normalize_results_z(filled_pauses(text_dir)),
+        "FLU_False Start_T": normalize_results_z(false_starts(text_dir)),
+        "FLU_Word Abandoned_T": normalize_results_z(word_abandoned(text_dir)),
+        "FLU_Word Repetition_T": normalize_results_z(word_repetition(text_dir)),
+        "FLU_Speech Rate Words_AT": normalize_results_z(speech_rate_words(audio_dir, text_dir)),
+        "FLU_Speech Rate Syllables_A": normalize_results_z(speech_rate_syllables(audio_dir)),
+        "FLU_Short Pauses_AT": normalize_results_z(silent_pauses(audio_dir, text_dir, 'short')),
+        "FLU_Long Pauses_AT": normalize_results_z(silent_pauses(audio_dir, text_dir, 'long')),
 
     }
 
@@ -217,14 +217,14 @@ def build_df_subject_task_features_absolute(
         # "GRAM_Syntactic Deviation": calculate_propof2CharLength(file_path),
 
 
-        # "FLU_Filled Pause_T": filled_pauses(text_dir),
-        # "FLU_False Start_T": false_starts(text_dir),
-        # "FLU_Word Abandoned_T": word_abandoned(text_dir),
-        # "FLU_Word Repetition_T": word_repetition(text_dir),
-        # "FLU_Speech Rate Words_AT": speech_rate_words(audio_dir, text_dir),
-        # "FLU_Speech Rate Syllables_A": speech_rate_syllables(audio_dir),
-        # "FLU_Short Pauses_AT": silent_pauses(audio_dir, text_dir, 'short'),
-        # "FLU_Long Pauses_AT": silent_pauses(audio_dir, text_dir, 'long'),
+        "FLU_Filled Pause_T": filled_pauses(text_dir),
+        "FLU_False Start_T": false_starts(text_dir),
+        "FLU_Word Abandoned_T": word_abandoned(text_dir),
+        "FLU_Word Repetition_T": word_repetition(text_dir),
+        "FLU_Speech Rate Words_AT": speech_rate_words(audio_dir, text_dir),
+        "FLU_Speech Rate Syllables_A": speech_rate_syllables(audio_dir),
+        "FLU_Short Pauses_AT": silent_pauses(audio_dir, text_dir, 'short'),
+        "FLU_Long Pauses_AT": silent_pauses(audio_dir, text_dir, 'long'),
 
     }
 
@@ -299,11 +299,12 @@ if __name__ == "__main__":
     audio_dir = AUDIO_PATIENTU_DIR
     tables_dir = TABLES_DIR
 
-    # build_df_subject_task_features(text_dir, audio_dir, tables_dir)
-    # build_df_subject_features_per_task(text_dir, audio_dir, tables_dir)
+    build_df_subject_task_features(text_dir, audio_dir, tables_dir)
+    build_df_subject_features_per_task(text_dir, audio_dir, tables_dir)
+    """
     build_df_subject_task_features_absolute(text_dir, audio_dir, tables_dir)
-
     build_df_subject_features_per_task(text_dir, audio_dir, tables_dir,
                                        excel_name_df_subject_task_features='df_subject_task_features_absolute.xlsx',
                                        excel_name='df_subject_features_per_task_absolute.xlsx'
                                        )
+    """

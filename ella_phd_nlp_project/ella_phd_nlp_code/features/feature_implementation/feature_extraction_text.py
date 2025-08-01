@@ -65,6 +65,7 @@ text_list = read_transcripts(TEXT_DIR)
 """ SPACY NOTE """
 # Make sure you use the most up to date version of Spacy (at least version spacy-3.8.7). Otherwise, it will not run.
 # So if necessary, pip install spacy==3.8.7
+# source: see https://github.com/explosion/spaCy/issues/13659#issuecomment-2532573576
 
 """ SET UP NLP"""
 ## Call NLP
