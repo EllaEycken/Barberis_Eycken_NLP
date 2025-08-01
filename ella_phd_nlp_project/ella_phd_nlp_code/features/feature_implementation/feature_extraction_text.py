@@ -30,6 +30,7 @@ The following features are extracted:
     - Word Repetition
 
 """
+import faulthandler; faulthandler.enable()
 
 """ IMPORT STATEMENTS """
 

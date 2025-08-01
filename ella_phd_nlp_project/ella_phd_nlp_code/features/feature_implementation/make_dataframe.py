@@ -9,6 +9,8 @@ The second dataframe will have the following structure:
 - rows = subjects of the study
 - columns = extracted features
 """
+import faulthandler; faulthandler.enable()
+
 
 """ IMPORTS """
 import os
@@ -301,6 +303,7 @@ if __name__ == "__main__":
     # build_df_subject_task_features(text_dir, audio_dir, tables_dir)
     # build_df_subject_features_per_task(text_dir, audio_dir, tables_dir)
     build_df_subject_task_features_absolute(text_dir, audio_dir, tables_dir)
+
     build_df_subject_features_per_task(text_dir, audio_dir, tables_dir,
                                        excel_name_df_subject_task_features='df_subject_task_features_absolute.xlsx',
                                        excel_name='df_subject_features_per_task_absolute.xlsx'
