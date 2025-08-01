@@ -90,10 +90,21 @@ def give_patient_spk_code(diar_txt_path_in):
         # Get the last element, which should be the speaker code
         first_line_diar_code = int(parts[-1])
 
-    if first_line_diar_code == 0:  # we assume first line will be the test administrator, so the first spk is NOT who we want
-        spk_code = int(1)  # if the first speaker (test admin) has spk-code 0, then the patient has code 1...
-    if first_line_diar_code == 1:
-        spk_code = int(0)  #... and vice versa
+        lines = f.readlines()
+        if not lines:  # there was only one line
+            spk_code = first_line_diar_code
+        else:
+            for line in lines:
+                parts = line.split(',')
+                diar_code_this_line = int(parts[-1])
+                if diar_code_this_line != first_line_diar_code:  # so there are multiple speakers
+                    if first_line_diar_code == 0:  # we assume first line will be the test administrator, so the first spk is NOT who we want
+                        spk_code = int(1)  # if the first speaker (test admin) has spk-code 0, then the patient has code 1...
+                    if first_line_diar_code == 1:
+                        spk_code = int(0)  #... and vice versa
+                    break
+                else:  # if only one speaker appears, then it will be the patient
+                    spk_code = first_line_diar_code
 
     return int(spk_code)
 
@@ -633,8 +644,16 @@ if __name__ == "__main__":
     # interim_dir = CLEAN_DIAR_DIR_DUMMY
     # cleanup_diar_txt_file(diar_txt_path_in, interim_dir)
 
-    preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir, processed_dir, overrule_spk_code_list=None)
+    # preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir, processed_dir, overrule_spk_code_list=None)
     # preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir, overrule_spk_code_list=None)
+
+
+    preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir, processed_dir,
+                                               overrule_spk_code_list=(('sub-a006_CAT-NL', 0),
+                                                                       ('sub-c060_MCA', 1),
+                                                                       ('sub-c060_story_weekend', 0))
+                                               )
+
 
     """
 
