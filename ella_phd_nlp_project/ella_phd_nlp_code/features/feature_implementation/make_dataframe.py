@@ -95,9 +95,9 @@ def build_df_subject_task_features(
     tables_dir: str,
     excel_name = str("df_subject_task_features.xlsx"),
 ) -> pd.DataFrame:
-    """Build a dataframe with all subject-task-pairs and features.
+    """Build a dataframe with all subject-task-pairs and features (z-normalized values).
     - rows: subject-task pairs
-    - columns: features
+    - columns: features (z-scores: mean 0, std 1)
 
     :param text_dir: path to the (processed) text directory (already in function)
     :param audio_dir: path to the (processed) audio directory
@@ -166,6 +166,82 @@ def build_df_subject_task_features(
     return df_features
 
 
+def build_df_subject_task_features_absolute(
+    text_dir: str,
+    audio_dir: str,
+    tables_dir: str,
+    excel_name = str("df_subject_task_features_absolute.xlsx"),
+) -> pd.DataFrame:
+    """Build a dataframe with all subject-task-pairs and features (absolute values).
+    - rows: subject-task pairs
+    - columns: features
+
+    :param text_dir: path to the (processed) text directory (already in function)
+    :param audio_dir: path to the (processed) audio directory
+    :param tables_dir: path to the tables directory
+    :param excel_name: defaults to df_subject_task_features.xlsx
+    :return: a Pandas dataframe covering ALL features (as z-values), with subjects-tasks pairs as rows,
+    features as columns and an Excel file saved in the tables directory
+    """
+    # ---- STEP 1: initialize lists of data ----
+    data = {
+        "subject_id": [name[0] for name in get_subject_question_names_from_files(text_dir)],
+        # use list comprehension ([...]) and take the first part of the 'subject and question name'
+        # aka take the 'subject name'
+        "task_id": [name[1] for name in get_subject_question_names_from_files(text_dir)],
+        # use list comprehension ([...]) and take the second part of the 'subject and question name'
+        # aka take the 'question name'
+
+        "SEM_Semantic Paraphasias": semantic_paraphasias(text_dir),
+
+        "PHON_Phonemic Paraphasias": phonemic_paraphasias(text_dir),
+        "PHON_Neologisms": neologisms(text_dir),
+
+        "LEX_Number of Words": number_of_words(text_dir),
+        "LEX_Brunet's Index": brunets_index(text_dir),
+        "LEX_Noun Rate": noun_rate(text_dir),
+        "LEX_Verb Rate": verb_rate(text_dir),
+        "LEX_Adjective Rate": adjective_rate(text_dir),
+        "LEX_Pronoun Rate": pronoun_rate(text_dir),
+        "LEX_Adverb Rate": adverb_rate(text_dir),
+        "LEX_Determiner Rate": determiner_rate(text_dir),
+        "LEX_Conjunction Rate": conjunction_rate(text_dir),
+        "LEX_Preposition Rate": preposition_rate(text_dir),
+        "LEX_Particle Rate": particle_rate(text_dir),
+        "LEX_Content-Function Ratio": content_function_ratio(text_dir),
+
+        "GRAM_MLU": mean_length_utterance(text_dir),
+        "GRAM_Noun-Verb Rate": noun_verb_rate(text_dir),
+        "GRAM_Subordinate Clauses": subordinate_clauses(text_dir),
+        # "GRAM_Syntactic Deviation": calculate_propof2CharLength(file_path),
+
+
+        # "FLU_Filled Pause_T": filled_pauses(text_dir),
+        # "FLU_False Start_T": false_starts(text_dir),
+        # "FLU_Word Abandoned_T": word_abandoned(text_dir),
+        # "FLU_Word Repetition_T": word_repetition(text_dir),
+        # "FLU_Speech Rate Words_AT": speech_rate_words(audio_dir, text_dir),
+        # "FLU_Speech Rate Syllables_A": speech_rate_syllables(audio_dir),
+        # "FLU_Short Pauses_AT": silent_pauses(audio_dir, text_dir, 'short'),
+        # "FLU_Long Pauses_AT": silent_pauses(audio_dir, text_dir, 'long'),
+
+    }
+
+    # ---- STEP 2: Create Dataframe ----
+    df_features = pd.DataFrame(data)
+    # https://stackoverflow.com/questions/18837262/convert-python-dict-into-a-dataframe
+    pd.set_option("display.max.columns", None)
+    df_features.style.background_gradient().set_caption("Table of Features").apply(
+        color_if_even, subset=["subject_id"]
+    )
+
+    # ---- STEP 3: save Dataframe as excel in interim data directory
+    file_name = os.path.join(TABLES_DIR, excel_name)
+    df_features.to_excel(file_name, index=False)
+    # https://www.geeksforgeeks.org/exporting-a-pandas-dataframe-to-an-excel-file/
+
+    return df_features
+
 
 def build_df_subject_features_per_task(
     text_dir: str,
@@ -222,5 +298,10 @@ if __name__ == "__main__":
     audio_dir = AUDIO_PATIENTU_DIR
     tables_dir = TABLES_DIR
 
-    build_df_subject_task_features(text_dir, audio_dir, tables_dir)
-    build_df_subject_features_per_task(text_dir, audio_dir, tables_dir)
+    # build_df_subject_task_features(text_dir, audio_dir, tables_dir)
+    # build_df_subject_features_per_task(text_dir, audio_dir, tables_dir)
+    build_df_subject_task_features_absolute(text_dir, audio_dir, tables_dir)
+    build_df_subject_features_per_task(text_dir, audio_dir, tables_dir,
+                                       excel_name_df_subject_task_features='df_subject_task_features_absolute.xlsx',
+                                       excel_name='df_subject_features_per_task_absolute.xlsx'
+                                       )
