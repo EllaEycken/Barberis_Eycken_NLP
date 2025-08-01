@@ -30,7 +30,6 @@ The following features are extracted:
     - Word Repetition
 
 """
-import faulthandler; faulthandler.enable()
 
 """ IMPORT STATEMENTS """
 
@@ -63,6 +62,9 @@ from ella_phd_nlp_project.ella_phd_nlp_code.features.feature_helper_functions.he
 
 text_list = read_transcripts(TEXT_DIR)
 
+""" SPACY NOTE """
+# Make sure you use the most up to date version of Spacy (at least version spacy-3.8.7). Otherwise, it will not run.
+# So if necessary, pip install spacy==3.8.7
 
 """ SET UP NLP"""
 ## Call NLP

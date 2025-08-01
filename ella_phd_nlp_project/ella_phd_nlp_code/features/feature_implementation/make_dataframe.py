@@ -9,7 +9,6 @@ The second dataframe will have the following structure:
 - rows = subjects of the study
 - columns = extracted features
 """
-import faulthandler; faulthandler.enable()
 
 
 """ IMPORTS """
