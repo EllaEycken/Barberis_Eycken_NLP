@@ -719,7 +719,7 @@ def filled_pauses(
     prop_filled_pauses_list = list()
     list_of_transcripts = read_transcripts(file_path)
     for transcript in list_of_transcripts:
-        cleaned_transcript = CleanTranscript(transcript).clean_transcript_for_token_counting()
+        # cleaned_transcript = CleanTranscript(transcript).clean_transcript_for_token_counting()
         # see helper function to clean transcripts for token counting
         # Note: Why CleanTranscript.clean_transcript_for_token_counting(my_text) doesn't work:
         # clean_transcript_for_token_counting is an instance method,
@@ -728,9 +728,10 @@ def filled_pauses(
         # cleaned_transcript = CleanTranscript(transcript).clean_transcript_for_token_counting()
         # This will make sure the function (clean_transcript_for...) will be calculated on the object (class
         # instance) 'CleanTranscript(transcript)' and not on the class CleanTranscript itself.
-        cleaned_transcript_str = str(cleaned_transcript)  # make string out of transcript
+        # cleaned_transcript_str = str(cleaned_transcript)  # make string out of transcript
+        transcript_str = str(transcript)
 
-        doc = nlp(cleaned_transcript_str)  # read transcript into nlp-doc
+        doc = nlp(transcript_str)  # read transcript into nlp-doc
         filled_pauses_list = list()
 
         for token in doc:
