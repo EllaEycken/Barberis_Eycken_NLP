@@ -296,6 +296,8 @@ if __name__ == "__main__":
     audio_dir = AUDIO_PATIENTU_DIR
     transcript_dir = TEXT_DIR
 
+    # audio_dir_sub038 = "C:/Users/u0146803/git/Ella_PhD_NLP_repo/data/external/sound/"
+    # transcript_dir_sub038 = "C:/Users/u0146803/git/Ella_PhD_NLP_repo/data/external/transcript/"
     # speech_rate_words(audio_dir, transcript_dir)
     # speech_rate_syllables(audio_dir)
     # silent_pauses(audio_dir, transcript_dir, 'short')
