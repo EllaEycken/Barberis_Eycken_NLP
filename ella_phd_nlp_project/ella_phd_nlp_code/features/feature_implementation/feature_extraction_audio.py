@@ -85,16 +85,14 @@ def speech_rate_words(
         sound_index = list_of_sounds.index(sound)
         (subject_name_audio, question_name_audio) = list_of_subject_question_pairs_audio[sound_index]
 
-        # Find the transcript corresponding to that subject and question
-        transcript_index = None
-        transcript = None
-        for (subject_name_transcript, question_name_transcript) in list_of_subject_question_pairs_transcripts:
-            if subject_name_audio == subject_name_transcript:
-                if question_name_audio == question_name_transcript:
-                    transcript_index = list_of_subject_question_pairs_transcripts.index([subject_name_transcript,
-                                                                                         question_name_transcript])
-                    transcript = list_of_transcripts[transcript_index]
-                    break
+        ## Find the transcript corresponding to that subject and question and compute the total number of words
+        transcript = str()
+        for idx, (subject_name_transcript, question_name_transcript) in enumerate(
+                list_of_subject_question_pairs_transcripts):
+            if subject_name_audio == subject_name_transcript and question_name_audio == question_name_transcript:
+                transcript = list_of_transcripts[idx]
+                break
+        total_nb_of_words = TokenCounter(transcript).total_number_of_words()
 
 
         # Calculate the speech rate
@@ -105,8 +103,6 @@ def speech_rate_words(
         speechRate_list.append(speechRateMin)
 
     return speechRate_list
-
-
 
 
 def speech_rate_syllables(
@@ -191,17 +187,24 @@ def silent_pauses(
         (subject_name_audio, question_name_audio) = list_of_subject_question_pairs_audio[sound_index]
 
         ## Find the transcript corresponding to that subject and question and compute the total number of words
-        transcript_index = None
-        transcript = None
-        for (subject_name_transcript, question_name_transcript) in list_of_subject_question_pairs_transcripts:
-            if subject_name_audio == subject_name_transcript:
-                if question_name_audio == question_name_transcript:
-                    transcript_index = list_of_subject_question_pairs_transcripts.index([subject_name_transcript,
-                                                                                         question_name_transcript])
-                    transcript = list_of_transcripts[transcript_index]
-                    break
+        transcript = str()
+        for idx, (subject_name_transcript, question_name_transcript) in enumerate(
+                list_of_subject_question_pairs_transcripts):
+            if subject_name_audio == subject_name_transcript and question_name_audio == question_name_transcript:
+                transcript = list_of_transcripts[idx]
+                break
         total_nb_of_words = TokenCounter(transcript).total_number_of_words()
 
+        ## Find the transcript corresponding to that subject and question and compute the total number of words
+        # transcript_index = None
+        # transcript = None
+        # for (subject_name_transcript, question_name_transcript) in list_of_subject_question_pairs_transcripts:
+            # if subject_name_audio == subject_name_transcript:
+                # if question_name_audio == question_name_transcript:
+                    # transcript_index = list_of_subject_question_pairs_transcripts.index([subject_name_transcript,
+                                                                                         # question_name_transcript])
+                    # transcript = list_of_transcripts[transcript_index]
+                    # break
 
         ## Calculate the proportion of silent pauses for this sound
 
@@ -240,54 +243,6 @@ def silent_pauses(
 
 
     return propSilentPauses_list
-
-
-# NOT USED
-def calculate_SilentPausesRate(
-    audio_dir: str,
-):
-    """Calculate the proportion of silent Pauses using PRAAT via Parselmouth (inspired by Dr Feinberg).
-
-    :param audio_dir: the audio directory (containing the patientonly audio files)
-    :return: list of floats containing the percentage of silent pauses (s) compared to the total duration of the audio
-    signal
-    # TODO: pas aan van total duration naar total amount of words
-    using PRAAT via Parselmouth (inspired by Dr Feinberg)
-    https://github.com/drfeinberg/PraatScripts/blob/master/Measure%20Pitch%2C%20HNR%2C%20Jitter%2C%20Shimmer%2C%20and%20Formants.ipynb
-    and based on the example of:
-    https://stackoverflow.com/questions/34770105/praat-script-to-remove-silence-cannot-select-and-remove-objects
-    and
-    https://github.com/stylerw/styler_praat_scripts/blob/master/extract_silences.praat
-    """
-    propSilentPauses_list = []  # define a now still empty list of silent pauses across the audio-files
-    list_of_sounds = read_sounds(audio_dir)  # make a list of sounds with the read-function
-    for sound in list_of_sounds:  # for each item in this list of sounds
-        silentPauses_list = []
-        duration = calculate_duration(sound)  # calculate the duration of the sound
-        textGridSilencesObject = create_textGridSilencesObject(sound)
-        # make a textgrid object that distinguishes between sounding and silent intervals
-        df_silences_af = create_textGridDataframe(textGridSilencesObject)
-        # turn this textgrid into a pandas dataframe to make it readable in Python
-        df_silentOnly = df_silences_af[df_silences_af["text"].str.contains("silent")]
-        # keep only the 'silent' rows in the dataframe of this audio file
-        # from: https: // saturncloud.io / blog / how - to - filter - pandas - dataframes - by - column - of - strings
-        # /  #:~:text=Filtering%20by%20a%20Single%20String,string%20value%20in%20the%20column.
-        for i in range(0, len(df_silentOnly)):
-            tstart = df_silentOnly.iloc[i]["tmin"]
-            tstop = df_silentOnly.iloc[i]["tmax"]
-            # https://stackoverflow.com/questions/16729574/how-can-i-get-a-value-from-a-cell-of-a-dataframe
-            deltat = tstop - tstart
-            silentPauses_list.append(deltat)
-        totalSilentPauses = sum(silentPauses_list)
-
-        propSilentPauses = totalSilentPauses / duration
-
-        propSilentPauses_list.append(propSilentPauses)
-        # append this prop of silent pauses from this audio-file
-        # to a list of prop of silent pauses across all audio-files
-
-    return propSilentPauses_list
-
 
 
 

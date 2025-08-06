@@ -163,7 +163,7 @@ def get_subject_question_names_from_files(
         question_name = splitted_file_name[2].split(".")[0]
         # [2] because [1] is the transcription (in the text files) or the 'patientonly' (in the audio files)
         # without the split: would be TASK_NAME.txt; with the split: TASK_NAME (idem for audio files: .wav)
-        list_of_subject_question_names.append([subject_name, question_name])
+        list_of_subject_question_names.append((subject_name, question_name))
 
     return list_of_subject_question_names
 
