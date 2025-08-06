@@ -203,7 +203,7 @@ def number_of_words(
     nb_of_words_list = list()
     list_of_transcripts = read_transcripts(file_path)
     for transcript in list_of_transcripts:
-        total_nb_of_words = TokenCounter(transcript).total_number_of_words()
+        total_nb_of_words = float(TokenCounter(transcript).total_number_of_words())
         nb_of_words_list.append(total_nb_of_words)
 
     return nb_of_words_list
