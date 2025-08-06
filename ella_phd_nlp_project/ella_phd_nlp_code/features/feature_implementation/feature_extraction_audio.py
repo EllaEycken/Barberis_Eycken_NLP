@@ -144,13 +144,83 @@ def speech_rate_syllables(
 
     return speechRateMin_list
 
+def silent_pauses_rate(
+    audio_dir: str,
+    short_or_long: str,
+):
+    """Calculate the rate of silent Pauses (#/s) using PRAAT via Parselmouth (inspired by Dr Feinberg).
+
+    :param audio_dir: the audio directory (containing the patientonly audio files)
+    :param short_or_long: the short or long silence
+    :return: list of floats containing the rate of SHORT silent pauses (#/s)
+
+    For SHORT pauses: Based on the following definition:
+    Number of silent regions between words that are 150-400 ms (Le et al., 2018; Pakhomov et al., 2010)
+    divided by the total duration of the sound (note that this sound contains only the segments where
+    the patient is speaking, including pauses etc).
+
+    For LONG pauses: Based on the following definition:
+    Number of silent regions between words that are > 400 ms (Le et al., 2018; Pakhomov et al., 2010)
+    divided by the total duration of the sound (note that this sound contains only the segments where
+    the patient is speaking, including pauses etc).
+
+    using PRAAT via Parselmouth (inspired by Dr Feinberg)
+    https://github.com/drfeinberg/PraatScripts/blob/master/Measure%20Pitch%2C%20HNR%2C%20Jitter%2C%20Shimmer%2C%20and%20Formants.ipynb
+    and based on the example of:
+    https://stackoverflow.com/questions/34770105/praat-script-to-remove-silence-cannot-select-and-remove-objects
+    and
+    https://github.com/stylerw/styler_praat_scripts/blob/master/extract_silences.praat
+    """
+    rateSilentPauses_list = []  # define a now still empty list of rates of silent pauses across the audio-files
+    list_of_sounds = read_sounds(audio_dir)  # make a list of sounds with the read-function
+
+    for sound in list_of_sounds:  # for each item in this list of sounds
+
+        # Filter the silent parts of the audio signal into one 'silence' dataframe
+        textGridSilencesObject = create_textGridSilencesObject(sound) # make a textgrid object that distinguishes between sounding and silent intervals
+        df_silences_af = create_textGridDataframe(textGridSilencesObject) # turn this textgrid into a pandas dataframe to make it readable in Python
+        df_silentOnly = df_silences_af[df_silences_af["text"].str.contains("silent")] # keep only the 'silent' rows in the dataframe of this audio file
+        # from: https: // saturncloud.io / blog / how - to - filter - pandas - dataframes - by - column - of - strings
+        # /  #:~:text=Filtering%20by%20a%20Single%20String,string%20value%20in%20the%20column.
+
+        # Extract the  silent pauses from each silent segment (row) in the dataframe
+        silentPauses_list = []
+        for i in range(0, len(df_silentOnly)): # go over the rows of the df
+            tstart = df_silentOnly.iloc[i]["tmin"]  # note: is in SECONDS
+            tstop = df_silentOnly.iloc[i]["tmax"]
+            # https://stackoverflow.com/questions/16729574/how-can-i-get-a-value-from-a-cell-of-a-dataframe
+            deltat = tstop - tstart
+            if short_or_long == "short":
+                if minshortpause<= deltat <= maxshortpause:  # note: is all in SECONDS
+                    silentPauses_list.append(deltat)
+                else:
+                    continue
+            else: # so looking at long pauses
+                if minlongpause < deltat:  # note: is all in SECONDS
+                    silentPauses_list.append(deltat)
+                else:
+                    continue
+
+
+        # Calculate the rate of silent pauses for this patient-task file
+        total_amount_silent_pauses = len(silentPauses_list)
+        total_duration = calculate_duration(sound)
+        rate_silent_pauses = total_amount_silent_pauses/ total_duration
+        rateSilentPauses_list.append(rate_silent_pauses)
+        # append this rate of silent pauses from this audio-file
+        # to a list of rate of silent pauses across all audio-files
+
+
+    return rateSilentPauses_list
+
+
 
 def silent_pauses(
     audio_dir: str,
     transcript_dir: str,
     short_or_long: str,
 ):
-    """Calculate the proportion of SHORT silent Pauses (#/word) using PRAAT via Parselmouth (inspired by Dr Feinberg).
+    """Calculate the proportion of silent Pauses (#/word) using PRAAT via Parselmouth (inspired by Dr Feinberg).
 
     :param audio_dir: the audio directory (containing the patientonly audio files)
     :param transcript_dir: the transcript directory (containing the transcripts)
@@ -256,4 +326,5 @@ if __name__ == "__main__":
     # speech_rate_words(audio_dir, transcript_dir)
     # speech_rate_syllables(audio_dir)
     # silent_pauses(audio_dir, transcript_dir, 'short')
-    silent_pauses(audio_dir, transcript_dir, 'long')
+    # silent_pauses(audio_dir, transcript_dir, 'long')
+    silent_pauses_rate(audio_dir, 'long')

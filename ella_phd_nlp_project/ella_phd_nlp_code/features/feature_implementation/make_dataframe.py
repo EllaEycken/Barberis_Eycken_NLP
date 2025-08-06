@@ -222,6 +222,12 @@ def build_df_subject_task_features_updated(
     df_features["FLU_Long Pauses_AT"] = df_features.index.map(
         feature_to_dict(silent_pauses, audio_dir, text_dir, short_or_long='long')
     )
+    df_features["FLU_Short Pause Rate_A"] = df_features.index.map(
+        feature_to_dict(silent_pauses_rate,     audio_dir, short_or_long='short')
+    )
+    df_features["FLU_Long Pause Rate_A"] = df_features.index.map(
+        feature_to_dict(silent_pauses_rate, audio_dir, short_or_long='long')
+    )
 
     ## if normalize == True, Normalize all feature columns (ignore NaNs) to z-scores (mean = 0, std = 1)
     if normalize:
@@ -390,6 +396,8 @@ def build_df_subject_task_features_absolute(
         "FLU_Speech Rate Syllables_A": speech_rate_syllables(audio_dir),
         "FLU_Short Pauses_AT": silent_pauses(audio_dir, text_dir, 'short'),
         "FLU_Long Pauses_AT": silent_pauses(audio_dir, text_dir, 'long'),
+        "FLU_Short Pause Rate_A": silent_pauses_rate(audio_dir, 'short'),
+        "FLU_Long Pause Rate_A": silent_pauses_rate(audio_dir, 'long'),
 
     }
 
@@ -410,11 +418,9 @@ def build_df_subject_task_features_absolute(
 
 
 def build_df_subject_features_per_task(
-    text_dir: str,
-    audio_dir: str,
     tables_dir: str,
-    excel_name_df_subject_task_features = str("df_subject_task_features.xlsx"),
-    excel_name = str("df_subject_features_per_task.xlsx")
+    excel_name_df_subject_task_features: str = "df_subject_task_features.xlsx",
+    excel_name: str = "df_subject_features_per_task.xlsx"
 ):
     """
     Generate a dataframe with all subjects and features, per task
@@ -422,9 +428,9 @@ def build_df_subject_features_per_task(
     - rows: subjects
     - columns: features
 
-    :param text_dir: the (processed) text directory
-    :param audio_dir: the (processed) audio directory
     :param tables_dir: the tables directory
+    :param excel_name_df_subject_task_features: the original excel file,
+    defaults to df_subject_task_features.xlsx,
     :param excel_name: defaults to df_subject_features_per_task.xlsx
     :return: a dictionary containing key-value pairs,
      - with key = task_name
@@ -450,8 +456,8 @@ def build_df_subject_features_per_task(
         task_dfs[task_name] = df_task
 
     # Write to Excel with multiple sheets
-    file_name = os.path.join(TABLES_DIR, excel_name)
-    with pd.ExcelWriter(file_name) as writer:
+    output_path = os.path.join(tables_dir, excel_name)
+    with pd.ExcelWriter(output_path) as writer:
         for task_name, task_df in task_dfs.items():
             task_df.to_excel(writer, sheet_name=str(task_name), index=False)
 
@@ -464,8 +470,24 @@ if __name__ == "__main__":
     audio_dir = AUDIO_PATIENTU_DIR
     tables_dir = TABLES_DIR
 
-    # build_df_subject_task_features_updated(text_dir, audio_dir, tables_dir)
-    build_df_subject_task_features_updated(text_dir, audio_dir, tables_dir, normalize = False)
+    build_df_subject_task_features_updated(text_dir, audio_dir, tables_dir, normalize=False)
+    build_df_subject_features_per_task(
+        tables_dir,
+        excel_name_df_subject_task_features="df_subject_task_features.xlsx",
+        excel_name= "df_subject_features_per_task.xlsx",
+    )
+
+    build_df_subject_task_features_updated(text_dir, audio_dir, tables_dir,
+                                           excel_name = "df_subject_task_features_additional.xlsx",
+                                           normalize=True)
+    build_df_subject_features_per_task(tables_dir,
+                                        excel_name_df_subject_task_features = "df_subject_task_features_normalized_additional.xlsx",
+                                        excel_name= "df_subject_features_per_task_normalized_additional.xlsx",)
+    # TODO: idem for absolute values!
+
+
+
+    # build_df_subject_task_features_updated(text_dir, audio_dir, tables_dir, normalize = False)
     """"
     build_df_subject_task_features(text_dir, audio_dir, tables_dir)
     build_df_subject_features_per_task(text_dir, audio_dir, tables_dir)
