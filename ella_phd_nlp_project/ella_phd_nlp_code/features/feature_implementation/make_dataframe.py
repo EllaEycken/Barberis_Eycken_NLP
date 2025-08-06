@@ -261,7 +261,7 @@ def build_df_subject_task_features_updated(
 
 
 
-def build_df_subject_task_features(
+def build_df_subject_task_features_OLD(
     text_dir: str,
     audio_dir: str,
     tables_dir: str,
@@ -338,7 +338,7 @@ def build_df_subject_task_features(
     return df_features
 
 
-def build_df_subject_task_features_absolute(
+def build_df_subject_task_features_absolute_OLD(
     text_dir: str,
     audio_dir: str,
     tables_dir: str,
@@ -470,20 +470,20 @@ if __name__ == "__main__":
     audio_dir = AUDIO_PATIENTU_DIR
     tables_dir = TABLES_DIR
 
-    build_df_subject_task_features_updated(text_dir, audio_dir, tables_dir, normalize=False)
-    build_df_subject_features_per_task(
-        tables_dir,
-        excel_name_df_subject_task_features="df_subject_task_features.xlsx",
-        excel_name= "df_subject_features_per_task.xlsx",
-    )
 
     build_df_subject_task_features_updated(text_dir, audio_dir, tables_dir,
-                                           excel_name = "df_subject_task_features_additional.xlsx",
+                                           excel_name = "df_subject_task_features_07082025.xlsx",
                                            normalize=True)
     build_df_subject_features_per_task(tables_dir,
-                                        excel_name_df_subject_task_features = "df_subject_task_features_normalized_additional.xlsx",
-                                        excel_name= "df_subject_features_per_task_normalized_additional.xlsx",)
-    # TODO: idem for absolute values!
+                                        excel_name_df_subject_task_features = "df_subject_task_features_07082025_normalized.xlsx",
+                                        excel_name= "df_subject_features_per_task_07082025_normalized.xlsx")
+
+    build_df_subject_task_features_updated(text_dir, audio_dir, tables_dir,
+                                           excel_name="df_subject_task_features_07082025.xlsx",
+                                           normalize=False)
+    build_df_subject_features_per_task(tables_dir,
+                                       excel_name_df_subject_task_features="df_subject_task_features_07082025.xlsx",
+                                       excel_name="df_subject_features_per_task_07082025.xlsx")
 
 
 
