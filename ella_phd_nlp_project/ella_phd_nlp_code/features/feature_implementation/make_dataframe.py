@@ -89,6 +89,171 @@ def normalize_results_z(input_list: list):
 
 """ BUILD DATAFRAME """
 
+import os
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+
+def build_df_subject_task_features_updated(
+    text_dir: str,
+    audio_dir: str,
+    tables_dir: str,
+    excel_name="df_subject_task_features.xlsx",
+    normalize = True,
+) -> pd.DataFrame:
+    """
+    Build a dataframe with all subject-task pairs and features (z-normalized values).
+    Rows: subject-task pairs
+    Columns: features (z-scores: mean 0, std 1)
+
+    :param text_dir: path to the processed text directory
+    :param audio_dir: path to the processed audio directory
+    :param tables_dir: path to the tables directory
+    :param excel_name: filename for Excel output (default: df_subject_task_features.xlsx)
+    :param normalize: whether to normalize the features (default: True)
+    :return: a Pandas dataframe with normalized features, saved to Excel
+    """
+
+    ## Get the list of subject-task pairs from text_dir (or audio_dir if preferred)
+    subject_task_pairs = get_subject_question_names_from_files(text_dir)
+    index = pd.MultiIndex.from_tuples(subject_task_pairs, names=["subject_id", "task_id"])
+    # these are subject-task pair indices: each index entry is a (subject_id, task_id) typle
+
+    ## Initialize empty DataFrame with multi-index
+    df_features = pd.DataFrame(index=index)
+
+    ##  Helper function: Map features to dict keyed by (subject, task): this generates feature dictionaries for each feature
+    def feature_to_dict(feature_func, *args, **kwargs):
+        results = feature_func(*args, **kwargs)
+        keys = get_subject_question_names_from_files(text_dir)  # or audio_dir depending on feature_func
+        return dict(zip(keys, results))
+        # The result is a dictionary for this function:{
+        #   (subject1, task1): value1,
+        #   (subject1, task2): value2,
+        #   (subject2, task1): value3,
+        #   ...
+        # }
+
+    ## Map features to columns in df_features: add each feature as a column by mapping from the dictionary
+    #  1) .map() takes each index tuple and looks it up in the dictionary of the specific feature function (eg sem par).
+    #  2) It returns the corresponding feature value.
+    #  3) This creates a new column (eg "SEM_Semantic Paraphasias") with the feature values aligned to the correct
+    #  (subject_id, task_id) rows.
+    df_features["SEM_Semantic Paraphasias"] = df_features.index.map(
+        feature_to_dict(semantic_paraphasias, text_dir)
+    )
+
+    df_features["PHON_Phonemic Paraphasias"] = df_features.index.map(
+        feature_to_dict(phonemic_paraphasias, text_dir)
+    )
+    df_features["PHON_Neologisms"] = df_features.index.map(
+        feature_to_dict(neologisms, text_dir)
+    )
+
+    df_features["LEX_Number of Words"] = df_features.index.map(
+        feature_to_dict(number_of_words, text_dir)
+    )
+    df_features["LEX_Brunet's Index"] = df_features.index.map(
+        feature_to_dict(brunets_index, text_dir)
+    )
+    df_features["LEX_Noun Rate"] = df_features.index.map(
+        feature_to_dict(noun_rate, text_dir)
+    )
+    df_features["LEX_Verb Rate"] = df_features.index.map(
+        feature_to_dict(verb_rate, text_dir)
+    )
+    df_features["LEX_Adjective Rate"] = df_features.index.map(
+        feature_to_dict(adjective_rate, text_dir)
+    )
+    df_features["LEX_Pronoun Rate"] = df_features.index.map(
+        feature_to_dict(pronoun_rate, text_dir)
+    )
+    df_features["LEX_Adverb Rate"] = df_features.index.map(
+        feature_to_dict(adverb_rate, text_dir)
+    )
+    df_features["LEX_Determiner Rate"] = df_features.index.map(
+        feature_to_dict(determiner_rate, text_dir)
+    )
+    df_features["LEX_Conjunction Rate"] = df_features.index.map(
+        feature_to_dict(conjunction_rate, text_dir)
+    )
+    df_features["LEX_Preposition Rate"] = df_features.index.map(
+        feature_to_dict(preposition_rate, text_dir)
+    )
+    df_features["LEX_Particle Rate"] = df_features.index.map(
+        feature_to_dict(particle_rate, text_dir)
+    )
+    df_features["LEX_Content-Function Ratio"] = df_features.index.map(
+        feature_to_dict(content_function_ratio, text_dir)
+    )
+
+    df_features["GRAM_MLU"] = df_features.index.map(
+        feature_to_dict(mean_length_utterance, text_dir)
+    )
+    df_features["GRAM_Noun-Verb Rate"] = df_features.index.map(
+        feature_to_dict(noun_verb_rate, text_dir)
+    )
+    df_features["GRAM_Subordinate Clauses"] = df_features.index.map(
+        feature_to_dict(subordinate_clauses, text_dir)
+    )
+    # Add # "GRAM_Syntactic Deviation" similarly..
+
+    df_features["FLU_Filled Pause_T"] = df_features.index.map(
+        feature_to_dict(filled_pauses, text_dir)
+    )
+    df_features["FLU_False Start_T"] = df_features.index.map(
+        feature_to_dict(false_starts, text_dir)
+    )
+    df_features["FLU_Word Abandoned_T"] = df_features.index.map(
+        feature_to_dict(word_abandoned, text_dir)
+    )
+    df_features["FLU_Word Repetition_T"] = df_features.index.map(
+        feature_to_dict(word_repetition, text_dir)
+    )
+
+    df_features["FLU_Speech Rate Words_AT"] = df_features.index.map(
+        feature_to_dict(speech_rate_words, audio_dir, text_dir)
+    )
+    df_features["FLU_Speech Rate Syllables_A"] = df_features.index.map(
+        feature_to_dict(speech_rate_syllables, audio_dir)
+    )
+    df_features["FLU_Short Pauses_AT"] = df_features.index.map(
+        feature_to_dict(silent_pauses, audio_dir, text_dir, short_or_long='short')
+    )
+    df_features["FLU_Long Pauses_AT"] = df_features.index.map(
+        feature_to_dict(silent_pauses, audio_dir, text_dir, short_or_long='long')
+    )
+
+    ## if normalize == True, Normalize all feature columns (ignore NaNs) to z-scores (mean = 0, std = 1)
+    if normalize:
+        scaler = StandardScaler()
+        df_features[:] = scaler.fit_transform(df_features.values)
+        # 1) df_features.values extracts the underlying numpy array of the dataframe values only (no index or column labels).
+        # It’s a 2D array with shape (num_rows, num_features).
+        # 2) scaler.fit_transform: i) fit (i) computes the mean and stdv for each column (feature), ii) transform() scales
+        # the values using those mean and stdv statistics
+        # 3) df_features[:] = ...
+        # This assigns the normalized numpy array back in place to the original dataframe.
+        # The [:] syntax means you replace all values in df_features without changing its structure (index and columns stay intact).
+        # So the dataframe now holds the z-scored feature values.
+        # Note: normally the df only has numeric values (feature outcomes), as the tuple-indices are not yet set to
+        # separate columns (only happens later). It is thus safe to normalize the columns as it is only feature outcomes.
+        base, ext = os.path.splitext(excel_name)  # ext includes the dot, e.g., ".xlsx"
+        excel_name = f"{base}_normalized{ext}"
+        # excel_name = '_'.join([excel_name.split('.')[0], "normalized", "xlsx"])
+
+    ## Save to Excel (reset index to have subject_id and task_id as columns)
+    output_path = os.path.join(tables_dir, excel_name)
+    df_features.reset_index().to_excel(output_path, index=False)
+    # Calling df_features.reset_index() moves the index levels back into regular columns.
+    # So if your index is (subject_id, task_id), after reset_index() the dataframe will have columns: subject_id | task_id |...
+    # Note: The index=False argument tells pandas not to write the dataframe index as an extra unnamed column.
+
+    print(f"Saved feature dataframe to {output_path}")
+
+    return df_features.reset_index()
+
+
+
 
 def build_df_subject_task_features(
     text_dir: str,
@@ -299,6 +464,8 @@ if __name__ == "__main__":
     audio_dir = AUDIO_PATIENTU_DIR
     tables_dir = TABLES_DIR
 
+    build_df_subject_task_features_updated(text_dir, audio_dir, tables_dir)
+    """"
     build_df_subject_task_features(text_dir, audio_dir, tables_dir)
     build_df_subject_features_per_task(text_dir, audio_dir, tables_dir)
 
@@ -307,3 +474,4 @@ if __name__ == "__main__":
                                        excel_name_df_subject_task_features='df_subject_task_features_absolute.xlsx',
                                        excel_name='df_subject_features_per_task_absolute.xlsx'
                                        )
+    """
