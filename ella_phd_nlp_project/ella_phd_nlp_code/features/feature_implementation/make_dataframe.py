@@ -472,18 +472,18 @@ if __name__ == "__main__":
 
 
     build_df_subject_task_features_updated(text_dir, audio_dir, tables_dir,
-                                           excel_name = "df_subject_task_features_07082025.xlsx",
+                                           excel_name = "df_subject_task_features.xlsx",
                                            normalize=True)
     build_df_subject_features_per_task(tables_dir,
-                                        excel_name_df_subject_task_features = "df_subject_task_features_07082025_normalized.xlsx",
-                                        excel_name= "df_subject_features_per_task_07082025_normalized.xlsx")
+                                        excel_name_df_subject_task_features = "df_subject_task_features_normalized.xlsx",
+                                        excel_name= "df_subject_features_per_task_normalized.xlsx")
 
     build_df_subject_task_features_updated(text_dir, audio_dir, tables_dir,
-                                           excel_name="df_subject_task_features_07082025.xlsx",
+                                           excel_name="df_subject_task_features.xlsx",
                                            normalize=False)
     build_df_subject_features_per_task(tables_dir,
-                                       excel_name_df_subject_task_features="df_subject_task_features_07082025.xlsx",
-                                       excel_name="df_subject_features_per_task_07082025.xlsx")
+                                       excel_name_df_subject_task_features="df_subject_task_features.xlsx",
+                                       excel_name="df_subject_features_per_task.xlsx")
 
 
 
