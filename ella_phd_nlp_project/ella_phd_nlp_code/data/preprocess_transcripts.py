@@ -1,4 +1,6 @@
 """ Preprocess transcripts from IANSA dataset """
+""" Use this preprocessing file if the transcripts are WORD-files and not text files
+    Mostly used if you want to use annotated transcripts. """
 
 import os
 import re
