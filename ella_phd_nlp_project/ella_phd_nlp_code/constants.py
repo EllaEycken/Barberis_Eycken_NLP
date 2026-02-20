@@ -34,26 +34,17 @@ PROCESSED_DIR = os.path.join(DATA_DIR, 'processed')
 
 DEMOGRAPHICS_DIR = os.path.join(RAW_DIR,'demographics')
 
-DOCX_DIR = os.path.join(RAW_DIR, 'docx_transcripts')
-DOCX_DIR_DUMMY = os.path.join(RAW_DIR, 'docx_transcripts_dummy')
-PRECLEANTEXT_DIR = os.path.join(INTERIM_DIR, 'txt_transcripts_preclean')
-PRECLEANTEXT_DIR_DUMMY = os.path.join(INTERIM_DIR, 'txt_transcripts_preclean_dummy')
-TEXT_DIR = os.path.join(PROCESSED_DIR, 'txt_transcripts')
-TEXT_DIR_DUMMY = os.path.join(PROCESSED_DIR, 'txt_transcripts_dummy')
+DOCX_DIR = os.path.join(RAW_DIR, 'docx_transcripts')  # TODO: change name for new analyses
+PRECLEANTEXT_DIR = os.path.join(INTERIM_DIR, 'txt_transcripts_preclean_febr2026')  # TODO: change name for new analyses
+TEXT_DIR = os.path.join(PROCESSED_DIR, 'txt_transcripts_febr2026')  # TODO: change name for new analyses
 
-AUDIO_DIR = os.path.join(RAW_DIR, 'raw_audio')
-AUDIO_DIR_DUMMY = os.path.join(RAW_DIR, 'raw_audio_dummy')
-NONMERGED_AUDIO_PATIENT_DIR = os.path.join(INTERIM_DIR, 'audio_patientonly_nonmerged')
-NONMERGED_AUDIO_PATIENT_DIR_DUMMY = os.path.join(INTERIM_DIR, 'audio_patientonly_nonmerged_dummy')
-NONMERGED_AUDIO_PATIENTU_DIR = os.path.join(INTERIM_DIR, 'audio_patientonlyU_nonmerged')
-NONMERGED_AUDIO_PATIENTU_DIR_DUMMY = os.path.join(INTERIM_DIR, 'audio_patientonlyU_nonmerged_dummy')
-AUDIO_PATIENT_DIR = os.path.join(PROCESSED_DIR, 'audio_patientonly')
-AUDIO_PATIENT_DIR_DUMMY = os.path.join(PROCESSED_DIR, 'audio_patientonly_dummy')
-AUDIO_PATIENTU_DIR = os.path.join(PROCESSED_DIR, 'audio_patientonlyU')
-AUDIO_PATIENTU_DIR_DUMMY = os.path.join(PROCESSED_DIR, 'audio_patientonlyU_dummy')
+AUDIO_DIR = os.path.join(RAW_DIR, 'raw_audio_febr2026')  # TODO: change name for new analyses
+NONMERGED_AUDIO_PATIENT_DIR = os.path.join(INTERIM_DIR, 'audio_patientonly_nonmerged_febr2026')  # TODO: change name for new analyses
+NONMERGED_AUDIO_PATIENTU_DIR = os.path.join(INTERIM_DIR, 'audio_patientonlyU_nonmerged_febr2026')  # TODO: change name for new analyses
+AUDIO_PATIENT_DIR = os.path.join(PROCESSED_DIR, 'audio_patientonly_febr2026') # TODO: change name for new analyses
+AUDIO_PATIENTU_DIR = os.path.join(PROCESSED_DIR, 'audio_patientonlyU_febr2026') # TODO: change name for new analyses
 
-DIAR_DIR = os.path.join(RAW_DIR, 'diarization')
-DIAR_DIR_DUMMY = os.path.join(RAW_DIR, 'diarization_dummy')
+DIAR_DIR = os.path.join(RAW_DIR, 'diarization_febr2026') # TODO: change name for new analyses
 # CLEAN_DIAR_DIR = os.path.join(INTERIM_DIR, 'diarization_clean')
 # CLEAN_DIAR_DIR_DUMMY = os.path.join(INTERIM_DIR, 'diarization_clean_dummy')
 
