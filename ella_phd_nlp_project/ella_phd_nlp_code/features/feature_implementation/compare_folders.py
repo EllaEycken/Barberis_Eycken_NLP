@@ -6,8 +6,8 @@ import os
 def all_paths(folder):
     return [os.path.join(folder, f) for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))]
 
-folder1 = r'C:\Users\u0146803\git\Ella_PhD_NLP_repo\data\processed\audio_patientonlyU'
-folder2 = r'C:\Users\u0146803\git\Ella_PhD_NLP_repo\data\processed\txt_transcripts'
+folder1 = r'C:\Users\u0146803\git\Ella_PhD_NLP_repo\data\raw\raw_audio_dec2025'
+folder2 = r'C:\Users\u0146803\git\Ella_PhD_NLP_repo\data\raw\raw_audio_febr2026'
 
 files1 = all_paths(folder1)
 files2 = all_paths(folder2)
@@ -18,7 +18,8 @@ def extract_subject_question_names(file_list):
         file_name = os.path.basename(file)
         splitted_file_name = file_name.split("_")
         subject_name = splitted_file_name[0]
-        question_name = splitted_file_name[2].split(".")[0]
+        question_name = splitted_file_name[1]  # TODO: change if other sequence
+        # question_name = splitted_file_name[2].split(".")[0]
         result.append((subject_name, question_name))  # Using tuple instead of list
     return result
 
