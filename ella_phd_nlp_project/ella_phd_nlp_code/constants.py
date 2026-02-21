@@ -48,6 +48,12 @@ DIAR_DIR = os.path.join(RAW_DIR, 'diarization_febr2026') # TODO: change name for
 # CLEAN_DIAR_DIR = os.path.join(INTERIM_DIR, 'diarization_clean')
 # CLEAN_DIAR_DIR_DUMMY = os.path.join(INTERIM_DIR, 'diarization_clean_dummy')
 
+
+## Directories for reports
+REPORTS_DIR = os.path.join(PROJECT_DIR, '../reports') # TODO: change name for new analyses
+FIGURES_DIR = os.path.join(REPORTS_DIR, 'figures') # TODO: change name for new analyses
+TABLES_DIR = os.path.join(REPORTS_DIR, 'tables') # TODO: change name for new analyses
+
 ## Directory for models
 MODELS_DIR = os.path.join(PROJECT_DIR, '../models')
 MILTENBURG_MODEL_PATH = os.path.join(MODELS_DIR, 'miltenburg', 'model.perc.dutch_tagger_large.pickle')
@@ -95,10 +101,7 @@ NON_NOUNS = {
     "eh",
 }
 
-## Directories for reports
-REPORTS_DIR = os.path.join(PROJECT_DIR, '../reports')
-FIGURES_DIR = os.path.join(REPORTS_DIR, 'figures')
-TABLES_DIR = os.path.join(REPORTS_DIR, 'tables')
+
 
 
 ## Path to diagnostic labels
