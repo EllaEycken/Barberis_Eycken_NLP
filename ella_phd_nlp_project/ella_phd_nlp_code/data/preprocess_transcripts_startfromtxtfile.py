@@ -127,15 +127,15 @@ def preprocess_IANSA_transcripts_startfromtxtfile(interim_dir, processed_dir):
         + glob.glob(interim_dir + f"{os.path.sep}sub-c[0-9]*")
     )
 
-    # Group potential narrative pairs
     narrative_groups = {}
     other_files = []
 
     for txt_path in all_txt_files:
         filename = os.path.basename(txt_path)
 
-        if "_story_stroke" in filename or "_story_weekend" in filename:
-            subject_id = filename.split("_story_")[0]
+        # Detect all possible story types
+        if "_story" in filename:
+            subject_id = filename.split("_story")[0]
 
             if subject_id not in narrative_groups:
                 narrative_groups[subject_id] = []
@@ -146,38 +146,49 @@ def preprocess_IANSA_transcripts_startfromtxtfile(interim_dir, processed_dir):
 
     cleaned_files = []
 
-    # --- Process non-narrative files normally ---
+    # --- Process non-story files normally ---
     for txt_file in other_files:
         cleaned_txt_file = cleanup_txt_file(txt_file, processed_dir)
         cleaned_files.append(cleaned_txt_file)
 
-    # --- Process narrative pairs ---
+    # --- Handle story files ---
     for subject_id, file_list in narrative_groups.items():
 
+        output_path = os.path.join(
+            processed_dir, f"{subject_id}_narrative.txt"
+        )
+
+        # Case A: two story files → merge
         if len(file_list) == 2:
-            merged_output_path = os.path.join(
-                processed_dir, f"{subject_id}_narrative.txt"
-            )
 
-            with open(merged_output_path, "w", encoding="utf-8") as outfile:
+            with open(output_path, "w", encoding="utf-8") as outfile:
 
-                # Ensure consistent order
-                for txt_file in sorted(file_list):
+                for txt_file in sorted(file_list):  # consistent order
                     cleaned_temp_path = cleanup_txt_file(txt_file, processed_dir)
 
                     with open(cleaned_temp_path, "r", encoding="utf-8") as infile:
                         outfile.write(infile.read())
                         outfile.write("\n")
 
-                    # Optional: remove temporary cleaned stroke/weekend file
                     os.remove(cleaned_temp_path)
 
-            cleaned_files.append(merged_output_path)
+            cleaned_files.append(output_path)
+
+        # Case B: only one story file → rename to narrative
+        elif len(file_list) == 1:
+
+            cleaned_temp_path = cleanup_txt_file(file_list[0], processed_dir)
+
+            os.rename(cleaned_temp_path, output_path)
+
+            cleaned_files.append(output_path)
 
         else:
-            print(f"Warning: {subject_id} missing one narrative file.")
+            print(f"Warning: Unexpected number of story files for {subject_id}")
 
     return cleaned_files
+
+
 
 
 
