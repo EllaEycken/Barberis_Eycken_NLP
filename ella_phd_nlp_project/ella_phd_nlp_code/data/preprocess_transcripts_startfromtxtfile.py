@@ -1,7 +1,12 @@
 """ Preprocess transcripts from IANSA dataset (Starting from TEXT FILES) """
-""" Use this preprocessing file if the transcripts are TXT-files and not docx
+""" Use this preprocessing file if the transcripts are TXT-files and not docx.
     Mostly used if you want to use non-annotated transcripts. 
-    Note that annotations are NOT fixed because it assumes there were none. """
+    
+    Note that the original text files will now be stored in the INTERIM direction as a starting point (so the raw folder is empty).
+    Note also that the original text file names should be sub-XX_nameTask.
+    Note that annotations are NOT fixed because it assumes there were none. 
+    
+    """
 
 import os
 import re
@@ -17,9 +22,15 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
     # DOCX_DIR_DUMMY, PRECLEANTEXT_DIR_DUMMY, TEXT_DIR_DUMMY,
 
 
+
 def cleanup_txt_file(txt_path_in, processed_dir):
     """
     Helper function to clean up a text file
+
+    Note that the text_file names are expected to be sub-X_nameTask (so exactly as the processed text file should be called,
+    except for the story files that will be merge into a narrative text file in the preprocess_IANSA function (next step))
+
+
     :param txt_path_in: the text file path that must be cleaned up
     :param processed_dir: the processed directory path where the cleaned text files will be saved
     :return: returns the text file with the following changes
@@ -40,29 +51,24 @@ def cleanup_txt_file(txt_path_in, processed_dir):
 
     """
     ## Choose the name for the cleaned text file
-    txt_name_subparts = os.path.splitext(os.path.basename(txt_path_in))[0].split('_')
-    # 'os.path.splitext(os.path.basename(txt_path_in))[0]' extracts the name of the txt_path (all without the .txt
-    # extension)
-    txt_correct_name = str
-    if txt_name_subparts[-1] != 'transcriptie':
-        txt_correct_name = '_'.join(txt_name_subparts)
-    if txt_name_subparts[-1] == 'transcriptie':
-        txt_name_subparts[-2], txt_name_subparts[-1] = txt_name_subparts[-1], txt_name_subparts[-2]
-        txt_correct_name = '_'.join(txt_name_subparts)
-
-    txt_correct_name = '_'.join(txt_name_subparts[:-1])
-    # make sure you only keep the 'sub-XXX', 'transcriptie' and 'NAME TASK' (so discard the last 'preclean' part) and
-    # join them
+    filename = os.path.basename(txt_path_in)
 
     txt_path_out = os.path.join(
         processed_dir, ".".join(
-            [txt_correct_name, 'txt']))
+            [filename, 'txt']))
 
+    try:
+        with open(txt_path_in, 'r', encoding="utf-8") as infile:  # means: if encoded by Python (utf-8)
+            lines = infile.readlines()
+    except UnicodeDecodeError:
+        with open(txt_path_in, 'r', encoding="cp1252") as infile:  # means: if encoded by other Windows program (cp1252)
+            lines = infile.readlines()
 
-    with (
-        open(txt_path_in, 'r', encoding = "utf-8") as infile,
-        open(txt_path_out, 'w') as outfile
-    ):
+    ## Original code (didn't account for encoding difference between utf-8 and cp1252)
+    # with (
+        # open(txt_path_in, 'r', encoding = "utf-8") as infile,
+        # open(txt_path_out, 'w') as outfile
+    # ):
         # 'r' = open the txt_path_in file for reading, 'w' = open the txt_path_out for writing
         # Note: encoding as utf-8 is needed as Python should be able to read different characters , encoding = 'utf-8'
 
@@ -70,10 +76,12 @@ def cleanup_txt_file(txt_path_in, processed_dir):
         # if not first_line:
         #    raise ValueError("The input file is empty")
 
-        lines = infile.readlines()
-        if not lines:
-            raise ValueError("The input file is empty")
+        # lines = read_file_safely(file_path)
 
+    if not lines:
+        raise ValueError("The input file is empty")
+
+    with open(txt_path_out, 'w', encoding="utf-8") as outfile:
         for line in lines:
             ## Remove abundant text
             line = line.replace('ggg', '').replace('<spk>', '').replace('xxx', ''
@@ -104,24 +112,73 @@ def cleanup_txt_file(txt_path_in, processed_dir):
 def preprocess_IANSA_transcripts_startfromtxtfile(interim_dir, processed_dir):
     """
     Preprocess ALL IANSA transcripts (using the helper function cleanup_txt_file)
+    AND merge story_stroke and story_weekend into a narrative.txt file
+
     :param interim_dir: the interim directory where all the ***ORIGINAL*** TEXT files were stored
     :param processed_dir: the processed directory path where the cleaned TEXT files will be saved
     :return: a list of all the CLEANED text files in the interim directory
     """
-    all_txt_files_list = list()
-    all_txt_files_list = (
-        glob.glob(interim_dir + f"{os.path.sep}sub-a[0-9]*")  # txt files from aphasia patients
+    all_txt_files = (
+        glob.glob(interim_dir + f"{os.path.sep}sub-a[0-9]*")
         #  the 'sub-a*' looks for all files starting with sub-a
         #  [0-9] means 'any digit and doesn't matter how many digits;
         #  * means 'doesn't matter what comes after this'
-        + glob.glob(interim_dir + f"{os.path.sep}sub-b[0-9]*") # txt files from control patients (comm partner)
-        + glob.glob(interim_dir + f"{os.path.sep}sub-c[0-9]*")  # txt files from control patients (non-related)
+        + glob.glob(interim_dir + f"{os.path.sep}sub-b[0-9]*")
+        + glob.glob(interim_dir + f"{os.path.sep}sub-c[0-9]*")
     )
-    for txt_file in all_txt_files_list:
-        cleaned_txt_file = cleanup_txt_file(txt_file,processed_dir)
-        all_txt_files_list.append(cleaned_txt_file)
 
-    return all_txt_files_list
+    # Group potential narrative pairs
+    narrative_groups = {}
+    other_files = []
+
+    for txt_path in all_txt_files:
+        filename = os.path.basename(txt_path)
+
+        if "_story_stroke" in filename or "_story_weekend" in filename:
+            subject_id = filename.split("_story_")[0]
+
+            if subject_id not in narrative_groups:
+                narrative_groups[subject_id] = []
+
+            narrative_groups[subject_id].append(txt_path)
+        else:
+            other_files.append(txt_path)
+
+    cleaned_files = []
+
+    # --- Process non-narrative files normally ---
+    for txt_file in other_files:
+        cleaned_txt_file = cleanup_txt_file(txt_file, processed_dir)
+        cleaned_files.append(cleaned_txt_file)
+
+    # --- Process narrative pairs ---
+    for subject_id, file_list in narrative_groups.items():
+
+        if len(file_list) == 2:
+            merged_output_path = os.path.join(
+                processed_dir, f"{subject_id}_narrative.txt"
+            )
+
+            with open(merged_output_path, "w", encoding="utf-8") as outfile:
+
+                # Ensure consistent order
+                for txt_file in sorted(file_list):
+                    cleaned_temp_path = cleanup_txt_file(txt_file, processed_dir)
+
+                    with open(cleaned_temp_path, "r", encoding="utf-8") as infile:
+                        outfile.write(infile.read())
+                        outfile.write("\n")
+
+                    # Optional: remove temporary cleaned stroke/weekend file
+                    os.remove(cleaned_temp_path)
+
+            cleaned_files.append(merged_output_path)
+
+        else:
+            print(f"Warning: {subject_id} missing one narrative file.")
+
+    return cleaned_files
+
 
 
 if __name__ == "__main__":
