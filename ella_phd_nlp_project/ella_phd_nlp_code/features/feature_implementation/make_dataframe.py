@@ -141,93 +141,117 @@ def build_df_subject_task_features_updated(
     df_features["SEM_Semantic Paraphasias"] = df_features.index.map(
         feature_to_dict(semantic_paraphasias, text_dir)
     )
-
+    print('semantic paraphasias calculated')
     df_features["PHON_Phonemic Paraphasias"] = df_features.index.map(
         feature_to_dict(phonemic_paraphasias, text_dir)
     )
+    print('phonemic paraphasias calculated')
     df_features["PHON_Neologisms"] = df_features.index.map(
         feature_to_dict(neologisms, text_dir)
     )
-
+    print('neologisms calculated')
     df_features["LEX_Number of Words"] = df_features.index.map(
         feature_to_dict(number_of_words, text_dir)
     )
+    print('nb of words calculated')
     df_features["LEX_Brunet's Index"] = df_features.index.map(
         feature_to_dict(brunets_index, text_dir)
     )
+    print('BI calculated')
     df_features["LEX_Noun Rate"] = df_features.index.map(
         feature_to_dict(noun_rate, text_dir)
     )
+    print('noun rate calculated')
     df_features["LEX_Verb Rate"] = df_features.index.map(
         feature_to_dict(verb_rate, text_dir)
     )
+    print('verb rate calculated')
     df_features["LEX_Adjective Rate"] = df_features.index.map(
         feature_to_dict(adjective_rate, text_dir)
     )
+    print('adjective rate calculated')
     df_features["LEX_Pronoun Rate"] = df_features.index.map(
         feature_to_dict(pronoun_rate, text_dir)
     )
+    print('pronoun rate calculated')
     df_features["LEX_Adverb Rate"] = df_features.index.map(
         feature_to_dict(adverb_rate, text_dir)
     )
+    print('adverb rate calculated')
     df_features["LEX_Determiner Rate"] = df_features.index.map(
         feature_to_dict(determiner_rate, text_dir)
     )
+    print('determiner rate calculated')
     df_features["LEX_Conjunction Rate"] = df_features.index.map(
         feature_to_dict(conjunction_rate, text_dir)
     )
+    print('conjunction rate calculated')
     df_features["LEX_Preposition Rate"] = df_features.index.map(
         feature_to_dict(preposition_rate, text_dir)
     )
+    print('preposition rate calculated')
     df_features["LEX_Particle Rate"] = df_features.index.map(
         feature_to_dict(particle_rate, text_dir)
     )
+    print('particle rate calculated')
     df_features["LEX_Content-Function Ratio"] = df_features.index.map(
         feature_to_dict(content_function_ratio, text_dir)
     )
-
+    print('content function ratio calculated')
     df_features["GRAM_MLU"] = df_features.index.map(
         feature_to_dict(mean_length_utterance, text_dir)
     )
+    print('mean length utterance calculated')
     df_features["GRAM_Noun-Verb Rate"] = df_features.index.map(
         feature_to_dict(noun_verb_rate, text_dir)
     )
+    print('noun verb rate calculated')
     df_features["GRAM_Subordinate Clauses"] = df_features.index.map(
         feature_to_dict(subordinate_clauses, text_dir)
     )
+    print('subordinate clauses calculated')
     # Add # "GRAM_Syntactic Deviation" similarly..
 
     df_features["FLU_Filled Pause_T"] = df_features.index.map(
         feature_to_dict(filled_pauses, text_dir)
     )
+    print('filled pauses calculated')
     df_features["FLU_False Start_T"] = df_features.index.map(
         feature_to_dict(false_starts, text_dir)
     )
+    print('false starts calculated')
     df_features["FLU_Word Abandoned_T"] = df_features.index.map(
         feature_to_dict(word_abandoned, text_dir)
     )
+    print('word abandoned calculated')
     df_features["FLU_Word Repetition_T"] = df_features.index.map(
         feature_to_dict(word_repetition, text_dir)
     )
-
+    print('word repetition calculated')
     df_features["FLU_Speech Rate Words_AT"] = df_features.index.map(
         feature_to_dict(speech_rate_words, audio_dir, text_dir)
     )
+    print('speech rate words AT calculated')
     df_features["FLU_Speech Rate Syllables_A"] = df_features.index.map(
         feature_to_dict(speech_rate_syllables, audio_dir)
     )
+    print('speech rate syllables A calculated')
     df_features["FLU_Short Pauses_AT"] = df_features.index.map(
         feature_to_dict(silent_pauses, audio_dir, text_dir, short_or_long='short')
     )
+    print('silent pauses calculated')
     df_features["FLU_Long Pauses_AT"] = df_features.index.map(
         feature_to_dict(silent_pauses, audio_dir, text_dir, short_or_long='long')
     )
+    print('silent pauses calculated')
     df_features["FLU_Short Pause Rate_A"] = df_features.index.map(
         feature_to_dict(silent_pauses_rate,     audio_dir, short_or_long='short')
     )
+    print('silent pause rate calculated')
     df_features["FLU_Long Pause Rate_A"] = df_features.index.map(
         feature_to_dict(silent_pauses_rate, audio_dir, short_or_long='long')
     )
+    print('silent pause rate calculated')
 
     ## if normalize == True, Normalize all feature columns (ignore NaNs) to z-scores (mean = 0, std = 1)
     if normalize:
@@ -472,18 +496,18 @@ if __name__ == "__main__":
 
 
     build_df_subject_task_features_updated(text_dir, audio_dir, tables_dir,
-                                           excel_name = "df_subject_task_features_normalized_23022026.xlsx",
+                                           excel_name = "df_subject_task_features.xlsx",
                                            normalize=True)
     build_df_subject_features_per_task(tables_dir,
-                                        excel_name_df_subject_task_features = "df_subject_task_features_normalized_23022026.xlsx",
-                                        excel_name= "df_subject_features_per_task_normalized_23022026.xlsx")
+                                        excel_name_df_subject_task_features = "df_subject_task_features_normalized.xlsx",
+                                        excel_name= "df_subject_features_per_task_normalized.xlsx")
 
     build_df_subject_task_features_updated(text_dir, audio_dir, tables_dir,
-                                           excel_name="df_subject_task_features_23022026.xlsx",
+                                           excel_name="df_subject_task_features.xlsx",
                                            normalize=False)
     build_df_subject_features_per_task(tables_dir,
-                                       excel_name_df_subject_task_features="df_subject_task_features_23022026.xlsx",
-                                       excel_name="df_subject_features_per_task_23022026.xlsx")
+                                       excel_name_df_subject_task_features="df_subject_task_features.xlsx",
+                                       excel_name="df_subject_features_per_task.xlsx")
 
 
 
