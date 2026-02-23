@@ -23,28 +23,17 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
 
 
 
-def cleanup_txt_file(txt_path_in, txt_path_out):
+def cleanup_txt_file(txt_path_in):
     """
-    Helper function to clean up a text file
+    Helper function to clean up a text file (NO new file is created!)
 
     Note that the text_file names are expected to be sub-X_nameTask (so exactly as the processed text file should be called,
     except for the story files that will be merge into a narrative text file in the preprocess_IANSA function (next step))
 
 
     :param txt_path_in: the text file path that must be cleaned up
-    :param processed_dir: the processed directory path where the cleaned text files will be saved
-    :return: returns the text file with the following changes
-        1) Remove the title (first line) for
-            ANTAT 1
-            MCA transcriptie
-        2) Remove the following lines: that start with.. 'ANTAT I', 'MCA transcriptie', 'Set', 'Item', 'Oefenitem'
-                                                          'A:', 'Weekend', 'Stroke'
-        3) Remove the 'A:' lines (= test leader)
-        4) Remove the 'B:' parts in the participant lines
+    :return: returns a string of the original text file with the following changes
         5) Remove ggg, <spk, and xxx
-        6) Remove [] in [...] statements unless it is an [A:…] statement, then remove it completely
-        7) Remove dialect words, only keep normalization --> remove ( ) from normalization so that normalization is
-        counted
         8) Remove direct speech annotations: :"..."
         9) Clean text formatting: Replace multiple spaces with a single space, Replace double punctuation with single,
          Remove  whitespace in between paragraphs, Add whitespace after '.' if necessary
@@ -62,34 +51,34 @@ def cleanup_txt_file(txt_path_in, txt_path_out):
     if not lines:
         raise ValueError("The input file is empty")
 
+    cleaned_fragments = []
 
-    ## Write to new output file
-    with open(txt_path_out, 'w', encoding="utf-8") as outfile:
-        for line in lines:
-            ## Remove abundant text
-            line = line.replace('ggg', '').replace('<spk>', '').replace('xxx', ''
-                                                                        ).replace(':"',''
-                                                                                  ).replace('"','')
-            # Remove coughs/laughs (transcribed as 'ggg') from transcript line
-            # Remove <spk> transcription for speaker changes from transcript line
-            # Remove direct speech annotations (:"")
-            # replace 'xxx' words
+    ## Clean the text file (not making a new text file, happens in preprocess function)
+    for line in lines:
+        ## Remove abundant text
+        line = line.replace('ggg', '').replace('<spk>', '').replace('xxx', ''
+                                                                    ).replace(':"',''
+                                                                              ).replace('"','')
+        # Remove coughs/laughs (transcribed as 'ggg') from transcript line
+        # Remove <spk> transcription for speaker changes from transcript line
+        # Remove direct speech annotations (:"")
+        # replace 'xxx' words
 
-            ## Remove 'allee'
-            line = line.replace('allee','')
+        ## Remove 'allee'
+        line = line.replace('allee','')
 
-            ## Clean text formatting
-            line = re.sub(r'\s+', ' ', line)  # Replace multiple spaces with a single space
-            line = line.replace('. .', '.')  # Replace double punctuation with single
-            line = line.strip()  # Strip leading/trailing whitespace
-            line = re.sub(r'\.(?!\s)', '. ', line)  # Add whitespace after '.' if necessary
+        ## Clean text formatting
+        line = re.sub(r'\s+', ' ', line)  # Replace multiple spaces with a single space
+        line = line.replace('. .', '.')  # Replace double punctuation with single
+        line = line.strip()  # Strip leading/trailing whitespace
+        line = re.sub(r'\.(?!\s)', '. ', line)  # Add whitespace after '.' if necessary
 
 
-            # Write the modified line to the output file, IF the line is not empty
-            if line:
-                outfile.write(line)
+        # Write the modified line to the output file, IF the line is not empty
+        if line:
+            cleaned_fragments.append(line)
 
-    return txt_path_out
+    return " ".join(cleaned_fragments)
 
 
 def preprocess_IANSA_transcripts_startfromtxtfile(interim_dir, processed_dir):
@@ -141,7 +130,11 @@ def preprocess_IANSA_transcripts_startfromtxtfile(interim_dir, processed_dir):
         output_filename = f"{subject_id}_transcriptie_{task_part}"
         output_path = os.path.join(processed_dir, output_filename)
 
-        cleanup_txt_file(txt_file, output_path)
+        cleaned_text = cleanup_txt_file(txt_file)
+
+        with open(output_path, "w", encoding="utf-8") as outfile:
+            outfile.write(cleaned_text)
+
         cleaned_files.append(output_path)
 
     # --- Handle story files ---
@@ -150,33 +143,15 @@ def preprocess_IANSA_transcripts_startfromtxtfile(interim_dir, processed_dir):
         output_filename = f"{subject_id}_transcriptie_narrative.txt"
         output_path = os.path.join(processed_dir, output_filename)
 
-        # Case A: two story files → merge
-        if len(file_list) == 2:
-            # Merge both stories
-            with open(output_path, "w", encoding="utf-8") as outfile:
-                for txt_file in sorted(file_list):
-                    temp_output = os.path.join(
-                        processed_dir,
-                        f"__temp_{os.path.basename(txt_file)}"
-                    )
+        merged_text = "".join(  # joins the cleaned text files from story_stroke and story_narrative
+            cleanup_txt_file(txt_file)
+            for txt_file in sorted(file_list)  # if only one kind of story, just adds that to the merged text
+        )
 
-                    cleanup_txt_file(txt_file, temp_output)
+        with open(output_path, "w", encoding="utf-8") as outfile:
+            outfile.write(merged_text)
 
-                    with open(temp_output, "r", encoding="utf-8") as infile:
-                        outfile.write(infile.read())
-                        outfile.write("\n")
-
-                    os.remove(temp_output)
-
-            cleaned_files.append(output_path)
-
-        elif len(file_list) == 1:
-            # Only one story → becomes narrative
-            cleanup_txt_file(file_list[0], output_path)
-            cleaned_files.append(output_path)
-
-        else:
-            print(f"Warning: Unexpected number of story files for {subject_id}")
+        cleaned_files.append(output_path)
 
     return cleaned_files
 
