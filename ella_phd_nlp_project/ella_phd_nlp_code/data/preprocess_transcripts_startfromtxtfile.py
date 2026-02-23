@@ -23,7 +23,7 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
 
 
 
-def cleanup_txt_file(txt_path_in, processed_dir):
+def cleanup_txt_file(txt_path_in, txt_path_out):
     """
     Helper function to clean up a text file
 
@@ -50,13 +50,8 @@ def cleanup_txt_file(txt_path_in, processed_dir):
          Remove  whitespace in between paragraphs, Add whitespace after '.' if necessary
 
     """
-    ## Choose the name for the cleaned text file
-    filename = os.path.basename(txt_path_in)
 
-    txt_path_out = os.path.join(
-        processed_dir, ".".join(
-            [filename, 'txt']))
-
+    ## Read original text file
     try:
         with open(txt_path_in, 'r', encoding="utf-8") as infile:  # means: if encoded by Python (utf-8)
             lines = infile.readlines()
@@ -64,23 +59,11 @@ def cleanup_txt_file(txt_path_in, processed_dir):
         with open(txt_path_in, 'r', encoding="cp1252") as infile:  # means: if encoded by other Windows program (cp1252)
             lines = infile.readlines()
 
-    ## Original code (didn't account for encoding difference between utf-8 and cp1252)
-    # with (
-        # open(txt_path_in, 'r', encoding = "utf-8") as infile,
-        # open(txt_path_out, 'w') as outfile
-    # ):
-        # 'r' = open the txt_path_in file for reading, 'w' = open the txt_path_out for writing
-        # Note: encoding as utf-8 is needed as Python should be able to read different characters , encoding = 'utf-8'
-
-        # first_line = infile.readline()
-        # if not first_line:
-        #    raise ValueError("The input file is empty")
-
-        # lines = read_file_safely(file_path)
-
     if not lines:
         raise ValueError("The input file is empty")
 
+
+    ## Write to new output file
     with open(txt_path_out, 'w', encoding="utf-8") as outfile:
         for line in lines:
             ## Remove abundant text
@@ -112,7 +95,10 @@ def cleanup_txt_file(txt_path_in, processed_dir):
 def preprocess_IANSA_transcripts_startfromtxtfile(interim_dir, processed_dir):
     """
     Preprocess ALL IANSA transcripts (using the helper function cleanup_txt_file)
-    AND merge story_stroke and story_weekend into a narrative.txt file
+    - Rename ALL cleaned files to:
+        sub-XX_transcriptie_task.txt
+    - Merge story files into:
+        sub-XX_transcriptie_narrative.txt
 
     :param interim_dir: the interim directory where all the ***ORIGINAL*** TEXT files were stored
     :param processed_dir: the processed directory path where the cleaned TEXT files will be saved
@@ -130,6 +116,7 @@ def preprocess_IANSA_transcripts_startfromtxtfile(interim_dir, processed_dir):
     narrative_groups = {}
     other_files = []
 
+    # --- Separate story vs non-story ---
     for txt_path in all_txt_files:
         filename = os.path.basename(txt_path)
 
@@ -148,49 +135,44 @@ def preprocess_IANSA_transcripts_startfromtxtfile(interim_dir, processed_dir):
 
     # --- Process non-story files normally ---
     for txt_file in other_files:
-        cleaned_txt_file = cleanup_txt_file(txt_file, processed_dir)
+        original_filename = os.path.basename(txt_file)
+        subject_id, task_part = original_filename.split("_", 1)
 
-        filename = os.path.basename(cleaned_txt_file)
+        output_filename = f"{subject_id}_transcriptie_{task_part}"
+        output_path = os.path.join(processed_dir, output_filename)
 
-        # Split into subject and task
-        subject_id, task_part = filename.split("_", 1)
-
-        new_filename = f"{subject_id}_transcriptie_{task_part}"
-        new_path = os.path.join(processed_dir, new_filename)
-
-        os.rename(cleaned_txt_file, new_path)
-        cleaned_files.append(new_path)
+        cleanup_txt_file(txt_file, output_path)
+        cleaned_files.append(output_path)
 
     # --- Handle story files ---
     for subject_id, file_list in narrative_groups.items():
 
-        output_path = os.path.join(
-            processed_dir, f"{subject_id}_transcriptie_narrative.txt"
-        )
+        output_filename = f"{subject_id}_transcriptie_narrative.txt"
+        output_path = os.path.join(processed_dir, output_filename)
 
         # Case A: two story files → merge
         if len(file_list) == 2:
-
+            # Merge both stories
             with open(output_path, "w", encoding="utf-8") as outfile:
+                for txt_file in sorted(file_list):
+                    temp_output = os.path.join(
+                        processed_dir,
+                        f"__temp_{os.path.basename(txt_file)}"
+                    )
 
-                for txt_file in sorted(file_list):  # consistent order
-                    cleaned_temp_path = cleanup_txt_file(txt_file, processed_dir)
+                    cleanup_txt_file(txt_file, temp_output)
 
-                    with open(cleaned_temp_path, "r", encoding="utf-8") as infile:
+                    with open(temp_output, "r", encoding="utf-8") as infile:
                         outfile.write(infile.read())
                         outfile.write("\n")
 
-                    os.remove(cleaned_temp_path)
+                    os.remove(temp_output)
 
             cleaned_files.append(output_path)
 
-        # Case B: only one story file → rename to narrative
         elif len(file_list) == 1:
-
-            cleaned_temp_path = cleanup_txt_file(file_list[0], processed_dir)
-
-            os.rename(cleaned_temp_path, output_path)
-
+            # Only one story → becomes narrative
+            cleanup_txt_file(file_list[0], output_path)
             cleaned_files.append(output_path)
 
         else:
