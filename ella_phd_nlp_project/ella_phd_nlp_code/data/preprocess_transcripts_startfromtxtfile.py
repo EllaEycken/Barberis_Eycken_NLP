@@ -149,13 +149,23 @@ def preprocess_IANSA_transcripts_startfromtxtfile(interim_dir, processed_dir):
     # --- Process non-story files normally ---
     for txt_file in other_files:
         cleaned_txt_file = cleanup_txt_file(txt_file, processed_dir)
-        cleaned_files.append(cleaned_txt_file)
+
+        filename = os.path.basename(cleaned_txt_file)
+
+        # Split into subject and task
+        subject_id, task_part = filename.split("_", 1)
+
+        new_filename = f"{subject_id}_transcriptie_{task_part}"
+        new_path = os.path.join(processed_dir, new_filename)
+
+        os.rename(cleaned_txt_file, new_path)
+        cleaned_files.append(new_path)
 
     # --- Handle story files ---
     for subject_id, file_list in narrative_groups.items():
 
         output_path = os.path.join(
-            processed_dir, f"{subject_id}_narrative.txt"
+            processed_dir, f"{subject_id}_transcriptie_narrative.txt"
         )
 
         # Case A: two story files → merge
