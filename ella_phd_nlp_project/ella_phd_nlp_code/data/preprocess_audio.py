@@ -262,6 +262,7 @@ def preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim
             #  * means 'doesn't matter what comes after this'
             + glob.glob(raw_dir + f"{os.path.sep}sub-b[0-9]*")  # docx from control patients (comm partner)
             + glob.glob(raw_dir + f"{os.path.sep}sub-c[0-9]*")  # docx from control patients (non-related)
+            + glob.glob(raw_dir + f"{os.path.sep}sub-[0-9]*")  # docx from acute stroke patients
     )
 
     all_diarization_files_list = (
