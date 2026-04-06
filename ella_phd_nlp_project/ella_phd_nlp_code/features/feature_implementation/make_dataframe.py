@@ -138,6 +138,7 @@ def build_df_subject_task_features_updated(
     #  2) It returns the corresponding feature value.
     #  3) This creates a new column (eg "SEM_Semantic Paraphasias") with the feature values aligned to the correct
     #  (subject_id, task_id) rows.
+
     df_features["SEM_Semantic Paraphasias"] = df_features.index.map(
         feature_to_dict(semantic_paraphasias, text_dir)
     )
@@ -388,10 +389,12 @@ def build_df_subject_task_features_absolute_OLD(
         # use list comprehension ([...]) and take the second part of the 'subject and question name'
         # aka take the 'question name'
 
+
         "SEM_Semantic Paraphasias": semantic_paraphasias(text_dir),
 
         "PHON_Phonemic Paraphasias": phonemic_paraphasias(text_dir),
         "PHON_Neologisms": neologisms(text_dir),
+        
 
         "LEX_Number of Words": number_of_words(text_dir),
         "LEX_Brunet's Index": brunets_index(text_dir),
@@ -439,6 +442,8 @@ def build_df_subject_task_features_absolute_OLD(
     # https://www.geeksforgeeks.org/exporting-a-pandas-dataframe-to-an-excel-file/
 
     return df_features
+
+
 
 
 def build_df_subject_features_per_task(
@@ -494,7 +499,6 @@ if __name__ == "__main__":
     audio_dir = AUDIO_PATIENTU_DIR
     tables_dir = TABLES_DIR
 
-
     build_df_subject_task_features_updated(text_dir, audio_dir, tables_dir,
                                            excel_name = "df_subject_task_features.xlsx",
                                            normalize=True)
@@ -505,6 +509,7 @@ if __name__ == "__main__":
     build_df_subject_task_features_updated(text_dir, audio_dir, tables_dir,
                                            excel_name="df_subject_task_features.xlsx",
                                            normalize=False)
+
     build_df_subject_features_per_task(tables_dir,
                                        excel_name_df_subject_task_features="df_subject_task_features.xlsx",
                                        excel_name="df_subject_features_per_task.xlsx")

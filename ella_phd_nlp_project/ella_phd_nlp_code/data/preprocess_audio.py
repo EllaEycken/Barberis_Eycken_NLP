@@ -70,8 +70,14 @@ def give_patient_spk_code(diar_txt_path_in):
     :param diar_txt_path_in: the diarization.txt path (showing the indices per speaker: start, end, spk)
     :return: the binary speaker code of the patient (0 or 1)
 
-    ASSUMPTION: assumes that the TEST ADMINISTRATOR starts speaking in the audio file. If not, then this function
-    will not work and spk_code must be inputted manually:
+    Determine the binary speaker code for the patient based on:
+        1. Original assumption: the FIRST speaker in the file is the test administrator.
+        2. Correction rule: if a speaker has MORE TURNS (more diarization lines),
+           that speaker is chosen as the patient.
+        3. Tie-break rule: if both speakers have the same number of turns,
+           fall back to the original assignment.
+
+    If the assumptions don't count, then this function will not work and spk_code must be inputted manually:
     - to filter ONE audio file: add as parameters in 'filter_audio_file' function: new_spk_code (number 0 or 1 or another), overrule_spk_code = True
     - to filter ALL audio files with some in need of manually added speaker code: add as parameter in
     'preprocess_IANSA_audio': overrule_spk_code_list = list(tuplex, tupley), with each tuple = (audio-file name (e.g.,
@@ -79,6 +85,51 @@ def give_patient_spk_code(diar_txt_path_in):
     Note: if diarization_files must be cleaned, then param diar_txt_path_in should be diar_txt_path_in_cleaned (as you
     will use the cleaned diarization files)
     """
+
+    # ------------ PART 1: READ DIARIZATION FILE ------------
+    segments = []
+    with open(diar_txt_path_in, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            start, end, spk = line.split(',')
+            segments.append((float(start), float(end), int(spk)))
+
+    if not segments:
+        raise ValueError("Diarization file is empty.")
+
+    # ------------ PART 2: ORIGINAL ASSIGNMENT ------------
+    first_spk = segments[0][2]
+    distinct_spks = {seg[2] for seg in segments}
+
+    if len(distinct_spks) == 1:
+        # Only one speaker → must be patient
+        original_patient_code = first_spk
+    else:
+        # First speaker = test administrator → patient is the other one
+        original_patient_code = 1 - first_spk
+
+    # ------------ PART 3: COUNT TURNS PER SPEAKER ------------
+    turn_count = {0: 0, 1: 0}
+
+    for _, _, spk in segments:
+        turn_count[spk] += 1
+
+    # ------------ PART 4: DECISION LOGIC WITH TIE-BREAK ------------
+    if turn_count[0] > turn_count:
+        final_patient_code = 0
+    elif turn_count[1] > turn_count:
+        final_patient_code = 1
+    else:
+        # Tie → use original assumption
+        final_patient_code = original_patient_code
+
+    return final_patient_code
+
+
+""" OLD FUNCTION (did not count total turns)
+def give_patient_spk_code(diar_txt_path_in):
     first_line_diar_code = int()
     spk_code = int()
     with open(diar_txt_path_in, 'r') as f:
@@ -107,6 +158,9 @@ def give_patient_spk_code(diar_txt_path_in):
                     spk_code = first_line_diar_code
 
     return int(spk_code)
+    """
+
+
 
 
 

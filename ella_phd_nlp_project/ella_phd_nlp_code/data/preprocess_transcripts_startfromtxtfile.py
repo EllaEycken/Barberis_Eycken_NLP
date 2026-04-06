@@ -125,7 +125,11 @@ def preprocess_IANSA_transcripts_startfromtxtfile(interim_dir, processed_dir):
     # --- Process non-story files normally ---
     for txt_file in other_files:
         original_filename = os.path.basename(txt_file)
-        subject_id, task_part = original_filename.split("_", 1)
+        if "_patientonlyU" in original_filename:
+            subject_id = original_filename.split("_")[0]
+            task_part = original_filename.split("_")[2]
+        else:
+            subject_id, task_part = original_filename.split("_", 1)
 
         output_filename = f"{subject_id}_transcriptie_{task_part}"
         output_path = os.path.join(processed_dir, output_filename)

@@ -648,4 +648,5 @@ for text in text_list:
     # tagger.tag_count('N')
     # tagger.tag_rate('N')
     # CleanTranscript(text).clean_transcript_for_token_counting()
-    Utterance(text).split_into_custom_utterances()
+    # Utterance(text).split_into_custom_utterances()
+    TokenCounter(text).total_number_of_words()
