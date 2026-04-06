@@ -182,7 +182,7 @@ def give_patient_spk_code(diar_txt_path_in):
 def sanity_check_diarization(
         diar_txt_path,
         file_id=None,
-        long_initial_threshold=4.0,
+        long_initial_threshold=8.0,
         avg_duration_min_threshold=0.05,
         consecutive_first_spk_threshold=5):
     """
@@ -192,8 +192,8 @@ def sanity_check_diarization(
     - long initial segment rule
     - over-segmentation rule (segments too short)
     - only one speaker label rule
-    - second speaker (expected patient) does NOT have the most turns rule
-    - first speaker (expected test administrator) has many initial consecutive turns rule
+    - second speaker (originally expected patient) does NOT have the most turns rule
+    - first speaker (originally expected test administrator) has many initial consecutive turns rule
 
     Returns:
     - dictionary with diagnostic info and list of issues
@@ -221,13 +221,7 @@ def sanity_check_diarization(
     # ---------------- BASIC STATS ----------------
     durations = [end - start for start, end, _ in segments]
     avg_duration = sum(durations) / len(durations)
-    max_duration = max(durations)
 
-    segment_stats = {
-        "avg_duration": avg_duration,
-        "max_duration": max_duration,
-        "total_segments": len(segments)
-    }
 
     # ---------------- ONLY ONE SPEAKER LABEL ----------------
     speaker_labels = {spk for _, _, spk in segments}  # note: a set removes duplicates so if consecutive speaker 0, then set = {0}
@@ -243,18 +237,30 @@ def sanity_check_diarization(
     if avg_duration < avg_duration_min_threshold:
         issues.append("oversegmentation_possible")
 
+    # If only one speaker detected → skip turn-based rules
+    if len(speaker_labels) == 1: # meaning: only_one_speaker
+        return {
+            "file": file_id,
+            "issues": issues
+            }
+
+    ## ---------------- TURN-BASED RULES (only if 2 speakers detected) ----------------
     # ---------------- TURN COUNTS ----------------
     turn_counts = {0: 0, 1: 0}
     for _, _, spk in segments:
         if spk in (0, 1):
             turn_counts[spk] += 1
-    # second speaker (patient expected based on your logic)
-    # = opposite of first_spk
-    expected_patient = 1 - first_spk
+
+    # second speaker (patient expected) = opposite of first_spk
+    second_speaker = 1 - first_spk
 
     # ---------------- SECOND SPEAKER NOT MOST TURNS ----------------
-    if turn_counts[expected_patient] < turn_counts[first_spk]:
-        issues.append("expected_patient_not_most_turns")
+    if turn_counts[second_speaker] < max(turn_counts.values()):
+        issues.append("assigned_patient_code_has_most_turns_but_is_NOT_second_speaker")
+        # if the second speaker (expected patient) does not have the max amount of turns
+        # (so in essence: has less turns than the first speaker),
+        # then the first speaker becomes the patient (the one with the most turns).
+        # Thus that is suspicious
 
     # ---------------- FIRST SPEAKER MANY INITIAL CONSECUTIVE TURNS ----------------
     consecutive = 0
@@ -265,14 +271,12 @@ def sanity_check_diarization(
             break
 
     if consecutive >= consecutive_first_spk_threshold:
-        issues.append("first_speaker_many_initial_consecutive_turns")
+        issues.append("first_speaker_has_many_initial_consecutive_turns")
 
     # ---------------- OUTPUT ----------------
     return {
         "file": file_id,
         "issues": issues,
-        "turn_counts": turn_counts,
-        "segment_stats": segment_stats,
         "recommended_manual_check": len(issues) > 0
     }
 
