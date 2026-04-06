@@ -34,15 +34,15 @@ PROCESSED_DIR = os.path.join(DATA_DIR, 'processed')
 
 DEMOGRAPHICS_DIR = os.path.join(RAW_DIR,'demographics')
 
-DOCX_DIR = os.path.join(RAW_DIR, 'docx_transcripts')  # TODO: change name for new analyses
-PRECLEANTEXT_DIR = os.path.join(INTERIM_DIR, 'txt_transcripts_preclean_febr2026')  # TODO: change name for new analyses
-TEXT_DIR = os.path.join(PROCESSED_DIR, 'txt_transcripts_febr2026')  # TODO: change name for new analyses
+DOCX_DIR = os.path.join(RAW_DIR, 'docx_transcripts_2026MPBoFloor')  # TODO: change name for new analyses
+PRECLEANTEXT_DIR = os.path.join(INTERIM_DIR, 'txt_transcripts_preclean_2026MPBoFloor')  # TODO: change name for new analyses
+TEXT_DIR = os.path.join(PROCESSED_DIR, 'txt_transcripts_2026MPBoFloor')  # TODO: change name for new analyses
 
-AUDIO_DIR = os.path.join(RAW_DIR, 'raw_audio_febr2026')  # TODO: change name for new analyses
-NONMERGED_AUDIO_PATIENT_DIR = os.path.join(INTERIM_DIR, 'audio_patientonly_nonmerged_febr2026')  # TODO: change name for new analyses
-NONMERGED_AUDIO_PATIENTU_DIR = os.path.join(INTERIM_DIR, 'audio_patientonlyU_nonmerged_febr2026')  # TODO: change name for new analyses
-AUDIO_PATIENT_DIR = os.path.join(PROCESSED_DIR, 'audio_patientonly_febr2026') # TODO: change name for new analyses
-AUDIO_PATIENTU_DIR = os.path.join(PROCESSED_DIR, 'audio_patientonlyU_febr2026') # TODO: change name for new analyses
+AUDIO_DIR = os.path.join(RAW_DIR, 'raw_audio_2026MPBoFloor')  # TODO: change name for new analyses
+NONMERGED_AUDIO_PATIENT_DIR = os.path.join(INTERIM_DIR, 'audio_patientonly_nonmerged_2026MPBoFloor')  # TODO: change name for new analyses
+NONMERGED_AUDIO_PATIENTU_DIR = os.path.join(INTERIM_DIR, 'audio_patientonlyU_nonmerged_2026MPBoFloor')  # TODO: change name for new analyses
+AUDIO_PATIENT_DIR = os.path.join(PROCESSED_DIR, 'audio_patientonly_2026MPBoFloor') # TODO: change name for new analyses
+AUDIO_PATIENTU_DIR = os.path.join(PROCESSED_DIR, 'audio_patientonlyU_2026MPBoFloor') # TODO: change name for new analyses
 
 DIAR_DIR = os.path.join(RAW_DIR, 'diarization_2026MPBoFloor') # TODO: change name for new analyses
 # CLEAN_DIAR_DIR = os.path.join(INTERIM_DIR, 'diarization_clean')
