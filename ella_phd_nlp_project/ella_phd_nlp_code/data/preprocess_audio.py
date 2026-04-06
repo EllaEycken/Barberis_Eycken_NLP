@@ -256,23 +256,25 @@ def preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim
 
     ## Get a list of all raw audio and diarization file paths
     all_audio_files_list = (
-            glob.glob(raw_dir + f"{os.path.sep}sub-a[0-9]*")  # audio files from aphasia patients
+            glob.glob(raw_dir + f"{os.path.sep}sub-[0-9]*")  # docx from acute stroke patients
+            + glob.glob(raw_dir + f"{os.path.sep}sub-a[0-9]*")  # audio files from aphasia patients
             #  the 'sub-a*' looks for all files starting with sub-a
             #  [0-9] means 'any digit and doesn't matter how many digits;
             #  * means 'doesn't matter what comes after this'
             + glob.glob(raw_dir + f"{os.path.sep}sub-b[0-9]*")  # docx from control patients (comm partner)
             + glob.glob(raw_dir + f"{os.path.sep}sub-c[0-9]*")  # docx from control patients (non-related)
-            + glob.glob(raw_dir + f"{os.path.sep}sub-[0-9]*")  # docx from acute stroke patients
     )
 
     all_diarization_files_list = (
-            glob.glob(diarization_dir + f"{os.path.sep}sub-a[0-9]*")  # audio files from aphasia patients
+            glob.glob(diarization_dir + f"{os.path.sep}sub-[0-9]*")  # docx from acute stroke patients
+            + glob.glob(diarization_dir + f"{os.path.sep}sub-a[0-9]*")  # audio files from aphasia patients
             #  the 'sub-a*' looks for all files starting with sub-a
             #  [0-9] means 'any digit and doesn't matter how many digits;
             #  * means 'doesn't matter what comes after this'
             + glob.glob(diarization_dir + f"{os.path.sep}sub-b[0-9]*")  # docx from control patients (comm partner)
             + glob.glob(diarization_dir + f"{os.path.sep}sub-c[0-9]*")  # docx from control patients (non-related)
     )
+
     if len(all_audio_files_list) != len(all_diarization_files_list):
         print("Not all audio files have a diarization file")
 
