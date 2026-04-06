@@ -27,7 +27,7 @@ from ella_phd_nlp_project.ella_phd_nlp_code.constants import (
     # CLEAN_DIAR_DIR_DUMMY,
     AUDIO_DIR, DIAR_DIR,
     NONMERGED_AUDIO_PATIENTU_DIR, AUDIO_PATIENTU_DIR,
-    concatenation_overlap_time)
+    concatenation_overlap_time, TABLES_DIR)
 
 from ella_phd_nlp_project.ella_phd_nlp_code.features.preliminary_analysis import *
 from ella_phd_nlp_project.ella_phd_nlp_code.features.feature_helper_functions.helper_extraction_audio import *
@@ -277,12 +277,70 @@ def sanity_check_diarization(
     }
 
 
+## MAIN LOOP: process folder & save Excel
+# ---------------------------------------------------------
+
+def process_all_diarizations(
+        diarization_dir,
+        tables_dir,
+        output_filename="diarization_report.xlsx"):
+    """
+
+    :param diarization_dir: the directory containing the diarization files (= output of ecapa diarization script)
+    :param tables_dir: the path where the diarization report will be saved
+    :param output_filename: the name of the output file
+    :return:  a single Excel file with:
+    | file_id | patient_speaker_code | sanity_check_issues |
+    (issues stored as a comma‑separated string or list)
+
+    How it works:
+    - Loops through all diarization .txt files in the diarization folder
+    - Computes the assigned patient speaker code (using the logic from the give_patient_spk_code function)
+    - Runs the sanity check (using the sanity_check_diarization function)
+    - Saves the results in a single Excel file with:| file_id | patient_speaker_code | sanity_check_issues |
+    (issues stored as a comma‑separated string or list)
+    """
+
+    # Ensure output directory exists
+    os.makedirs(tables_dir, exist_ok=True)
+
+    # Build full output path
+    output_excel_path = os.path.join(tables_dir, output_filename)
+
+    rows = []
+
+    for filename in os.listdir(diarization_dir):
+        if filename.endswith(".txt"):
+            diar_path = os.path.join(diarization_dir, filename)
+            file_id = os.path.splitext(filename)[0]
+
+            # Get speaker code
+            spk_code = give_patient_spk_code(diar_path)
+
+            # Sanity check
+            sanity = sanity_check_diarization(diar_path, file_id=file_id)
+            issues_text = ", ".join(sanity["issues"]) if sanity["issues"] else ""
+
+            rows.append({
+                "file_id": file_id,
+                "patient_speaker_code": spk_code,
+                "sanity_check_issues": issues_text
+            })
+
+    # Save to Excel
+    df = pd.DataFrame(rows)
+    df.to_excel(output_excel_path, index=False)
+
+    print(f" Diarization report saved to: {output_excel_path}")
+    return df
+
+
 
 if __name__ == "__main__":
     diarization_dir = DIAR_DIR
     # diar_txt_path_in = os.path.join(DIAR_DIR,'sub-a043_ANTAT.txt')
+    tables_dir = TABLES_DIR
 
-    # filter_audio_file_uninterruptedmerged(raw_audio_path_in, diarization_dir, processed_dir)
-    # filter_audio_file(raw_audio_path_in, diarization_dir, processed_dir)
-    # interim_dir = CLEAN_DIAR_DIR_DUMMY
-    # cleanup_diar_txt_file(diar_txt_path_in, interim_dir)
+    process_all_diarizations(
+        diarization_dir,tables_dir)
+

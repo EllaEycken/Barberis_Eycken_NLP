@@ -44,7 +44,7 @@ NONMERGED_AUDIO_PATIENTU_DIR = os.path.join(INTERIM_DIR, 'audio_patientonlyU_non
 AUDIO_PATIENT_DIR = os.path.join(PROCESSED_DIR, 'audio_patientonly_febr2026') # TODO: change name for new analyses
 AUDIO_PATIENTU_DIR = os.path.join(PROCESSED_DIR, 'audio_patientonlyU_febr2026') # TODO: change name for new analyses
 
-DIAR_DIR = os.path.join(RAW_DIR, 'diarization_febr2026') # TODO: change name for new analyses
+DIAR_DIR = os.path.join(RAW_DIR, 'diarization_2026MPBoFloor') # TODO: change name for new analyses
 # CLEAN_DIAR_DIR = os.path.join(INTERIM_DIR, 'diarization_clean')
 # CLEAN_DIAR_DIR_DUMMY = os.path.join(INTERIM_DIR, 'diarization_clean_dummy')
 

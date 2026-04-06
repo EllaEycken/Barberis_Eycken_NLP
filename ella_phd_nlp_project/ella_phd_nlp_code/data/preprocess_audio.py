@@ -24,7 +24,9 @@ from ella_phd_nlp_project.ella_phd_nlp_code.data.preprocess_diarization import *
 
 
 
-## Filter audio file based on the diarization indices
+## Filter ONE audio file based on the diarization indices
+# -------------------------------------------------------
+
 def filter_audio_file_uninterruptedmerged(raw_audio_path_in, diarization_dir, processed_dir, new_spk_code = 0, overrule_spk_code = False):
     """
 
@@ -224,7 +226,10 @@ def filter_audio_file(raw_audio_path_in, diarization_dir, processed_dir, new_spk
         return None
 
 
+
+
 ## Preprocess all IANSA audio files (by filtering them)
+# ------------------------------------------------------
 def preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir, processed_dir, overrule_spk_code_list = None):
     """
     Preprocessing function to filter the audio files based on the speaker diarization codes
