@@ -245,7 +245,8 @@ def preprocess_IANSA_transcripts(raw_dir,interim_dir, processed_dir):
     """
     all_txt_files_list = list()
     all_docx_files_list = (
-        glob.glob(raw_dir + f"{os.path.sep}sub-a[0-9]*")  # docx from aphasia patients
+        glob.glob(raw_dir + f"{os.path.sep}sub-[0-9]*")  # docx from acute stroke patients
+        + glob.glob(raw_dir + f"{os.path.sep}sub-a[0-9]*")  # docx from aphasia patients
         #  the 'sub-a*' looks for all files starting with sub-a
         #  [0-9] means 'any digit and doesn't matter how many digits;
         #  * means 'doesn't matter what comes after this'

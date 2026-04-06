@@ -1,4 +1,8 @@
 """ Preprocess audio files from IANSA dataset
+
+FIRST run preprocess_diarization.py so that you can MANUALLY add the audio-files that should
+have a different diarization than the proposed diarization file.
+
 Note: running again is not possible if the same wav-file must be overwritten. Then delete original wav-file and run again. """
 
 import os
@@ -420,7 +424,8 @@ def preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir,
 
     ## Get a list of all raw audio and diarization file paths
     all_audio_files_list = (
-            glob.glob(raw_dir + f"{os.path.sep}sub-a[0-9]*")  # audio files from aphasia patients
+            glob.glob(raw_dir + f"{os.path.sep}sub-[0-9]*")  # docx from acute stroke patients
+            + glob.glob(raw_dir + f"{os.path.sep}sub-a[0-9]*")  # audio files from aphasia patients
             #  the 'sub-a*' looks for all files starting with sub-a
             #  [0-9] means 'any digit and doesn't matter how many digits;
             #  * means 'doesn't matter what comes after this'
@@ -429,7 +434,8 @@ def preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir,
     )
 
     all_diarization_files_list = (
-            glob.glob(diarization_dir + f"{os.path.sep}sub-a[0-9]*")  # audio files from aphasia patients
+            glob.glob(diarization_dir + f"{os.path.sep}sub-[0-9]*")  # docx from acute stroke patients
+            + glob.glob(diarization_dir + f"{os.path.sep}sub-a[0-9]*")  # audio files from aphasia patients
             #  the 'sub-a*' looks for all files starting with sub-a
             #  [0-9] means 'any digit and doesn't matter how many digits;
             #  * means 'doesn't matter what comes after this'
@@ -559,6 +565,13 @@ if __name__ == "__main__":
     diarization_dir = DIAR_DIR
     interim_dir= NONMERGED_AUDIO_PATIENTU_DIR
     processed_dir = AUDIO_PATIENTU_DIR
+
+    #TODO: first run preprocess_diarization.py to see which diarization files have been wrongly attributed
+    overrule_spk_code_list = (
+                                ('sub-a006_CAT-NL', 0),
+                                ('sub-c060_MCA', 1),
+                                ('sub-c060_story_weekend', 0)
+                            )
     # diar_txt_path_in = os.path.join(DIAR_DIR,'sub-a043_ANTAT.txt')
 
     # filter_audio_file_uninterruptedmerged(raw_audio_path_in, diarization_dir, processed_dir)
@@ -570,9 +583,9 @@ if __name__ == "__main__":
     # preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir, overrule_spk_code_list=None)
 
     preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir, processed_dir,
-                                               overrule_spk_code_list=(('sub-0222_CAT-NL', 0),
+                                               overrule_spk_code_list=None)
 
-                                               ))
+
     """preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir, processed_dir,
                                                overrule_spk_code_list=(('sub-a006_CAT-NL', 0),
                                                                        ('sub-c060_MCA', 1),

@@ -34,7 +34,8 @@ def all_paths(file_path: str):
 
     """
     all_paths_list = (
-            glob.glob(file_path + f"{os.path.sep}sub-a[0-9]*")  # txt files from aphasia patients
+            glob.glob(file_path + f"{os.path.sep}sub-[0-9]*")  # txt files from acute stroke patients
+            + glob.glob(file_path + f"{os.path.sep}sub-a[0-9]*")  # txt files from aphasia patients
             #  the 'sub-a*' looks for all files starting with sub-a
             #  [0-9] means 'any digit and doesn't matter how many digits;
             #  * means 'doesn't matter what comes after this'
