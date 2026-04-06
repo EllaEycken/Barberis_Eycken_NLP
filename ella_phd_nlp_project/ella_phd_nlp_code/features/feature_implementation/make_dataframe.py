@@ -285,14 +285,15 @@ def build_df_subject_task_features_updated(
 
 
 
-
+"""
 def build_df_subject_task_features_OLD(
     text_dir: str,
     audio_dir: str,
     tables_dir: str,
     excel_name = str("df_subject_task_features.xlsx"),
 ) -> pd.DataFrame:
-    """Build a dataframe with all subject-task-pairs and features (z-normalized values).
+    
+    Build a dataframe with all subject-task-pairs and features (z-normalized values).
     - rows: subject-task pairs
     - columns: features (z-scores: mean 0, std 1)
 
@@ -302,7 +303,7 @@ def build_df_subject_task_features_OLD(
     :param excel_name: defaults to df_subject_task_features.xlsx
     :return: a Pandas dataframe covering ALL features (as z-values), with subjects-tasks pairs as rows,
     features as columns and an Excel file saved in the tables directory
-    """
+    
     # ---- STEP 1: initialize lists of data ----
     data = {
         "subject_id": [name[0] for name in get_subject_question_names_from_files(text_dir)],
@@ -361,15 +362,16 @@ def build_df_subject_task_features_OLD(
     # https://www.geeksforgeeks.org/exporting-a-pandas-dataframe-to-an-excel-file/
 
     return df_features
+"""
 
-
+"""
 def build_df_subject_task_features_absolute_OLD(
     text_dir: str,
     audio_dir: str,
     tables_dir: str,
     excel_name = str("df_subject_task_features_absolute.xlsx"),
 ) -> pd.DataFrame:
-    """Build a dataframe with all subject-task-pairs and features (absolute values).
+    Build a dataframe with all subject-task-pairs and features (absolute values).
     - rows: subject-task pairs
     - columns: features
 
@@ -379,7 +381,7 @@ def build_df_subject_task_features_absolute_OLD(
     :param excel_name: defaults to df_subject_task_features.xlsx
     :return: a Pandas dataframe covering ALL features (as z-values), with subjects-tasks pairs as rows,
     features as columns and an Excel file saved in the tables directory
-    """
+    
     # ---- STEP 1: initialize lists of data ----
     data = {
         "subject_id": [name[0] for name in get_subject_question_names_from_files(text_dir)],
@@ -442,7 +444,7 @@ def build_df_subject_task_features_absolute_OLD(
     # https://www.geeksforgeeks.org/exporting-a-pandas-dataframe-to-an-excel-file/
 
     return df_features
-
+"""
 
 
 
