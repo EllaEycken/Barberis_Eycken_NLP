@@ -1,3 +1,6 @@
+# virtual environment (this project is conda based)
+.venv/
+
 # Data
 /data/
 

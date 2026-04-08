@@ -1,4 +1,27 @@
 site_name: Ella_PhD_NLP_project
-# 
+#
 site_author: Ella E.
-# 
+#
+
+site_description: Audio, diarization, and transcript processing pipeline
+
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.expand
+    - navigation.sections
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Project Structure: project_structure.md
+  - Data Setup:
+      - Raw & Processed Data: data_setup.md
+  - Processing Pipeline:
+      - Preprocessing Steps: preprocessing.md
+      - Dataframe Creation: dataframe_creation.md
+  - Troubleshooting: troubleshooting.md
