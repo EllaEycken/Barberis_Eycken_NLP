@@ -1,10 +1,10 @@
-# Ella_PhD_NLP_project
+# Barberis_Eycken_NLP
 
 <a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
     <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
 </a>
 
-This is Ella's project for NLP analyses.
+This is ExpORLs project for NLP analyses.
 
 ## Project Organization
 
