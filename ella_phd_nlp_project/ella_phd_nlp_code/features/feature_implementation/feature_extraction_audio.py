@@ -315,7 +315,7 @@ def silent_pauses(
     return propSilentPauses_list
 
 
-def calculate_totalSpeechDuration(
+def total_speech_duration(
     file_path: str,
 ):
     """Calculate the total speech duration (after removing silences) using PRAAT via Parselmouth.
@@ -360,7 +360,7 @@ def calculate_totalSpeechDuration(
     return totalSpeechDurations_list
 
 
-def calculate_totalSpeechProportion(
+def total_speech_proportion(
     file_path: str,
 ):
     """Calculate the total speech proportion (relative to total duration of the audiosignal) using PRAAT via Parselmouth.
@@ -411,7 +411,7 @@ def calculate_totalSpeechProportion(
     return totalSpeechProportions_list
 
 
-def calculate_meanLengthSpeechSegments(
+def mean_length_speechSegments(
     file_path: str,
 ):
     """Calculate the mean length of speech segments using PRAAT via Parselmouth.
@@ -470,6 +470,6 @@ if __name__ == "__main__":
     # silent_pauses(audio_dir, transcript_dir, 'short')
     # silent_pauses(audio_dir, transcript_dir, 'long')
     # silent_pauses_rate(audio_dir, 'long')
-    calculate_totalSpeechDuration(audio_dir)
-    calculate_totalSpeechProportion(audio_dir)
-    calculate_meanLengthSpeechSegments(audio_dir)
+    total_speech_duration(audio_dir)
+    total_speech_proportion(audio_dir)
+    mean_length_speechSegments(audio_dir)
