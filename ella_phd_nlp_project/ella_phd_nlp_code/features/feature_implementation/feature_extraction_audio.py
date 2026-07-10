@@ -318,7 +318,7 @@ def silent_pauses(
 def total_speech_duration(
     audio_dir: str,
 ):
-    """Calculate the total speech duration (after removing silences) using PRAAT via Parselmouth.
+    """Calculate the total speech duration (in sec) (after removing silences) using PRAAT via Parselmouth.
 
     (inspired by Dr Feinberg).
 
