@@ -315,6 +315,148 @@ def silent_pauses(
     return propSilentPauses_list
 
 
+def total_speech_duration(
+    audio_dir: str,
+):
+    """Calculate the total speech duration (in sec) (after removing silences) using PRAAT via Parselmouth.
+
+    (inspired by Dr Feinberg).
+
+    :param audio_dir: string
+    :return: list of floats containing the total duration of speech (s) after removing silences
+    using PRAAT via Parselmouth (inspired by Dr Feinberg)
+    https://github.com/drfeinberg/PraatScripts/blob/master/
+    Measure%20Pitch%2C%20HNR%2C%20Jitter%2C%20Shimmer%2C%20and%20Formants.ipynb
+    and based on calculate_df_silences()
+
+    """
+    totalSpeechDurations_list = []  # define a now still empty list of total speech durations across the audio-files
+    list_of_sounds = read_sounds(audio_dir)  # make a list of sounds with the read-function
+    for sound in list_of_sounds:  # for each item in this list of sounds
+        speechSegmentDurations_list = []  # define a now still empty list of durations of the speech segments
+        # in this audio file
+        textGridSilencesObject = create_textGridSilencesObject(sound)
+        # make a textgrid object that distinguishes between sounding and silent intervals
+        df_silences_af = create_textGridDataframe(textGridSilencesObject)
+        # turn this textgrid into a pandas dataframe to make it readable in Python
+        df_soundingOnly = df_silences_af[df_silences_af["text"].str.contains("sounding")]
+        # only keep the 'sounding' segments in the df
+        # from: https: // saturncloud.io / blog / how - to - filter - pandas - dataframes - by - column - of - strings
+        # /  #:~:text=Filtering%20by%20a%20Single%20String,string%20value%20in%20the%20column.
+        for i in range(0, len(df_soundingOnly)):  # go over rows of sounding-only table
+            tstart = df_soundingOnly.iloc[i]["tmin"]  # get the starting time of a sounding segment
+            tstop = df_soundingOnly.iloc[i]["tmax"]  # idem for ending time
+            # https://stackoverflow.com/questions/16729574/how-can-i-get-a-value-from-a-cell-of-a-dataframe
+            deltat = tstop - tstart  # compute the duration of this sounding segment
+            speechSegmentDurations_list.append(deltat)  # append this duration to the list of lengths of
+            # sounding (aka speech) segments from this audio-file
+        totalSpeechDuration = sum(speechSegmentDurations_list)
+        # calculate the sum of the durations of the different speech segments in this audio file, and thus create the
+        # total speech duration in this audio file
+        totalSpeechDurations_list.append(totalSpeechDuration)
+        # append this total speech duration from this audio-file to a list of total speech durations
+        # across all audio-files
+
+    return totalSpeechDurations_list
+
+
+def total_speech_proportion(
+    audio_dir: str,
+):
+    """Calculate the total speech proportion (relative to total duration of the audiosignal) using PRAAT via Parselmouth.
+
+    (inspired by Dr Feinberg).
+
+    :param file_path: string
+    :return: list of floats containing the total speech proportion (relative to total duration of the audiosignal) aka
+    how much speech is in the audiosignal (removing silences) irt to total signal duration
+    using PRAAT via Parselmouth (inspired by Dr Feinberg)
+    https://github.com/drfeinberg/PraatScripts/blob/master/Measure%20Pitch%2C%20HNR%2C%20Jitter%2C%20Shimmer%2C%20and%20Formants.ipynb
+    and based on calculate_df_silences()
+
+    """
+    totalSpeechProportions_list = (
+        []
+    )  # define a now still empty list of total speech proportions across the audio-files
+    list_of_sounds = read_sounds(audio_dir)  # make a list of sounds with the read-function
+    for sound in list_of_sounds:  # for each item in this list of sounds
+        speechSegmentDurations_list = []  # define a now still empty list of durations of the speech segments
+        # in this audio file
+        totalDuration = call(sound, "Get total duration")
+        textGridSilencesObject = create_textGridSilencesObject(sound)
+        # make a textgrid object that distinguishes between sounding and silent intervals
+        df_silences_af = create_textGridDataframe(textGridSilencesObject)
+        # turn this textgrid into a pandas dataframe to make it readable in Python
+        df_soundingOnly = df_silences_af[df_silences_af["text"].str.contains("sounding")]
+        # only keep the 'sounding' segments in the df
+        # from: https: // saturncloud.io / blog / how - to - filter - pandas - dataframes - by - column - of - strings
+        # /  #:~:text=Filtering%20by%20a%20Single%20String,string%20value%20in%20the%20column.
+        for i in range(0, len(df_soundingOnly)):  # go over rows of sounding-only table
+            tstart = df_soundingOnly.iloc[i]["tmin"]  # get the starting time of a sounding segment
+            tstop = df_soundingOnly.iloc[i]["tmax"]  # idem for ending time
+            # https://stackoverflow.com/questions/16729574/how-can-i-get-a-value-from-a-cell-of-a-dataframe
+            deltat = tstop - tstart  # compute the duration of this sounding segment
+            speechSegmentDurations_list.append(deltat)  # append this duration to the list of lengths of
+            # sounding (aka speech) segments from this audio-file
+        totalSpeechDuration = sum(speechSegmentDurations_list)
+        # calculate the sum of the durations of the different speech segments in this audio file, and thus create the
+        # total speech duration in this audio file
+        totalSpeechProportion = totalSpeechDuration / totalDuration
+        # calculate the total speech proportion by dividing the total speech duration by the total duration (aka
+        # silences included) of this audio signal
+        totalSpeechProportions_list.append(totalSpeechProportion)
+        # append this total speech proportion from this audio-file to a list of total speech proportions
+        # across all audio-files
+
+    return totalSpeechProportions_list
+
+
+def mean_length_speechSegments(
+    audio_dir: str,
+):
+    """Calculate the mean length of speech segments using PRAAT via Parselmouth.
+
+    (inspired by Dr Feinberg).
+
+    :param file_path: string
+    :return: list of floats containing the mean length of speech segments aka
+    the average length of each speech segment in the audio signal
+    using PRAAT via Parselmouth (inspired by Dr Feinberg)
+    https://github.com/drfeinberg/PraatScripts/blob/master/
+    Measure%20Pitch%2C%20HNR%2C%20Jitter%2C%20Shimmer%2C%20and%20Formants.ipynb
+    and based on calculate_df_silences()
+
+    """
+    meanLengthSpeechSegments_list = []  # define a now still empty list of mean length of speech segments
+    # across the audio-files
+    list_of_sounds = read_sounds(audio_dir)  # make a list of sounds with the read-function
+    for sound in list_of_sounds:  # for each item in this list of sounds
+        speechSegmentDurations_list = []  # define a now still empty list of durations of the speech segments
+        # in this audio file
+        textGridSilencesObject = create_textGridSilencesObject(sound)
+        # make a textgrid object that distinguishes between sounding and silent intervals
+        df_silences_af = create_textGridDataframe(textGridSilencesObject)
+        # turn this textgrid into a pandas dataframe to make it readable in Python
+        df_soundingOnly = df_silences_af[df_silences_af["text"].str.contains("sounding")]
+        # only keep the 'sounding' segments in the df
+        # from: https: // saturncloud.io / blog / how - to - filter - pandas - dataframes - by - column - of - strings
+        # /  #:~:text=Filtering%20by%20a%20Single%20String,string%20value%20in%20the%20column.
+        for i in range(0, len(df_soundingOnly)):  # go over rows of sounding-only table
+            tstart = df_soundingOnly.iloc[i]["tmin"]  # get the starting time of a sounding segment
+            tstop = df_soundingOnly.iloc[i]["tmax"]  # idem for ending time
+            # https://stackoverflow.com/questions/16729574/how-can-i-get-a-value-from-a-cell-of-a-dataframe
+            deltat = tstop - tstart  # compute the duration of this sounding segment
+            speechSegmentDurations_list.append(deltat)  # append this duration to the list of lengths of
+            # sounding (aka speech) segments from this audio-file
+        meanLengthSpeechSegments = statistics.mean(speechSegmentDurations_list)
+        # calculate the mean of the speech segments lengths in this audio file
+        meanLengthSpeechSegments_list.append(meanLengthSpeechSegments)
+        # append this mean length from this audio-file to a list of mean lengths across all audio-files
+
+    return meanLengthSpeechSegments_list
+
+
+
 
 """RUNNING THE FUNCTIONS"""
 if __name__ == "__main__":
@@ -327,4 +469,7 @@ if __name__ == "__main__":
     # speech_rate_syllables(audio_dir)
     # silent_pauses(audio_dir, transcript_dir, 'short')
     # silent_pauses(audio_dir, transcript_dir, 'long')
-    silent_pauses_rate(audio_dir, 'long')
+    # silent_pauses_rate(audio_dir, 'long')
+    total_speech_duration(audio_dir)
+    total_speech_proportion(audio_dir)
+    mean_length_speechSegments(audio_dir)

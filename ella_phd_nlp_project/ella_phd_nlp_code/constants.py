@@ -26,6 +26,9 @@ PROJECT_DIR = os.path.join(os.path.abspath(os.path.join(HERE, os.pardir)))
 # The result is stored in the variable PROJECT_DIR.
 
 
+## Suffix for data analysis
+DATA_SUFFIX = '2026LatentAphasiaExt' # TODO: change name for new analyses
+
 ## Directories for DATA
 DATA_DIR = os.path.join(PROJECT_DIR, '../data')
 RAW_DIR = os.path.join(DATA_DIR, 'raw')
@@ -34,25 +37,34 @@ PROCESSED_DIR = os.path.join(DATA_DIR, 'processed')
 
 DEMOGRAPHICS_DIR = os.path.join(RAW_DIR,'demographics')
 
-DOCX_DIR = os.path.join(RAW_DIR, 'docx_transcripts_2026MPBoFloor')  # TODO: change name for new analyses
-PRECLEANTEXT_DIR = os.path.join(INTERIM_DIR, 'txt_transcripts_preclean_2026MPBoFloor')  # TODO: change name for new analyses
-TEXT_DIR = os.path.join(PROCESSED_DIR, 'txt_transcripts_2026MPBoFloor')  # TODO: change name for new analyses
+DOCX_DIR = os.path.join(RAW_DIR, f"docx_transcripts_{DATA_SUFFIX}")
+# original: DOCX_DIR = os.path.join(RAW_DIR, 'docx_transcripts_2026LatentAphasiaExt')
+PRECLEANTEXT_DIR = os.path.join(INTERIM_DIR, f"txt_transcripts_preclean_{DATA_SUFFIX}")
+TEXT_DIR = os.path.join(PROCESSED_DIR, f"txt_transcripts_{DATA_SUFFIX}")
 
-AUDIO_DIR = os.path.join(RAW_DIR, 'raw_audio_2026MPBoFloor')  # TODO: change name for new analyses
-NONMERGED_AUDIO_PATIENT_DIR = os.path.join(INTERIM_DIR, 'audio_patientonly_nonmerged_2026MPBoFloor')  # TODO: change name for new analyses
-NONMERGED_AUDIO_PATIENTU_DIR = os.path.join(INTERIM_DIR, 'audio_patientonlyU_nonmerged_2026MPBoFloor')  # TODO: change name for new analyses
-AUDIO_PATIENT_DIR = os.path.join(PROCESSED_DIR, 'audio_patientonly_2026MPBoFloor') # TODO: change name for new analyses
-AUDIO_PATIENTU_DIR = os.path.join(PROCESSED_DIR, 'audio_patientonlyU_2026MPBoFloor') # TODO: change name for new analyses
+AUDIO_DIR = os.path.join(RAW_DIR, f"raw_audio_{DATA_SUFFIX}")
+NONMERGED_AUDIO_PATIENT_DIR = os.path.join(
+    INTERIM_DIR, f"audio_patientonly_nonmerged_{DATA_SUFFIX}"
+)
+NONMERGED_AUDIO_PATIENTU_DIR = os.path.join(
+    INTERIM_DIR, f"audio_patientonlyU_nonmerged_{DATA_SUFFIX}"
+)
+AUDIO_PATIENT_DIR = os.path.join(
+    PROCESSED_DIR, f"audio_patientonly_{DATA_SUFFIX}"
+)
+AUDIO_PATIENTU_DIR = os.path.join(
+    PROCESSED_DIR, f"audio_patientonlyU_{DATA_SUFFIX}"
+)
 
-DIAR_DIR = os.path.join(RAW_DIR, 'diarization_2026MPBoFloor') # TODO: change name for new analyses
+DIAR_DIR = os.path.join(RAW_DIR, f"diarization_{DATA_SUFFIX}")
 # CLEAN_DIAR_DIR = os.path.join(INTERIM_DIR, 'diarization_clean')
 # CLEAN_DIAR_DIR_DUMMY = os.path.join(INTERIM_DIR, 'diarization_clean_dummy')
 
 
 ## Directories for reports
-REPORTS_DIR = os.path.join(PROJECT_DIR, '../reports') # TODO: change name for new analyses
-FIGURES_DIR = os.path.join(REPORTS_DIR, 'figures') # TODO: change name for new analyses
-TABLES_DIR = os.path.join(REPORTS_DIR, 'tables') # TODO: change name for new analyses
+REPORTS_DIR = os.path.join(PROJECT_DIR, '../reports')
+FIGURES_DIR = os.path.join(REPORTS_DIR, 'figures')
+TABLES_DIR = os.path.join(REPORTS_DIR, 'tables')
 
 ## Directory for models
 MODELS_DIR = os.path.join(PROJECT_DIR, '../models')

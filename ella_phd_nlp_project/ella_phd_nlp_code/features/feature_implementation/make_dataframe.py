@@ -253,6 +253,18 @@ def build_df_subject_task_features_updated(
         feature_to_dict(silent_pauses_rate, audio_dir, short_or_long='long')
     )
     print('silent pause rate calculated')
+    df_features["FLU_Total Speech Duration_A"] = df_features.index.map(
+        feature_to_dict(total_speech_duration, audio_dir)
+    )
+    print('total speech duration calculated')
+    df_features["FLU_Total Speech Proportion_A"] = df_features.index.map(
+        feature_to_dict(total_speech_proportion, audio_dir)
+    )
+    print('total speech proportion calculated')
+    df_features["FLU_Mean Length of Speech Segments"] = df_features.index.map(
+        feature_to_dict(mean_length_speechSegments, audio_dir)
+    )
+    print('mean length of speech segments calculated')
 
     ## if normalize == True, Normalize all feature columns (ignore NaNs) to z-scores (mean = 0, std = 1)
     if normalize:
