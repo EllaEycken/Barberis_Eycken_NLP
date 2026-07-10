@@ -582,17 +582,39 @@ if __name__ == "__main__":
     # preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir, processed_dir, overrule_spk_code_list=None)
     # preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir, overrule_spk_code_list=None)
 
-    preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir, processed_dir,
-                                               overrule_spk_code_list=None)
-
-
     """preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir, processed_dir,
-                                               overrule_spk_code_list=(('sub-a006_CAT-NL', 0),
-                                                                       ('sub-c060_MCA', 1),
-                                                                       ('sub-c060_story_weekend', 0))
+                                               overrule_spk_code_list=None)"""
+
+
+    preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir, processed_dir,
+                                               overrule_spk_code_list=(('sub-a015_ANTAT', 0),
+                                                                       ('sub-a038_ANTAT', 0),
+                                                                       ('sub-a061_ANTAT', 0),
+                                                                       ('sub-a061_story_stroke', 1),
+                                                                       ('sub-a072_ANTAT', 1),
+                                                                       ('sub-a082_ANTAT', 0),
+                                                                       ('sub-a089_ANTAT', 0),
+                                                                       ('sub-a123_ANTAT', 0),
+                                                                       ('sub-b001_ANTAT', 1),
+                                                                       ('sub-b016_ANTAT', 1),
+                                                                       ('sub-b034_ANTAT', 1),
+                                                                       ('sub-b043_ANTAT', 1),
+                                                                       ('sub-b043_story_weekend', 1),
+                                                                       ('sub-b046_ANTAT', 1),
+                                                                       ('sub-b057_ANTAT', 1),
+                                                                       ('sub-b057_CAT-NL', 0),
+                                                                       ('sub-b059_ANTAT', 0),
+                                                                       ('sub-b059_CAT-NL', 0),
+                                                                       ('sub-b060_ANTAT', 0),
+                                                                       ('sub-b092_ANTAT', 0),
+                                                                       ('sub-b092_MCA', 1),
+                                                                       ('sub-c024_ANTAT', 0)
+
+                                                                       
+                                                                       )
                                                )
     
-    """
+
 
 
 

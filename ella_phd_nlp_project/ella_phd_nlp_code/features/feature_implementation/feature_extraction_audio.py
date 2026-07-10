@@ -316,13 +316,13 @@ def silent_pauses(
 
 
 def total_speech_duration(
-    file_path: str,
+    audio_dir: str,
 ):
     """Calculate the total speech duration (after removing silences) using PRAAT via Parselmouth.
 
     (inspired by Dr Feinberg).
 
-    :param file_path: string
+    :param audio_dir: string
     :return: list of floats containing the total duration of speech (s) after removing silences
     using PRAAT via Parselmouth (inspired by Dr Feinberg)
     https://github.com/drfeinberg/PraatScripts/blob/master/
@@ -331,7 +331,7 @@ def total_speech_duration(
 
     """
     totalSpeechDurations_list = []  # define a now still empty list of total speech durations across the audio-files
-    list_of_sounds = read_sounds(file_path)  # make a list of sounds with the read-function
+    list_of_sounds = read_sounds(audio_dir)  # make a list of sounds with the read-function
     for sound in list_of_sounds:  # for each item in this list of sounds
         speechSegmentDurations_list = []  # define a now still empty list of durations of the speech segments
         # in this audio file
@@ -361,7 +361,7 @@ def total_speech_duration(
 
 
 def total_speech_proportion(
-    file_path: str,
+    audio_dir: str,
 ):
     """Calculate the total speech proportion (relative to total duration of the audiosignal) using PRAAT via Parselmouth.
 
@@ -378,7 +378,7 @@ def total_speech_proportion(
     totalSpeechProportions_list = (
         []
     )  # define a now still empty list of total speech proportions across the audio-files
-    list_of_sounds = read_sounds(file_path)  # make a list of sounds with the read-function
+    list_of_sounds = read_sounds(audio_dir)  # make a list of sounds with the read-function
     for sound in list_of_sounds:  # for each item in this list of sounds
         speechSegmentDurations_list = []  # define a now still empty list of durations of the speech segments
         # in this audio file
@@ -412,7 +412,7 @@ def total_speech_proportion(
 
 
 def mean_length_speechSegments(
-    file_path: str,
+    audio_dir: str,
 ):
     """Calculate the mean length of speech segments using PRAAT via Parselmouth.
 
@@ -429,7 +429,7 @@ def mean_length_speechSegments(
     """
     meanLengthSpeechSegments_list = []  # define a now still empty list of mean length of speech segments
     # across the audio-files
-    list_of_sounds = read_sounds(file_path)  # make a list of sounds with the read-function
+    list_of_sounds = read_sounds(audio_dir)  # make a list of sounds with the read-function
     for sound in list_of_sounds:  # for each item in this list of sounds
         speechSegmentDurations_list = []  # define a now still empty list of durations of the speech segments
         # in this audio file

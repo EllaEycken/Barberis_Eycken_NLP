@@ -27,7 +27,7 @@ PROJECT_DIR = os.path.join(os.path.abspath(os.path.join(HERE, os.pardir)))
 
 
 ## Suffix for data analysis
-data_suffix = '2026LatentAphasiaExt' # TODO: change name for new analyses
+DATA_SUFFIX = '2026LatentAphasiaExt' # TODO: change name for new analyses
 
 ## Directories for DATA
 DATA_DIR = os.path.join(PROJECT_DIR, '../data')
@@ -37,18 +37,26 @@ PROCESSED_DIR = os.path.join(DATA_DIR, 'processed')
 
 DEMOGRAPHICS_DIR = os.path.join(RAW_DIR,'demographics')
 
-DOCX_DIR = os.path.join(RAW_DIR, 'docx_transcripts_', data_suffix)
+DOCX_DIR = os.path.join(RAW_DIR, f"docx_transcripts_{DATA_SUFFIX}")
 # original: DOCX_DIR = os.path.join(RAW_DIR, 'docx_transcripts_2026LatentAphasiaExt')
-PRECLEANTEXT_DIR = os.path.join(INTERIM_DIR, 'txt_transcripts_preclean_', data_suffix)
-TEXT_DIR = os.path.join(PROCESSED_DIR, 'txt_transcripts_', data_suffix)
+PRECLEANTEXT_DIR = os.path.join(INTERIM_DIR, f"txt_transcripts_preclean_{DATA_SUFFIX}")
+TEXT_DIR = os.path.join(PROCESSED_DIR, f"txt_transcripts_{DATA_SUFFIX}")
 
-AUDIO_DIR = os.path.join(RAW_DIR, 'raw_audio_', data_suffix)
-NONMERGED_AUDIO_PATIENT_DIR = os.path.join(INTERIM_DIR, 'audio_patientonly_nonmerged_', data_suffix)
-NONMERGED_AUDIO_PATIENTU_DIR = os.path.join(INTERIM_DIR, 'audio_patientonlyU_nonmerged_', data_suffix)
-AUDIO_PATIENT_DIR = os.path.join(PROCESSED_DIR, 'audio_patientonly_', data_suffix)
-AUDIO_PATIENTU_DIR = os.path.join(PROCESSED_DIR, 'audio_patientonlyU_', data_suffix)
+AUDIO_DIR = os.path.join(RAW_DIR, f"raw_audio_{DATA_SUFFIX}")
+NONMERGED_AUDIO_PATIENT_DIR = os.path.join(
+    INTERIM_DIR, f"audio_patientonly_nonmerged_{DATA_SUFFIX}"
+)
+NONMERGED_AUDIO_PATIENTU_DIR = os.path.join(
+    INTERIM_DIR, f"audio_patientonlyU_nonmerged_{DATA_SUFFIX}"
+)
+AUDIO_PATIENT_DIR = os.path.join(
+    PROCESSED_DIR, f"audio_patientonly_{DATA_SUFFIX}"
+)
+AUDIO_PATIENTU_DIR = os.path.join(
+    PROCESSED_DIR, f"audio_patientonlyU_{DATA_SUFFIX}"
+)
 
-DIAR_DIR = os.path.join(RAW_DIR, 'diarization_', data_suffix)
+DIAR_DIR = os.path.join(RAW_DIR, f"diarization_{DATA_SUFFIX}")
 # CLEAN_DIAR_DIR = os.path.join(INTERIM_DIR, 'diarization_clean')
 # CLEAN_DIAR_DIR_DUMMY = os.path.join(INTERIM_DIR, 'diarization_clean_dummy')
 

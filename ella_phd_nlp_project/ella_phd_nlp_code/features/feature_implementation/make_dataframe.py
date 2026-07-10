@@ -254,15 +254,15 @@ def build_df_subject_task_features_updated(
     )
     print('silent pause rate calculated')
     df_features["FLU_Total Speech Duration_A"] = df_features.index.map(
-        feature_to_dict(total_speech_duration(), audio_dir)
+        feature_to_dict(total_speech_duration, audio_dir)
     )
     print('total speech duration calculated')
     df_features["FLU_Total Speech Proportion_A"] = df_features.index.map(
-        feature_to_dict(total_speech_proportion(), audio_dir)
+        feature_to_dict(total_speech_proportion, audio_dir)
     )
     print('total speech proportion calculated')
     df_features["FLU_Mean Length of Speech Segments"] = df_features.index.map(
-        feature_to_dict(mean_length_speechSegments(), audio_dir)
+        feature_to_dict(mean_length_speechSegments, audio_dir)
     )
     print('mean length of speech segments calculated')
 
