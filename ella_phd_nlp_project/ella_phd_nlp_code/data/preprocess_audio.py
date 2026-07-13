@@ -582,10 +582,18 @@ if __name__ == "__main__":
     # preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir, processed_dir, overrule_spk_code_list=None)
     # preprocess_IANSA_audio(raw_dir, diarization_dir, interim_dir, processed_dir, overrule_spk_code_list=None)
 
+
     """preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir, processed_dir,
                                                overrule_spk_code_list=None)"""
 
+    preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir, processed_dir,
+                                                   overrule_spk_code_list= (('sub-b007_ANTAT', 0),
+                                                                            ('sub-b071_ANTAT', 1),
+                                                                            ('sub-b077_ANTAT', 0),
 
+                                               )
+                                               )
+    """
     preprocess_IANSA_audio_uninterruptedmerged(raw_dir, diarization_dir, interim_dir, processed_dir,
                                                overrule_spk_code_list=(('sub-a015_ANTAT', 0),
                                                                        ('sub-a038_ANTAT', 0),
@@ -613,7 +621,7 @@ if __name__ == "__main__":
                                                                        
                                                                        )
                                                )
-    
+    """
 
 
 
