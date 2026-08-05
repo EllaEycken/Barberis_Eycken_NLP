@@ -28,7 +28,7 @@ PROJECT_DIR = os.path.join(os.path.abspath(os.path.join(HERE, os.pardir)))
 
 ## Suffix for data analysis
 DATA_SUFFIX = '2026LatentAphasiaExtControls' # TODO: change name for new analyses
-
+# example: DATA_SUFFIX = '2026LatentAphasiaExtControls'
 ## Directories for DATA
 DATA_DIR = os.path.join(PROJECT_DIR, '../data')
 RAW_DIR = os.path.join(DATA_DIR, 'raw')
