@@ -319,7 +319,7 @@ def pronoun_rate(
     list_of_transcripts = read_transcripts(file_path)
 
     for transcript in list_of_transcripts:
-        pronoun_rate = POSTagger(transcript).tag_rate(tag_type = "VNW")  # "N" = for nouns
+        pronoun_rate = POSTagger(transcript).tag_rate(tag_type = "VNW")  # "VNW" = for pronouns
         pronoun_rate_list.append(pronoun_rate)
 
     return pronoun_rate_list
