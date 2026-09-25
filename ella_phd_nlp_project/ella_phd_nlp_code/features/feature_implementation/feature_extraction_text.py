@@ -353,7 +353,6 @@ def determiner_rate(
     DEF: Total number of determiners divided by the total number of words.
     DEF: determiners for Dutch includes articles (lidwoorden), numerals (telwoorden), demonstrative and possessive
     pronouns (aanwijzende en bezittelijke voornaamwoorden), and quantifiers (kwantoren).
-    Source: https://nl.wikipedia.org/wiki/Determinator_(klasse)
     Note: here we work with POS_ (upos and xpos) as they are more specific than tag_. Moreover, for some words (pronouns)
     the morph_function is needed to capture determiners specifically for Dutch.
 
@@ -499,7 +498,7 @@ def content_function_ratio(
     - content words include: nouns, lexical verbs (= non-auxiliary), adjectives, adverbs
     - function words include: articles, pronouns, adpositions, conjunctions (coordinating and subordinating),
     auxiliary verbs, particles.
-    Source: https://en.wikipedia.org/wiki/Content_word and https://en.wikipedia.org/wiki/Function_word
+
     IMPLICATION: Measure of lexical proportion (Gordon, 2020).
     - High content-function ratio is characteristic of agrammatic speech (Gordon, 2006; Saffran et al., 1989)
     - Low content-function word ratio is characteristic of empty speech (Gordon, 2006)(Edwards, 2005).
@@ -507,7 +506,7 @@ def content_function_ratio(
     :file_path: text_directory
     :return: content-function rates in the transcripts
 
-    todo: in Wikipedia, function words also include interjections, expletives and pro-sentences. But seems bit odd. I left them out for now.
+    todo: function words also include interjections, expletives and pro-sentences. But seems bit odd. I left them out for now.
     todo: is 'goeiemorgen' and 'goeiemiddag' a particle?
     """
     content_function_ratio_list = list()
